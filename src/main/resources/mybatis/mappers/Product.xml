@@ -225,7 +225,8 @@
             product_id = #{id}
     </select>
     <select id ="getProductsByPage"  resultType="com.roommake.admin.product.dto.ProductListDto">
-        select
+        select *
+        from (select
             A.product_id              as id,
             A.product_name            as name,
             A.product_content         as content,
@@ -238,11 +239,27 @@
             A.product_discount        as discount,
             A.category_id             as categoryId,
             A.parents_product_id      as parentsId,
-            (select product_image_name from product_image x where x.product_id = A.product_id  order by x.product_image_id asc limit 1) imageName,
+            (select product_image_name from product_image x where x.product_id = A.product_id  order by x.product_image_id asc limit 1) AS imageName,
             C.product_category_id     as category_id,
             C.product_category_name   as category_name
-        from product A,product_category C
-        where A.category_id=C.product_category_id
+        from product A
+        INNER JOIN product_category C
+        ON C.product_category_id = A.category_id
+        WHERE 1=1
+        <if test='keyword != null and keyword != ""'>
+            <choose>
+                <when test='type == "name"'>
+                    AND A.product_name LIKE CONCAT(#{keyword}, '%')
+                </when>
+                <when test='type == "number"'>
+                    AND A.product_id = #{keyword}
+                </when>
+                <when test='type == "nameNumber"'>
+                    AND (A.product_id = #{keyword} OR A.product_name LIKE CONCAT(#{keyword}, '%'))
+                </when>
+            </choose>
+        </if>
+        order by A.product_id ) SA
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
@@ -343,7 +360,22 @@
     </update>
 
     <select id="getTotalProducts" resultType="int">
-    select COUNT(*)
-    from product
+        select COUNT(*)
+        from product
+        <where>
+        <if test='keyword != null and keyword != ""'>
+            <choose>
+                <when test='type == "name"'>
+                    product_name LIKE CONCAT(#{keyword}, '%')
+                </when>
+                <when test='type == "number"'>
+                    product_id = #{keyword}
+                </when>
+                <when test='type == "nameNumber"'>
+                    (product_id = #{keyword} OR product_name LIKE CONCAT(#{keyword}, '%'))
+                </when>
+            </choose>
+        </if>
+        </where>
     </select>
 </mapper>

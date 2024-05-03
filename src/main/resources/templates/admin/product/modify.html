@@ -29,8 +29,8 @@
                     <input type="text" class="form-control" name="discount" th:value="${product.discount}">
                 </div>
                 <div>
-                    <label>상품수정일</label>
-                    <input type="date" class="form-control" name="updateDate" th:value="${product.updateDate}">
+                    <label for="currentDate">상품수정일</label>
+                    <input type="text" id="currentDate" class="form-control" name="updateDate" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
                 </div>
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                     <button class="btn btn-primary me-md-2" type="submit">수정완료</button>

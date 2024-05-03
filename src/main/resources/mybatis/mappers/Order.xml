@@ -2,6 +2,15 @@
 <!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.roommake.order.mapper.OrderMapper">
 
+    <!--상품배송 관리 업데이트 -->
+    <resultMap id="orderList" type="com.roommake.order.vo.Order">
+        <id column="id" property="id" />
+        <result column="price" property="totalPrice"/>
+        <association property="orderStatus" javaType="com.roommake.order.vo.OrderStatus">
+            <result column="status" property="id"/>
+        </association>
+    </resultMap>
+
     <select id="getProductsByDetailId" parameterType="com.roommake.cart.dto.CartCreateForm" resultType="com.roommake.cart.dto.CartItemDto">
         select
             p.product_id            as productId,
@@ -78,8 +87,10 @@
         insert into payment
             (order_id, payment_price, payment_use_point, payment_tid)
         values
-            (#{order.id}, #{price}, #{usePoint}, #{tid})
+            (#{order.id}, #{price}, #{usePoint})
     </insert>
+
+
 
     <select id="getOrderById" parameterType="int" resultType="com.roommake.order.dto.OrderDto">
         select
@@ -153,12 +164,78 @@
         and oi.order_status_id = os.order_status_id
     </select>
 
+    <update id="updateExchangeApprovalYn">
+        update exchange
+        set exchange_approval_yn = 'Y'
+        where exchange_id = #{id}
+    </update>
+
+    <select id="getAllOrders" resultMap="orderList">
+        select
+        A.order_id            as id,
+        A.product_id          as productId,
+        A.product_detail_id   as detailId,
+        A.order_item_price    as price,
+        A.order_item_count    as count,
+        A.order_status_id     as status,
+        B.product_id          as productId,
+        B.product_name        as productName,
+        C.product_detail_unique_id as uniqueId
+        from
+        order_item A
+        join
+        product B ON A.product_id = B.product_id
+        join
+        product_detail C ON A.product_detail_id = C.product_detail_id;
+    </select>
+
+    <update id="updateOrderStatus" parameterType="com.roommake.order.vo.Order">
+        update
+            order_item
+        <set>
+            order_status_id  = #{orderStatus.id}
+        </set>
+        where
+            order_id = #{id}
+    </update>
+
+    <select id="getRefund" parameterType="com.roommake.order.vo.Refund">
+        select
+            refund_id                as id,
+            refund_update_date       as updateDate,
+            refund_create_date       as createDate,
+            refund_status            as status,
+            refund_amount            as amount
+        from
+            refund
+    </select>
+
+    <select id="getAllExchanges" resultMap="com.roommake.order.mapper.MyOrderMapper.OrderResultMap">
+        select
+            exchange_stauts         as status,
+            order_item_id           as itemId,
+            exchange_approval_yn    as yn,
+            return_exchange_reason_id   as reasonId,
+            exchange_create_date    as createDate,
+            exchange_update_date    as updateDate
+        from exchange;
+    </select>
+
     <select id="getAllOrderStatus" resultType="com.roommake.order.vo.OrderStatus">
         select
             order_status_id     as id,
             order_status_name   as name
         from
             order_status
+    </select>
+
+    <select id="getAllorderCancels" resultType="com.roommake.order.vo.OrderCancel">
+        select
+            order_cancel_id          as id,
+            order_cancel_create_date as createDate,
+            order_cancel_update_date as updateDate
+        from
+            order_cancel;
     </select>
 
 </mapper>

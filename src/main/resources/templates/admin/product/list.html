@@ -7,11 +7,11 @@
         <div class="col-10">
             <h1>상품리스트</h1>
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <form type="search" action="" method="">
-                    <select>
-                        <option value="">상품명</option>
-                        <option value="">상품번호</option>
-                        <option value="">상품명+상품번호</option>
+                <form type="search" action="/admin/product/list" method="GET">
+                    <select name="type">
+                        <option value="name">상품명</option>
+                        <option value="number">상품번호</option>
+                        <option value="nameNumber">상품명+상품번호</option>
                     </select>
                     <input type="text" name="keyword"/>
                     <button type="search">검색</button>
@@ -25,7 +25,7 @@
                     <th scope="col">상품이름</th>
                     <th scope="col">상품등록일</th>
                     <th scope="col">상품설명</th>
-                    <th scope="col">상품관리</th>
+                    <th scope="col">관리</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -42,7 +42,7 @@
                     <td th:text="${product.content}">참좋은 침대</td>
                     <td>
 
-                        <!--<a th:if="${product.id == 10000227}" class="btn btn-primary" th:href="@{'/admin/product/modify?id=' + ${product.id}}" role="button">수정2</a>-->
+                        <!--/<a th:if="${product.id == 10000227}" class="btn btn-primary" th:href="@{'/admin/product/modify?id=' + ${product.id}}" role="button">수정2</a>-->
                         <!--<a th:if="${product.id != 10000227}" class="btn btn-primary" href="javascript:void(0);" role="button">수정불가</a>-->
                         <a class="btn btn-primary" th:href="@{'/admin/product/modify?id=' + ${product.id}}" role="button">수정</a>
                     </td>
@@ -55,17 +55,16 @@
             <nav aria-label="Page navigation example">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:class="${page == 1} ? 'page-item disabled' : 'page-item'">
-                        <a class="page-link" th:href="@{'/list?page=' + (${page}-1)}">이전</a>
+                        <a class="page-link" th:href="@{'/admin/product/list?page=' + ${prevPage}}">이전</a>
                     </li>
                     <li class="page-item" th:each="pageNumber : ${#numbers.sequence(1, totalPages)}">
                         <a class="page-link" th:href="@{'/admin/product/list?page=' + ${pageNumber}}" th:text="${pageNumber}">1</a>
                     </li>
                     <li class="page-item" th:class="${page == totalPages} ? 'page-item disabled' : 'page-item'">
-                        <a class="page-link" th:href="@{'list?page=' + (${page}+1)}">다음</a>
+                        <a class="page-link" th:href="@{'/admin/product/list?page=' + ${nextPage}}">다음</a>
                     </li>
                 </ul>
             </nav>
-
         </div>
     </div>
 </div>

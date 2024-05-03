@@ -52,7 +52,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-primary" data-bs-dismiss="modal">승인</button>
-                                <button type="button" class="btn btn-danger">취소</button>
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">취소</button>
                             </div>
                         </div>
                     </div>
@@ -63,50 +63,22 @@
                 <tr>
                     <th></th>
                     <th>환불번호</th>
-                    <th>주문번호</th>
-                    <th>상품이름</th>
-                    <th>환불금액</th>
+                    <th>환불상세번호</th>
                     <th>환불접수일자</th>
-                    <th>환불포인트</th>
+                    <th>환불금액</th>
                     <th>환불처리상태</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
+                <tr th:each="refund : ${refund}">
                     <th>
                         <input class="form-check-input" type="checkbox" value="">
                     </th>
-                    <th>48448-4942</th>
-                    <td>48488</td>
-                    <td>쇼파</td>
-                    <td>50,000</td>
-                    <td>2024-04-16</td>
-                    <td>50,000</td>
-                    <td>환불신청</td>
-                </tr>
-                <tr>
-                    <th>
-                        <input class="form-check-input" type="checkbox" value="">
-                    </th>
-                    <th>48448-4942</th>
-                    <td>48488</td>
-                    <td>쇼파</td>
-                    <td>50,000</td>
-                    <td>2024-04-16</td>
-                    <td>50,000</td>
-                    <td>환불신청</td>
-                </tr>
-                <tr>
-                    <th>
-                        <input class="form-check-input" type="checkbox" value="">
-                    </th>
-                    <th>5252-5252</th>
-                    <td>48488</td>
-                    <td>쇼파</td>
-                    <td>50,000</td>
-                    <td>2024-04-16</td>
-                    <td>50,000</td>
-                    <td>환불신청</td>
+                    <th th:text="${refundStat.index+1}">1</th>
+                    <th th:text="${refund.id}">500000</th>
+                    <td th:text="${#dates.format(refund.createDate,'yyyy-MM-dd')}">2024-04-16</td>
+                    <td th:text="${refund.amount}">50,000</td>
+                    <td th:text="${refund.status}">환불신청</td>
                 </tr>
                 </tbody>
             </table>

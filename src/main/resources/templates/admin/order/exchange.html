@@ -20,34 +20,14 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    <td>50000001</td>
+                <tr th:each="exchanges : ${exchanges}">
+                    <td th:text="${exchangesStat.index+1}">50000001</td>
                     <td>10515</td>
                     <td><a class="link-offset-1" th:href="@{/admin/order/exchange-detail}">50628594</a></td>
                     <td>이순신</td>
                     <td>쇼파</td>
-                    <td>2022-05-05</td>
-                    <td>"쇼파 사이즈에 너무 작습니다"</td>
-                    <td align="center">교환신청</td>
-                </tr>
-                <tr>
-                    <td>50000002</td>
-                    <td>10515</td>
-                    <td><a class="link-offset-1" th:href="@{/admin/order/exchange-detail}">50628594</a></td>
-                    <td>홍길동</td>
-                    <td>쇼파</td>
-                    <td>2022-05-05</td>
-                    <td>"쇼파 사이즈에 너무 작습니다"</td>
-                    <td align="center">교환신청</td>
-                </tr>
-                <tr>
-                    <td>50000003</td>
-                    <td>10515</td>
-                    <td><a class="link-offset-1" th:href="@{/admin/order/exchange-detail}">50628594</a></td>
-                    <td>강감찬</td>
-                    <td>쇼파</td>
-                    <td>2022-05-05</td>
-                    <td>"쇼파 사이즈에 너무 작습니다"</td>
+                    <td>2024-04-16</td>
+                    <td>쇼파 사이즈에 너무 작습니다</td>
                     <td align="center">교환신청</td>
                 </tr>
                 </tbody>

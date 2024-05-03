@@ -84,14 +84,14 @@ public class AdminProductService {
         detailSearch(productId, model);
     }
 
-    public int getTotalProducts() {
-        return productMapper.getTotalProducts();
+    public int getTotalProducts(String keyword, String type) {
+        return productMapper.getTotalProducts(keyword, type);
     }
 
     // 페이징 처리
-    public List<ProductListDto> getProductByPage(int page, int pageSize) {
+    public List<ProductListDto> getProductByPage(int page, int pageSize, String keyword, String type) {
         int offset = (page - 1) * pageSize;
-        return productMapper.getProductsByPage(offset, pageSize);
+        return productMapper.getProductsByPage(offset, pageSize, keyword, type);
     }
 }
 

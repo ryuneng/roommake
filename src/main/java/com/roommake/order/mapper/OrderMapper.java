@@ -32,5 +32,17 @@ public interface OrderMapper {
 
     List<OrderItemDto> getItemsByOrderId(int orderId);
 
+    void updateExchangeApprovalYn(int id);
+
+    List<Order> getAllOrders();
+
+    int updateOrderStatus(Order order);
+
+    List<Refund> getRefund();
+
+    List<Exchange> getAllExchanges();
+
     List<OrderStatus> getAllOrderStatus();
+
+    List<OrderCancel> getAllorderCancels();
 }

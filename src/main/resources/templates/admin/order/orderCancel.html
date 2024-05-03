@@ -1,0 +1,60 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='order'">
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h1>상품취소 페이지</h1>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>취소번호</th>
+                    <th>취소상세번호</th>
+                    <th>취소신청일자</th>
+                    <th>주문자명</th>
+                    <th>취소승인여부</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>60000001</td>
+                    <td>2022-05-05</td>
+                    <td>이순신</td>
+                    <td>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#product-return">
+                            취소승인
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>60000002</td>
+                    <td>2022-05-05</td>
+                    <td>이순신</td>
+                    <td>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#product-return">
+                            취소승인
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>60000003</td>
+                    <td>2022-05-05</td>
+                    <td>이순신</td>
+                    <td>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#product-return">
+                            취소승인
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</html>

@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("admin/product")
@@ -18,6 +19,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminProductController {
     private final AdminProductService adminproductService;
     private final ProductService productService;
+
+    // 상품리스트 / 검색
+    @GetMapping("/list")
+    public String list(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            Model model,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "type", required = false) String type
+    ) {
+        // 페이징 처리
+        int pageSize = 10;
+        int totalProducts = adminproductService.getTotalProducts(keyword, type);
+        int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
+        page = Math.min(Math.max(page, 1), totalPages);
+        model.addAttribute("products", adminproductService.getProductByPage(page, pageSize, keyword, type));
+        model.addAttribute("page", Integer.valueOf(page));
+        model.addAttribute("nextPage", Integer.valueOf(page + 1));
+        model.addAttribute("prevPage", Integer.valueOf(page - 1));
+        model.addAttribute("totalPages", Integer.valueOf(totalPages));
+
+        return "admin/product/list";
+    }
 
     // 상품등록폼
     @GetMapping("/create")

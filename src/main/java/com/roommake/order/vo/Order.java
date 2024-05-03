@@ -19,5 +19,5 @@ public class Order {
     private int totalPrice;       // 총 주문금액
     private Delivery delivery;    // 배송지
     private int paymentPrice;     // 결제금액
-    private OrderStatus status;   // 주문상태
+    private OrderStatus orderStatus;   // 주문상태
 }

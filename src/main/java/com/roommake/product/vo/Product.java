@@ -32,4 +32,12 @@ public class Product {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         return (updateDate != null) ? formatter.format(updateDate) : null;
     }
+
+    public String getProductTag(int productId, int categoryId) {
+
+        ProductTag productTag = new ProductTag();
+        productTag.getProduct().setId(productId);
+        productTag.getCategory().setId(categoryId);
+        return null;
+    }
 }

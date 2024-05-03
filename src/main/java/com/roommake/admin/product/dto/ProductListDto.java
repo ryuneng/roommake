@@ -1,5 +1,6 @@
 package com.roommake.admin.product.dto;
 
+import com.roommake.product.vo.ProductTag;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,4 +17,7 @@ public class ProductListDto {
     private String categoryName;
     private String content;
     private Date createDate;
+    private ProductTag productTag;
+    private int discount;
+    private int starRating;
 }

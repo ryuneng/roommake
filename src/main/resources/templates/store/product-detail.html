@@ -1,4 +1,4 @@
-<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}" xmlns="http://www.w3.org/1999/html">
 <head>
     <style>
         .buy-btn {
@@ -154,13 +154,13 @@
                     <i class="bi bi-star-fill" style="height: 35px; color: gold;"></i>
                     <span th:text="${#numbers.formatDecimal((productRatingTotal/productReviewAmount), 1, 1)}" th:if="${productRatingTotal} > 0 ">4.3</span>
                     <span th:text="${productRatingTotal}" th:if="${productRatingTotal} == 0">4.3</span>
-                    <span><strong th:text="${productReviewAmount}">2,000</strong>개 리뷰</span>
+                    <span><strong th:text="${productReviewAmount}">상품의 리뷰갯수</strong>개 리뷰</span>
                 </div>
                 <div>
                     <span class="fs-2 text-danger" th:text="${product.discount}">50</span><span class="fs-2 text-danger">%</span>
                 </div>
                 <div>
-                    <span class="fs-2"><strong data-th-text="${#numbers.formatInteger(product.price, 3, 'COMMA')}">100,000</strong>원</span>
+                    <span class="fs-2"><strong id="product-price" th:attr="data-price=${product.price}" data-th-text="${#numbers.formatInteger(product.price, 3, 'COMMA')}">100,000</strong>원</span>
                 </div>
                 <hr>
                 <!-- 상단 상품선택 select바 -->
@@ -185,10 +185,11 @@
                 -->
             </div>
         </div>
+        <!--
         <div class="row mb-3">
             <div class="col-md-7 ps-6 offset-5">
                 <form id="order-form" method="post" th:action="@{/store/addCart}">
-                    <!-- 상품선택시 상품이 선택한 상품이 추가되는 영역 -->
+
                     <div class="bg-body-tertiary mb-3" id="order-box">
 
                     </div>
@@ -196,7 +197,7 @@
                         <span class="fs-3">총 주문금액</span>
                         <span class="fs-3" id="product-price" th:attr="data-price=${product.price}">
                         <strong id="totalPrice">0</strong>원
-                            <!--<strong data-th-text="${#numbers.formatInteger(product.price, 3, 'COMMA')}">100,000</strong>원-->
+
                         </span>
                     </div>
                     <button type="button" id="buy-btn-cart" class="btn btn-outline-primary buy-btn">장바구니</button>
@@ -204,6 +205,7 @@
                 </form>
             </div>
         </div>
+        -->
         <div class="product-navbar">
             <!-- 상품디테일페이지 네비바 -->
             <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -212,7 +214,7 @@
                     <tr>
                         <th class="detail-index" id="product-content">상품정보</th>
                         <th class="detail-index" id="product-review">상품리뷰</th>
-                        <th class="detail-index" id="product-change">상품문의</th>
+                        <th class="detail-index" id="product-qna">상품문의</th>
                         <th class="detail-index" id="order-product">다른상품</th>
                     </tr>
                     </thead>
@@ -400,23 +402,32 @@
                     </div>
                 </div>
                 <!-- 상품문의가 위치하는 부분 -->
-                <div>
+                <div id="product-qna-main">
                     <span class="fs-3">상품문의</span>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal1"
                             style="float: right;">
                         문의등록
                     </button>
                     <div class="card my-3">
-                        <div class="card-body py-1 px-2" th:each="productReview, loop:${productReviews}">
+                        <div class="card-body py-1 px-2" th:each="qna, loop:${qnas}">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <span class="badge bg-light text-dark">문의작성자의 이름</span>
-                                    <span class="badge bg-light text-dark">문의작성일자</span>
+                                    <span class="badge bg-light text-dark" th:text="${qna.userNickname}">문의작성자의 이름</span>
+                                    <span class="badge bg-light text-dark" th:text="${#dates.format(qna.createDate, 'yyyy년 M월 d일')}">문의작성일자</span>
                                 </div>
                             </div>
                             <div>
-                                <p class="card-text ps-2" style="white-space: pre-line;">문의내용</p>
+                                <div sec:authorize="isAnonymous()">
+                                    <div th:if="${qna.privateYn == 'Y'}">비밀글입니다.</div>
+                                    <div th:unless="${qna.privateYn == 'Y'}" th:text="${qna.content}">비밀글입니다.</div>
+                                </div>
+                                <div sec:authorize="isAuthenticated()">
+                                    <div th:if="${qna.privateYn == 'Y' && #authentication.principal.username == qna.userEmail}" th:text="${qna.content}"> </div>
+                                    <div th:if="${qna.privateYn == 'Y' && #authentication.principal.username != qna.userEmail}">비밀글입니다.</div>
+                                    <div th:if="${qna.privateYn == 'N'}" th:text="${qna.content}"></div>
+                                </div>
                             </div>
+                            <hr>
                         </div>
                     </div>
                 </div>
@@ -434,7 +445,7 @@
                                 <div class="modal-body">
                                     <select class="form-select reply-select" name="categoryId">
                                         <option type="hidden">문의종류을 선택하세요</option>
-                                        <option th:each="faqcategory, loop : ${faqCategories}" th:text="${faqcategory.name}" th:value="${faqcategory.id}"></option>
+                                        <option th:each="qnacategory, loop : ${qnaCategories}" th:text="${qnacategory.name}" th:value="${qnacategory.id}"></option>
                                     </select>
                                 </div>
                                 <div>
@@ -444,7 +455,7 @@
                                 </div>
                                 <div>
                                     <div class="modal-footer">
-                                        <input type="checkbox" name="secret">
+                                        <input type="checkbox" name="secret" value="Y">
                                         비밀글
                                         </input>
                                         <button type="submit" class="btn btn-primary">문의등록</button>
@@ -459,20 +470,7 @@
             <!-- 상품상세부분 우측 결제 내비바 -->
             <div class="col-md-5">
                 <div class="product-buy-navbar">
-                    <!-- 하단 상품선택 select바 -->
-                    <select class="form-select" id="product-option-under">
-                        <option hidden>상품을 선택하세요</option>
-                        <option id="product-name-under" name="option"
-                                th:value="${productDetail.id}"
-                                th:each="productDetail, loop : ${productDetail}"
-                                th:text="${product.name} + '/' + ${productDetail.size} + '/' + ${productDetail.color}"
-                                th:attr="data-name=${product.name},
-                            data-size=${productDetail.size},
-                            data-color=${productDetail.color},
-                            data-product-detail-id=${productDetail.id},
-                            data-product-id=${product.id}">갈색침대
-                        </option>
-                    </select>
+
                     <!-- 상품옵션이 있을 경우에 추가할 예정
                     <select class="form-select d-none" id="product-options-under">
                         <option hidden>옵션을 선택하세요</option>
@@ -480,14 +478,14 @@
                     </select>
                     -->
                     <div>
-                        <form id="order-form-under" method="post" th:action="@{/store/addCart}">
+                        <form id="order-form" method="post" th:action="@{/store/addCart}">
                             <!-- 상품선택시 상품이 선택한 상품이 추가되는 영역 -->
                             <div class="bg-body-tertiary mb-3" id="order-box-under">
 
                             </div>
                             <div class="d-flex justify-content-between">
                                 <span class="fs-3">주문금액</span>
-                                <span class="fs-3"><strong>100,000</strong>원</span>
+                                <span class="fs-3"><strong id="total-price">0</strong>원</span>
                             </div>
                             <button type="button" id="buy-btn-cart" class="btn btn-outline-primary buy-btn-under">장바구니</button>
                             <button type="button" id="buy-btn-order" class="btn btn-primary buy-btn-under">바로구매</button>
@@ -657,15 +655,15 @@
 <script type="text/javascript" layout:fragment="script">
     const ctx = document.getElementById('myChart');
 
-    // 상품 디테일 페이지 상단에 위치한 select박스 선택시 상단,하단에 있는 추가상품 select바 생성 및
-    // 오더 폼에 선택한 상품정보 출력
+    //상품 디테일 페이지 상단에 위치한 select박스 선택시 상단,하단에 있는 추가상품 select바 생성 및
+    //오더 폼에 선택한 상품정보 출력
     $("select[id=product-option]").change(function() {
         $("#product-options").removeClass("d-none");
         $("#product-options-under").removeClass("d-none");
         $("#product-option-under").val($(this).prop("value"));
 
         let $option = $(this).find("option:selected");
-        let price = parseInt($("span[id=product-price]").attr("data-price"))
+        let price = parseInt($("strong[id=product-price]").attr("data-price"))
 
         let name = $option.attr("data-name");
         let size = $option.attr("data-size");
@@ -673,78 +671,72 @@
         let productDetailId = $option.attr("data-product-detail-id");
         let productid = $option.attr("data-product-id");
 
+        let exist = false;
+        $("input[name=productDetailId]").each(function() {
+            if ($(this).val() === productDetailId) {
+                exist = true;
+            }
+        })
+
+        if (exist) {
+            alert("이미 선택한 옵셥입니다.");
+            return;
+        }
 
         let div = `
-			<span>${name}/${size}/${color}</span>
-
-			<input type="hidden" name="id" value="${productid}"></input>
-			<input type="hidden" name="productDetailId" value="${productDetailId}"></input>
-                    <div class="d-flex justify-content-between" style="margin-top: 20px">
+                <div id="order-detail-box-${productDetailId}" class="mb-3 border-bottom pb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>${name}/${size}/${color}</span>
+                        <button type="button" class="btn btn-xs" id='btn-del-${productDetailId}' data-delete-button="${productDetailId}"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                    <input type="hidden" name="id" value="${productid}"></input>
+                    <input type="hidden" name="productDetailId" value="${productDetailId}"></input>
+                    <div class="d-flex justify-content-between" >
                         <div>
                             <input style="width: 50%" type="number" id='result-${productDetailId}' data-product-productDetailId="${productDetailId}" name="amount" value="1" style="display:inline-block"></input>
                         </div>
-                        <span class="fs-5"><strong id="product-price-${productDetailId}">${(price).toLocaleString()}</strong>원</span>
+                        <span class="fs-5"><strong id="product-price-${productDetailId}" data-this-price="${price}">${(price).toLocaleString()}</strong>원</span>
                     </div>
-		`
-        $("div[id=order-box]").append(div);
-        $("div[id=order-box-under]").append(div);
-    })
+                </div>
+            `
+        $("div[id=order-box-under]").append(div)
+        refreshTotalPrice();
 
-    // 상품 디테일 페이지 하단에 위치한 select박스 선택시 상단,하단에 있는 추가상품 select바 생성 및
-    // 오더 폼에 선택한 상품정보 출력
-    $("select[id=product-option-under]").change(function() {
-        $("#product-options-under").removeClass("d-none");
-        $("#product-option-under").removeClass("d-none");
-        $("#product-option").val($(this).prop("value"));
-
-        let $option = $(this).find("option:selected");
-        let price = parseInt($("span[id=product-price]").attr("data-price"))
-
-        let name = $option.attr("data-name");
-        let size = $option.attr("data-size");
-        let color = $option.attr("data-color");
-        let productDetailId = $option.attr("data-product-detail-id");
-        let productid = $option.attr("data-product-id");
-
-
-        let div = `
-			<span>${name}/${size}/${color}</span>
-
-			<input type="hidden" name="id" value="${productid}"></input>
-			<input type="hidden" name="productDetailId" value="${productDetailId}"></input>
-                    <div class="d-flex justify-content-between" style="margin-top: 20px">
-                        <div>
-                            <input style="width: 50%" type="number" id='result-${productDetailId}' data-product-productDetailId="${productDetailId}" name="amount" value="1" style="display:inline-block"></input>
-                        </div>
-                        <span class="fs-5"><strong id="product-price-${productDetailId}">${(price).toLocaleString()}</strong>원</span>
-                    </div>
-		`
-        $("div[id=order-box]").append(div);
-        $("div[id=order-box-under]").append(div);
-    })
-
-    // 상단 상품개수 변경시 상품가격도 같이 변경되는 함수
-    $("div[id=order-box]").on('change', 'input', function() {
-        let price = parseInt($("span[id=product-price]").attr("data-price"))    // 해당상품 가격
-        let val = $(this).val();    // 해당상품갯수
-        let producttotal = parseInt(price * val);   // 갯수 * 가격
-        let productDetailId = $(this).attr("data-product-productDetailId")
-
-
-        $(`[id="product-price-${productDetailId}"]`).text(producttotal.toLocaleString());
 
     })
 
     // 하단 상품개수 변경시 상품가격도 같이 변경되는 함수
     $("div[id=order-box-under]").on('change', 'input', function() {
-        let price = parseInt($("span[id=product-price]").attr("data-price"))    // 해당상품 가격
+        let price = parseInt($("strong[id=product-price]").attr("data-price"))    // 해당상품 가격
         let val = $(this).val();    // 해당상품갯수
         let producttotal = parseInt(price * val);   // 갯수 * 가격
         let productDetailId = $(this).attr("data-product-productDetailId")
-
-
+        $(`[id="product-price-${productDetailId}"]`).attr("data-this-price", producttotal)
         $(`[id="product-price-${productDetailId}"]`).text(producttotal.toLocaleString());
 
+
+        refreshTotalPrice();
+
+    })
+
+    // 상품 총 주문금액을 재정의 해주는 함수
+    function refreshTotalPrice() {
+        let totalPrice = 0
+        $("#order-box-under strong").each(function() {
+            totalPrice += parseInt($(this).attr("data-this-price"));
+        });
+
+        $("#total-price").text(totalPrice.toLocaleString());
+
+    }
+
+
+    // 하단에 위치한 상품박스에 x버튼 클릭시 해당하는 상품박스가 사라지는 함수
+    $("div[id=order-box-under]").on('click','button',function() {
+        let boxId = $(this).attr("data-delete-button")
+
+        $(`[id="order-detail-box-${boxId}"]`).remove();
+        refreshTotalPrice();
     })
 
     // 상품리뷰에서 상품선택 시 리뷰작성폼에서의 select바에서도 상품이 같은 값으로 변경
@@ -757,7 +749,7 @@
         let form = $("form[id=order-form]");
         form.attr("action", "/store/addCart")
         form.trigger("submit")
-        $("div[id=modal-form-cart]").show()
+        //$("div[id=modal-form-cart]").show()
 
 
     })
@@ -783,8 +775,8 @@
     })
 
     // 상품상세 네비바에 교환환불 클릭시 교환환불 시작위치로 이동하는 함수
-    $("th[id=product-return]").click(function() {
-        let movePoint = $("div[id=product-return-main]").offset();
+    $("th[id=product-qna]").click(function() {
+        let movePoint = $("div[id=product-qna-main]").offset();
         $("html, body").animate({scrollTop: movePoint.top}, 0);
     })
 

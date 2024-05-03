@@ -17,6 +17,7 @@
 <!--        <association property="product_category" javaType="com.roommake.product.vo.ProductCategory">-->
 <!--            <id column="product_category_id" property="id" />-->
 <!--            <result column="product_category_name" property="name" />-->
+<!--            <result column="parents_product_category_id" property="parentsId" />-->
 <!--        </association>-->
 <!--        <collection property="prod_tag_category" ofType="com.roommake.product.vo.ProductTagCategory">-->
 <!--            <id column="product_tag_category" property="id"/>-->
@@ -88,19 +89,6 @@
         order by
             product_id asc
     </select>
-
-<!--    <select id="getProductsById" parameterType="int" resultMap="ProductResultMap">-->
-<!--        select-->
-<!--            *-->
-<!--        from-->
-<!--            product a, product_tag b, prod_tag_category c-->
-<!--        where-->
-<!--            category_id = #{value},-->
-<!--            a.product_id = b.product_id,-->
-<!--            b.prod_tag_category_id = c.prod_tag_category_id-->
-<!--        order by-->
-<!--            product_id asc-->
-<!--    </select>-->
 
     <select id="getAllProductTags" resultType="com.roommake.product.vo.ProductTag">
         select
@@ -377,5 +365,38 @@
             </choose>
         </if>
         </where>
+    </select>
+
+    <insert id="createQna" parameterType="com.roommake.admin.management.vo.Qna">
+        insert into qna
+            (qna_category_id, qna_title, qna_content, user_id, qna_private_yn, product_id)
+        values
+            (#{category.id}, #{title}, #{content}, #{user.id}, #{privateYn}, #{product.id})
+    </insert>
+
+    <select id="getProductQnasById" parameterType="int" resultType="com.roommake.product.dto.ProductQnaDto">
+        select
+            q.product_id          as productId,
+            q.qna_answer          as answer,
+            q.qna_answer_writer   as answerWriter,
+            q.qna_answer_yn       as answerYn,
+            q.qna_category_id     as categoryId,
+            q.qna_content         as content,
+            q.qna_create_date     as createDate,
+            q.qna_delete_date     as deleteDate,
+            q.qna_delete_yn       as deleteYn,
+            q.qna_id              as id,
+            q.qna_private_yn      as privateYn,
+            q.qna_title           as title,
+            q.qna_update_date     as updateDate,
+            u.user_id             as userId,
+            u.user_nickname       as usernickname,
+            u.user_email          as userEmail
+        from
+            qna q, user u
+        where
+            q.user_id = u.user_id
+          and
+            product_id=#{id}
     </select>
 </mapper>

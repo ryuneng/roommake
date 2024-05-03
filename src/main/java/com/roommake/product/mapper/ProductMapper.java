@@ -1,7 +1,9 @@
 package com.roommake.product.mapper;
 
+import com.roommake.admin.management.vo.Qna;
 import com.roommake.admin.product.dto.ProductListDto;
 import com.roommake.cart.vo.Cart;
+import com.roommake.product.dto.ProductQnaDto;
 import com.roommake.product.dto.ProductReviewDto;
 import com.roommake.product.vo.*;
 import org.apache.ibatis.annotations.Mapper;
@@ -63,4 +65,8 @@ public interface ProductMapper {
     void addCountProductReviewVote(int reviewId);
 
     void deleteCountProductReviewVote(int reviewId);
+
+    void createQna(Qna qna);
+
+    List<ProductQnaDto> getProductQnasById(int id);
 }

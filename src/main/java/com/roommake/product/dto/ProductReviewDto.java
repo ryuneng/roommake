@@ -10,7 +10,6 @@ import java.util.Date;
 
 @Getter
 @Setter
-
 public class ProductReviewDto {
 
     private int id;

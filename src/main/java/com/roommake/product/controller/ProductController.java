@@ -1,14 +1,19 @@
 package com.roommake.product.controller;
 
 import com.roommake.admin.management.service.FaqService;
+import com.roommake.admin.management.service.QnaService;
 import com.roommake.admin.management.vo.Faq;
 import com.roommake.admin.management.vo.FaqCategory;
+import com.roommake.admin.management.vo.Qna;
+import com.roommake.admin.management.vo.QnaCategory;
 import com.roommake.cart.dto.CartCreateForm;
+import com.roommake.product.dto.ProductQnaDto;
 import com.roommake.product.dto.ProductReviewDto;
 import com.roommake.product.service.ProductService;
 import com.roommake.product.vo.*;
 import com.roommake.resolver.Login;
 import com.roommake.user.security.LoginUser;
+import com.roommake.user.service.UserService;
 import com.roommake.user.vo.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +34,8 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
-    private final FaqService faqService;
+    private final QnaService qnaService;
+    private final UserService userService;
 
     // 상품홈으로 이동하는 메소드
     @GetMapping("/home")
@@ -57,8 +63,11 @@ public class ProductController {
         double productRatingTotal = productService.getProductRatingTotalById(id);
         model.addAttribute("productRatingTotal", productRatingTotal);
 
-        List<FaqCategory> faqCategories = faqService.getFaqCategories();
-        model.addAttribute("faqCategories", faqCategories);
+        List<QnaCategory> qnaCategories = qnaService.getQnaCategories();
+        model.addAttribute("qnaCategories", qnaCategories);
+
+        List<ProductQnaDto> qnas = productService.getProductQnasById(id);
+        model.addAttribute("qnas", qnas);
 
         return "store/product-detail";
     }
@@ -120,15 +129,23 @@ public class ProductController {
     @PreAuthorize("isAuthenticated()")
     public String createQna(@PathVariable int id, @RequestParam("categoryId") int categoryId, @RequestParam("title") String title, @RequestParam("secret") String secret, @RequestParam("content") String content, @Login LoginUser loginuser) {
 
-        FaqCategory faqCategory = faqService.getFaqCategory(categoryId);
-        String userNickname = loginuser.getNickname();
+        Product product = productService.getProductById(id);
+        QnaCategory qnaCategory = qnaService.getQnaCategory(categoryId);
 
-        Faq faq = new Faq();
-        faq.setTitle(title);
-        faq.setContent(content);
-        faq.setCategory(faqCategory);
+        if (!secret.equals("Y")) {
+            return "N";
+        }
 
-        return null;
+        Qna qna = new Qna();
+        qna.setProduct(product);
+        qna.setTitle(title);
+        qna.setContent(content);
+        qna.setCategory(qnaCategory);
+        qna.setPrivateYn(secret);
+
+        productService.createQna(qna, loginuser.getId());
+
+        return String.format("redirect:/store/detail/%d", id);
     }
 
 //    @PostMapping("/replyCreate/{id}")

@@ -1,10 +1,12 @@
 package com.roommake.product.service;
 
+import com.roommake.admin.management.vo.Qna;
 import com.roommake.admin.product.dto.ProductListDto;
 import com.roommake.admin.product.form.ProductCreateForm;
 import com.roommake.cart.dto.CartCreateForm;
 import com.roommake.cart.vo.Cart;
 import com.roommake.order.vo.OrderItem;
+import com.roommake.product.dto.ProductQnaDto;
 import com.roommake.product.dto.ProductReviewDto;
 import com.roommake.product.mapper.ProductMapper;
 import com.roommake.product.vo.*;
@@ -39,6 +41,16 @@ public class ProductService {
     }
 
     public List<Product> getProductsById(int id) {
+
+//        List<Product> productList = productMapper.getProductsById(id);
+
+//        Product product = new Product();
+//        for (Product x : productList) {
+//            int productId = x.getId();
+//            int categoryId = x.getCategory().getId();
+//            product.getProductTag(productId, categoryId);
+//        }
+
         return productMapper.getProductsById(id);
     }
 
@@ -150,6 +162,20 @@ public class ProductService {
     public ProductReview getProductReviewById(int id) {
 
         return productMapper.getProductReviewById(id);
+    }
+
+    public void createQna(Qna qna, int userId) {
+
+        User user = User.builder().id(userId).build();
+
+        qna.setUser(user);
+
+        productMapper.createQna(qna);
+    }
+
+    public List<ProductQnaDto> getProductQnasById(int id) {
+
+        return productMapper.getProductQnasById(id);
     }
 
     ;

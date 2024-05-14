@@ -29,8 +29,8 @@
         <!-- 좌측 로고, 메뉴 -->
         <div class="ms-3 d-flex flex-row align-items-center">
             <div class="me-3">
-                <a class="navbar-brand" href="http://localhost"><img th:src="@{/images/home/logo.png}"
-                                                                     style="width: 100px; height: 30px"></a>
+                <a class="navbar-brand" href="http://43.202.27.255"><img th:src="@{/images/home/logo.png}"
+                                                                         style="width: 100px; height: 30px"></a>
             </div>
             <div>
                 <ul class="nav justify-content-start fw-bold" style="font-size: large">
@@ -68,8 +68,9 @@
                 <li class="nav-item">
                     <a class="nav-link text-dark position-relative" th:href="@{/cart}">
                         <i class="bi bi-cart2 h4"></i>
-                        <span class="position-absolute translate-middle badge border border-light rounded-circle bg-primary"><span
-                                class="small" th:text="${cartCount}">2</span></span>
+                        <span class="position-absolute translate-middle badge border border-light rounded-circle bg-primary">
+                            <span class="small" th:text="${cartCount}">2</span>
+                        </span>
                     </a>
                 </li>
                 <li class="nav-item">

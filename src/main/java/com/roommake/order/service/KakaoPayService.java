@@ -41,9 +41,9 @@ public class KakaoPayService {
         parameters.put("quantity", "1");                                        // 상품 수량
         parameters.put("total_amount", String.valueOf(totalPrice));             // 상품 총액
         parameters.put("tax_free_amount", "0");                                 // 상품 비과세 금액
-        parameters.put("approval_url", "http://localhost/order/pay/completed"); // 결제 성공 시 URL
-        parameters.put("cancel_url", "http://localhost/order/pay/cancel");      // 결제 취소 시 URL
-        parameters.put("fail_url", "http://localhost/order/pay/fail");          // 결제 실패 시 URL
+        parameters.put("approval_url", "http://43.202.27.255/order/pay/completed"); // 결제 성공 시 URL
+        parameters.put("cancel_url", "http://43.202.27.255/order/pay/cancel");      // 결제 취소 시 URL
+        parameters.put("fail_url", "http://43.202.27.255/order/pay/fail");          // 결제 실패 시 URL
 
         // HttpEntity : HTTP 요청 또는 응답에 해당하는 Http Header와 Http Body를 포함하는 클래스
         HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(parameters, this.getHeaders());

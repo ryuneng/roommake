@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -71,6 +72,13 @@ public class AdminProductController {
         return "redirect:/admin/product/list";
     }
 
+    @PostMapping("/excel")
+    public String excelUpload(@RequestPart(required = false, name = "excel") MultipartFile file) {
+        adminproductService.excelUpload(file);
+
+        return "redirect:/admin/product/list";
+    }
+
     public String create(ProductCreateForm form) {
         return "redirect:/product/list";
     }
@@ -86,7 +94,7 @@ public class AdminProductController {
         model.addAttribute("product", product);
         return "/admin/product/modify";
     }
-    
+
     @PostMapping("/modify")
     public String modifyPost(Product product) {
         adminproductService.modifyProduct(product);

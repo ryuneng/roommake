@@ -797,6 +797,11 @@
         values (#{amount}, #{userId}, #{typeId}, #{pointReason})
     </insert>
 
+    <insert id="insertProductTag">
+        insert into product_tag
+        values (#{productId}, #{prodTagCategoryId})
+    </insert>
+
     <select id="getProductReviewIdByuserIdorderId" resultType="com.roommake.product.vo.ProductReview">
         select
             order_item_id               as "orderItem.id",

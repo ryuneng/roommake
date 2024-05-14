@@ -10,10 +10,17 @@ import com.roommake.product.vo.ProductDetail;
 import com.roommake.product.vo.ProductImage;
 import com.roommake.utils.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -56,6 +63,8 @@ public class AdminProductService {
         product.setCategory(category);
 
         productMapper.insertProduct(product);
+        List<Integer> tagCategoryIdList = List.of(form.getTagCategoryId1(), form.getTagCategoryId2(), form.getTagCategoryId3());
+        tagCategoryIdList.stream().filter(id -> 0 != id).forEach(id -> productMapper.insertProductTag(id, product.getId()));
 
         ProductImage productImage = new ProductImage();
         if (!form.getImageFiles().isEmpty()) {
@@ -118,6 +127,32 @@ public class AdminProductService {
 
     public List<ProductCategory> getAllProductCategories() {
         return productMapper.getProductCategories();
+    }
+
+    public void excelUpload(MultipartFile file) {
+        List<Product> productList = new ArrayList<>();
+        try (InputStream input = file.getInputStream(); Workbook wb = new XSSFWorkbook(input)) {
+            Sheet sheet = wb.getSheetAt(0);
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                Product product = new Product();
+                String productName = row.getCell(0).getStringCellValue();
+                int price = (int) row.getCell(1).getNumericCellValue();
+                int discount = (int) row.getCell(2).getNumericCellValue();
+                String content = row.getCell(3).getStringCellValue();
+                product.setName(productName);
+                product.setPrice(price);
+                product.setDiscount(discount);
+                product.setContent(content);
+                ProductCategory category = new ProductCategory();
+                category.setId(101);
+                product.setCategory(category);
+                productList.add(product);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        productList.forEach(productMapper::insertProduct);
     }
 }
 

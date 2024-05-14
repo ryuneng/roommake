@@ -6,6 +6,15 @@
         </div>
         <div class="col-10">
             <h1>상품리스트</h1>
+            <form action="/admin/product/excel" method="POST" enctype="multipart/form-data" class="row g-3 align-items-center" style="max-width: 300px; margin-right: auto;">
+                <div class="col-auto">
+                    <label for="excel" class="visually-hidden">엑셀 파일 선택</label>
+                    <input type="file" accept=".xlsx" class="form-control form-control-sm" id="excel" name="excel">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary btn-sm">저장</button>
+                </div>
+            </form>
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <form type="search" action="/admin/product/list" method="GET">
                     <select name="type" style="height: 28px">

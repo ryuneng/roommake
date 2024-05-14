@@ -3,14 +3,11 @@ package com.roommake.product.mapper;
 import com.roommake.admin.management.vo.Qna;
 import com.roommake.admin.product.dto.ProductListDto;
 import com.roommake.cart.vo.Cart;
-import com.roommake.dto.Criteria;
-import com.roommake.order.vo.Order;
 import com.roommake.order.vo.OrderItem;
 import com.roommake.product.dto.*;
 import com.roommake.product.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
@@ -38,6 +35,8 @@ public interface ProductMapper {
     void createCart(Cart cart);
 
     void insertProduct(Product product);
+
+    void insertProductTag(@Param("prodTagCategoryId") int tagCategoryId, @Param("productId") int productId);
 
     void insertProductImage(ProductImage productImage);
 

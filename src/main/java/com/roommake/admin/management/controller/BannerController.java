@@ -5,7 +5,6 @@ import com.roommake.admin.management.service.BannerService;
 import com.roommake.admin.management.vo.Banner;
 import com.roommake.resolver.Login;
 import com.roommake.user.security.LoginUser;
-import com.roommake.utils.S3Uploader;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -22,19 +21,14 @@ import java.util.List;
 public class BannerController {
 
     private final BannerService bannerService;
-    private final S3Uploader s3Uploader;
 
     @Operation(summary = "배너 등록", description = "배너를 등록한다.")
     @PostMapping("/create")
     @ResponseBody
     @PreAuthorize("isAuthenticated()")
     public String create(@Login LoginUser loginUser, BannerForm bannerForm) {
-        String imageName = "https://roommake.s3.ap-northeast-2.amazonaws.com/c9b205fe-0178-4a07-998b-ed4cbafacefb.jpeg";
-        if (bannerForm.getImageFile() != null) {
-            imageName = s3Uploader.saveFile(bannerForm.getImageFile());
-        }
-        bannerService.createBanner(bannerForm, imageName, loginUser.getId());
 
+        bannerService.createBanner(bannerForm, loginUser.getId());
         return "redirect:/admin/management/banner";
     }
 
@@ -52,11 +46,7 @@ public class BannerController {
     @PreAuthorize("isAuthenticated()")
     public Banner modify(@PathVariable("id") int bannerId, @Login LoginUser loginUser, BannerForm bannerForm) {
 
-        String imageName = "";
-        if (bannerForm.getImageFile() != null) {
-            imageName = s3Uploader.saveFile(bannerForm.getImageFile());
-        }
-        return bannerService.modifyBanner(bannerId, bannerForm, imageName, loginUser.getId());
+        return bannerService.modifyBanner(bannerId, bannerForm, loginUser.getId());
     }
 
     @Operation(summary = "배너 삭제", description = "배너를 삭제한다.")

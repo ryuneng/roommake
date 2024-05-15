@@ -23,6 +23,7 @@ public class OrderItemDto {
     private int stock;             // 상품상세 재고
     private int itemStatusId;      // 주문상세 상태 번호
     private String itemStatusName; // 주문상세 상태 이름
+    private String imageName;      // 상품 이미지명
 
     public int getItemPrice() {
 

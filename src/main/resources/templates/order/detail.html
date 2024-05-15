@@ -7,7 +7,81 @@
             --bs-btn-padding-x: .35rem;
             --bs-btn-font-size: .75rem;
         }
+
+        #myform fieldset {
+            display: inline-block;
+            direction: rtl;
+            border: 0;
+        }
+
+        #myform fieldset legend {
+            text-align: right;
+        }
+
+        #myform input[type=radio] {
+            display: none;
+        }
+
+        #myform label {
+            font-size: 3em;
+            color: transparent;
+            text-shadow: 0 0 0 #f0f0f0;
+        }
+
+        #myform label:hover {
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+
+        #myform label:hover ~ label {
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+
+        #myform input[type=radio]:checked ~ label {
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+
+        #reviewContents {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: solid 1.5px #D3D3D3;
+            border-radius: 5px;
+            font-size: 16px;
+            resize: none;
+        }
+
+        /* 상뷰리뷰 별점을 나타내는 css */
+        .star_rating {
+            width: 100%;
+            box-sizing: border-box;
+            display: inline-flex;
+            float: left;
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .star_rating .star {
+            width: 25px;
+            height: 25px;
+            margin-right: 10px;
+            display: inline-block;
+            background: url('https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FE2bww%2FbtsviSSBz4Q%2F5UYnwSWgTlFt6CEFZ1L3Q0%2Fimg.png') no-repeat;
+            background-size: 100%;
+            box-sizing: border-box;
+        }
+
+        .star_rating .star.on {
+            width: 25px;
+            height: 25px;
+            margin-right: 10px;
+            display: inline-block;
+            background: url('https://blog.kakaocdn.net/dn/b2d6gV/btsvbDoal87/XH5b17uLeEJcBP3RV3FyDk/img.png') no-repeat;
+            background-size: 100%;
+            box-sizing: border-box;
+        }
     </style>
+    <link href="/assets/css/star.css" rel="stylesheet"/>
 </head>
 <div layout:fragment="content" class="container my-3 mt-4">
     <div class="container">
@@ -59,7 +133,7 @@
                                         <div class="d-flex w-100 justify-content-start">
                                             <a th:href="@{/store/detail/{id}(id=${item.productId})}" class="link-underline link-underline-opacity-0 text-dark">
                                                 <div>
-                                                    <img th:src="@{/images/home/banner3.jpg}" style="width: 80px; height: 80px">
+                                                    <img th:src="@{${item.imageName}}" style="width: 80px; height: 80px">
                                                 </div>
                                             </a>
                                             <div class="ms-3 text-start">
@@ -130,9 +204,14 @@
                                     </td>
                                     <!-- 4) 구매확정-->
                                     <td th:if="${item.itemStatusId == 4}">
-                                        <div>
-                                            <a th:href="@{#}" type="button" class="btn btn-xs btn-outline-secondary mb-1">리뷰작성</a>
-                                        </div>
+                                        <button type="button" id="orderReviewBtn" class="btn btn-xs btn-outline-secondary mb-1" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                                                th:attr="data-orderItem-name=${item.name},
+                                                         data-orderItem-size=${item.size},
+                                                         data-orderItem-color=${item.color},
+                                                         data-orderItem-id=${item.orderItemId},
+                                                         data-product-id=${item.productId}">
+                                            리뷰작성
+                                        </button>
                                         <div>
                                             <a th:href="@{|/order/claim/return-exchange-form/${dto.orderId}/${item.orderItemId}|}" type="button" class="btn btn-xs btn-outline-secondary mb-1">반품/교환</a>
                                         </div>
@@ -188,6 +267,7 @@
                                     <li>배송지 변경이나 부분취소를 원하시면 전체주문취소 후 다시 주문해주세요.</li>
                                     <li>주문취소는 결제완료, 상품준비중 상태에만 가능합니다.</li>
                                     <li>배송완료 후 7일이 지난 경우에는 자동으로 상품 구매확정이 진행됩니다.</li>
+                                    <li>구매확정 시 포인트가 적립되며, 회원등급에 따라 차등지급됩니다.</li>
                                     <li>리뷰 작성 시 100포인트가 적립됩니다.</li>
                                 </ul>
                             </div>
@@ -253,7 +333,52 @@
             </div>
         </div>
     </div>
+    <!-- 신규댓글등록 모달창 -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">상품리뷰</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <span id="reviewItemName" class="position-relative">상품이름</span>
+                    <div class="text-secondary mt-2" style="font-size: 12px">
+                        사이즈: <span id="reviewItemSize">슈퍼싱글SS 프레임만</span>
+                        / 색상: <span id="reviewItemColor">화이트</span>
+                    </div>
+                    <form class="mb-3 visually" name="myform" id="myform" method="post" enctype="multipart/form-data" action="create">
+                        <fieldset>
+                            <span class="text-bold">별점을 선택해주세요</span>
+                            <input type="radio" name="reviewStar" value="5" id="rate1"><label
+                                for="rate1">★</label>
+                            <input type="radio" name="reviewStar" value="4" id="rate2"><label
+                                for="rate2">★</label>
+                            <input type="radio" name="reviewStar" value="3" id="rate3"><label
+                                for="rate3">★</label>
+                            <input type="radio" name="reviewStar" value="2" id="rate4"><label
+                                for="rate4">★</label>
+                            <input type="radio" name="reviewStar" value="1" id="rate5"><label
+                                for="rate5">★</label>
+                        </fieldset>
+                        <div>
+                            <textarea class="col-auto form-control" type="text" id="reviewContents" name="content"
+                                      placeholder="리뷰를 적어주세요"></textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <input type="file" class="form-control" name="imageFile"/>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">리뷰등록</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
 <script type="text/javascript" layout:fragment="script">
     $(function() {
         // 구매확정
@@ -319,5 +444,18 @@
     let originalAddress = $("#span-delivery-address").text();
     let maskedAddress = maskingAddress(originalAddress);
     $("#span-delivery-address").text(maskedAddress);
+
+    $("button[id=orderReviewBtn]").click(function() {
+        let name = $(this).attr("data-orderItem-name")
+        let size = $(this).attr("data-orderItem-size")
+        let color = $(this).attr("data-orderItem-color")
+        let id = $(this).attr("data-orderItem-id")
+        let productId = $(this).attr("data-product-id")
+        $("span[id=reviewItemName]").text(name)
+        $("span[id=reviewItemSize]").text(size)
+        $("span[id=reviewItemColor] ").text(color)
+        $("form[id=myform]").attr('action', `/store/replyCreate/${id}/${productId}`)
+
+    })
 </script>
 </html>

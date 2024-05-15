@@ -51,8 +51,7 @@
                                     <div class="d-flex w-100 justify-content-start">
                                         <a th:href="@{/store/detail/{id}(id=${item.productId})}" class="link-underline link-underline-opacity-0 text-dark" target="_blank">
                                             <div>
-                                                <img th:src="@{/images/home/banner3.jpg}"
-                                                     style="width: 80px; height: 80px">
+                                                <img th:src="@{${item.imageName}}" style="width: 80px; height: 80px">
                                             </div>
                                         </a>
                                         <div class="ms-3 text-start">
@@ -401,8 +400,7 @@
                     <div class="d-flex w-100 justify-content-start">
                         <a href="/store/detail/${item.productId}" class="link-underline link-underline-opacity-0 text-dark" target="_blank">
                             <div>
-                                <img src="/images/home/banner3.jpg"
-                                     style="width: 80px; height: 80px">
+                                <img src="${item.imageName}" style="width: 80px; height: 80px">
                             </div>
                         </a>
                         <div class="ms-3 text-start">

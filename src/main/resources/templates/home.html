@@ -58,7 +58,7 @@
                         <a th:href="@{/store/detail/{id}(id=${product.id})}" class="link-offset-2 link-underline link-underline-opacity-0 text-black">
                             <div class="card border-0" style="width: 18rem;">
                                 <div class="image-wrapper">
-                                    <img th:src="@{/images/home/banner3.jpg}" class="card-img-top rounded" alt="...">
+                                    <img th:src="@{${product.imageName}}" class="card-img-top rounded" alt="...">
                                 </div>
                                 <div class="card-body">
                                     <p class="card-title small"
@@ -95,12 +95,7 @@
                         <a th:href="@{/community/detail/{id}(id=${post.id})}" class="link-offset-2 link-underline link-underline-opacity-0 text-black">
                             <div class="card border-0" style="width: 18rem;">
                                 <div class="image-wrapper">
-                                    <img th:if="${post.imageName == 'default.jpg'}"
-                                         th:src="|/images/community/${post.imageName}|"
-                                         class="card-img-top rounded" alt="...">
-                                    <img th:if="${post.imageName != 'default.jpg'}"
-                                         th:src="@{${post.imageName}}"
-                                         class="card-img-top rounded" alt="...">
+                                    <img th:src="@{${post.imageName}}" class="card-img-top rounded" alt="...">
                                 </div>
                                 <div class="card-body">
                                     <p class="card-title"
@@ -133,12 +128,7 @@
                         <a th:href="@{/community/detail/{id}(id=${post.id})}" class="link-offset-2 link-underline link-underline-opacity-0 text-black">
                             <div class="card border-0" style="width: 18rem;">
                                 <div class="image-wrapper">
-                                    <img th:if="${post.imageName == 'default.jpg'}"
-                                         th:src="|/images/community/${post.imageName}|"
-                                         class="card-img-top rounded" alt="...">
-                                    <img th:if="${post.imageName != 'default.jpg'}"
-                                         th:src="@{${post.imageName}}"
-                                         class="card-img-top rounded" alt="...">
+                                    <img th:src="@{${post.imageName}}" class="card-img-top rounded" alt="...">
                                 </div>
                                 <div class="card-body">
                                     <p class="card-title"

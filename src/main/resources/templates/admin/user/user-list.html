@@ -21,7 +21,7 @@
                         <option value="all" th:selected="${criteria.filt eq 'all' or criteria.filt == null}" }>전체</option>
                         <option value="active" th:selected="${criteria.filt eq 'active'}">활동중</option>
                         <option value="block" th:selected="${criteria.filt eq 'block'}" }>차단</option>
-                        <option value="block" th:selected="${criteria.filt eq 'delete'}" }>탈퇴</option>
+                        <option value="delete" th:selected="${criteria.filt eq 'delete'}" }>탈퇴</option>
                     </select>
                     <div>
                         <div class="form-check form-check-inline">

@@ -85,7 +85,7 @@ public class ChannelController {
             return "channel/form";
         }
         String imageName = s3Uploader.saveFile(channelForm.getImageFile());
-        if (imageName == "") {
+        if ("default".equals(imageName)) {
             imageName = "https://roommake.s3.ap-northeast-2.amazonaws.com/0545826f-b85e-4afb-9ccc-d0c433932d32.jpg";
         }
         channelService.createChannel(channelForm, imageName, loginUser.getId());
@@ -104,11 +104,8 @@ public class ChannelController {
         ChannelForm channelForm = new ChannelForm();
         channelForm.setTitle(channel.getTitle());
         channelForm.setDescription(channel.getDescription());
-        if (channel.getImageName() != null) {
-            String imageName = channel.getImageName();
-            model.addAttribute("imageName", imageName);
-        }
 
+        model.addAttribute("imageName", channel.getImageName());
         model.addAttribute("channelForm", channelForm);
         model.addAttribute("channelId", channelId);
 
@@ -127,7 +124,7 @@ public class ChannelController {
             throw new RuntimeException("다른 사용자의 채널은 수정할 수 없습니다.");
         }
         String imageName = channel.getImageName();
-        if (channelForm.getImageFile() != null) {
+        if (!channelForm.getImageFile().isEmpty()) {
             imageName = s3Uploader.saveFile(channelForm.getImageFile());
         }
         channelService.modifyChannel(channelForm, imageName, channel);

@@ -24,7 +24,8 @@ public class OrderDto {
     private int statusId;                // 주문상태 번호
     private String statusName;           // 주문상태 이름
     private String deliveryMemo;         // 배송메모
-    private String invoiceNumber;        // 송장번호 
+    private String invoiceNumber;        // 송장번호
+    private String imageName;            // 상품 이미지명
     private Payment payment;             // 결제
     private Delivery delivery;           // 배송지
     private OrderItemDto item;           // 상품정보, 상품상세정보가 담긴 객체 단품 (부분취소, 반품, 교환 시 사용)

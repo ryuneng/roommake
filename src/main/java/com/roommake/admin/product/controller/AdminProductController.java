@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -64,10 +65,6 @@ public class AdminProductController {
         return "admin/product/form";
     }
 
-    /**
-     * @param productCreateForm 상품등록폼
-     * @return
-     */
     @PostMapping("/create")
     public String createproduct(ProductCreateForm productCreateForm) {
         adminproductService.insertProduct(productCreateForm);
@@ -75,10 +72,13 @@ public class AdminProductController {
         return "redirect:/admin/product/list";
     }
 
-    /**
-     * @param form 상품이미지 등록
-     * @return
-     */
+    @PostMapping("/excel")
+    public String excelUpload(@RequestPart(required = false, name = "excel") MultipartFile file) {
+        adminproductService.excelUpload(file);
+
+        return "redirect:/admin/product/list";
+    }
+
     public String create(ProductCreateForm form) {
         return "redirect:/product/list";
     }
@@ -95,10 +95,6 @@ public class AdminProductController {
         return "/admin/product/modify";
     }
 
-    /**
-     * @param product 상품 수정
-     * @return
-     */
     @PostMapping("/modify")
     public String modifyPost(Product product) {
         adminproductService.modifyProduct(product);

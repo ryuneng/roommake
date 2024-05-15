@@ -105,7 +105,7 @@ public class CommunityController {
             return "community/form";
         }
         String imageName = s3Uploader.saveFile(communityForm.getImageFile());
-        if (imageName == "") {
+        if ("default".equals(imageName)) {
             imageName = "https://roommake.s3.ap-northeast-2.amazonaws.com/3786ebc5-2ab9-4567-971d-9adfb097a153.jpg";
         }
         communityService.createCommunity(communityForm, imageName, loginUser.getId());
@@ -169,7 +169,7 @@ public class CommunityController {
             throw new RuntimeException("다른 사용자의 글은 수정할 수 없습니다.");
         }
         String imageName = community.getImageName();
-        if (communityForm.getImageFile() != null) {
+        if (!communityForm.getImageFile().isEmpty()) {
             imageName = s3Uploader.saveFile(communityForm.getImageFile());
         }
         communityService.modifyCommunity(communityForm, imageName, community);

@@ -93,7 +93,7 @@
                             c.comm_create_date desc
                         </when>
                         <when test="'like' == sort">
-                            c.comm_view_count desc
+                            c.comm_like_count desc
                         </when>
                         <when test="'view' == sort">
                             c.comm_view_count desc
@@ -269,7 +269,7 @@
             community_scrap
         where
             comm_id = #{commId}
-          and user_id = #{userId}
+            and user_id = #{userId}
     </delete>
 
     <!-- 사용자 ID로 커뮤니티 정보 조회 -->

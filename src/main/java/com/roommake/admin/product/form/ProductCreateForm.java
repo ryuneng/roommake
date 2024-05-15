@@ -18,4 +18,7 @@ public class ProductCreateForm {
     private int discount;
     private List<MultipartFile> imageFiles;
     private String content;
+    private int tagCategoryId1;
+    private int tagCategoryId2;
+    private int tagCategoryId3;
 }

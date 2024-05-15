@@ -24,7 +24,11 @@
             pd.product_detail_color as color,
             pd.product_detail_stock as stock,
             os.order_status_id      as itemStatusId,
-            os.order_status_name    as itemStatusName
+            os.order_status_name    as itemStatusName,
+            (select pi.product_image_name
+             from product_image pi
+             where pi.product_id = p.product_id
+             limit 1) as imageName
         from
             order_item oi join `order` o join product p join product_detail pd join order_status os
         on

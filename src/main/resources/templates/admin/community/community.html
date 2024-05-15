@@ -141,6 +141,9 @@
             success() {
                 location.reload();
                 alert("커뮤니티 글이 삭제되었습니다.");
+            },
+            error: function() {
+                alert("삭제 처리에 실패했습니다. 확인 후 다시 시도해주십시오.");
             }
         })
     })

@@ -6,7 +6,7 @@ import com.roommake.community.vo.Community;
 import com.roommake.dto.Criteria;
 import com.roommake.event.service.EventService;
 import com.roommake.home.service.HomeService;
-import com.roommake.product.vo.Product;
+import com.roommake.product.dto.ProductDto;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -25,7 +25,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(HttpServletRequest request, Model model) {
-        List<Product> products = homeService.getNewProducts();
+        List<ProductDto> products = homeService.getNewProducts();
 
         Criteria criteria = new Criteria();
         criteria.setFilt("active");

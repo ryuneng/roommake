@@ -20,6 +20,7 @@ public class CartItemDto {
     private String size;          // 상품상세 크기
     private String color;         // 상품상세 색상
     private int stock;            // 상품상세 재고
+    private String imageName;     // 상품 이미지명
 
     public int getItemPrice() {
 

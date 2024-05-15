@@ -22,4 +22,5 @@ public class ProductReviewDto {
     private String nickname;
     private String email;
     private String loginEmail;
+    private String imageName;
 }

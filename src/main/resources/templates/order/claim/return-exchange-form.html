@@ -72,7 +72,7 @@
                                         <div class="d-flex w-100 justify-content-start">
                                             <a th:href="@{/store/detail/{id}(id=${dto.item.productId})}" class="link-underline link-underline-opacity-0 text-dark">
                                                 <div>
-                                                    <img th:src="@{/images/home/banner3.jpg}" style="width: 80px; height: 80px">
+                                                    <img th:src="@{${dto.item.imageName}}" style="width: 80px; height: 80px">
                                                 </div>
                                             </a>
                                             <div class="ms-3 text-start">
@@ -507,13 +507,6 @@
             });
         });
     });
-
-    // 옵션변경 모달
-    /*const optionModal = new bootstrap.Modal(document.getElementById('modal-modify-option'));
-
-    async function showOptionList() {
-        optionModal.show();
-    }*/
 
     // 재배송지 리스트 팝업창
     $("#btn-re-delivery").click(function() {

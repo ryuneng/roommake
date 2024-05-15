@@ -6,6 +6,15 @@
         </div>
         <div class="col-10">
             <h1>상품리스트</h1>
+            <form action="/admin/product/excel" method="POST" enctype="multipart/form-data" class="row g-3 align-items-center" style="max-width: 300px; margin-right: auto;">
+                <div class="col-auto">
+                    <label for="excel" class="visually-hidden">엑셀 파일 선택</label>
+                    <input type="file" accept=".xlsx" class="form-control form-control-sm" id="excel" name="excel">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary btn-sm">저장</button>
+                </div>
+            </form>
             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <form type="search" action="/admin/product/list" method="GET">
                     <select name="type" style="height: 28px">
@@ -55,8 +64,8 @@
                     <li class="page-item" th:class="${page == 1} ? 'page-item disabled' : 'page-item'">
                         <a class="page-link" th:href="@{'/admin/product/list?page=' + ${prevPage} + '&type=' + ${type} + '&keyword=' + ${keyword}}">이전</a>
                     </li>
-                    <li class="page-item" th:each="pageNumber : ${#numbers.sequence(1, totalPages)}">
-                        <a class="page-link" th:href="@{'/admin/product/list?page=' + ${pageNumber} + '&type=' + ${type} + '&keyword=' + ${keyword} }" th:text="${pageNumber}">1</a>
+                    <li class="page-item" th:each="pageNumber : ${#numbers.sequence(page - 2 > 0 ? page - 2 : 1, page + 2 < totalPages ? page + 2 : totalPages)}">
+                        <a class="page-link" th:href="@{'/admin/product/list?page=' + ${pageNumber} + '&type=' + ${type} + '&keyword=' + ${keyword} }" th:text="${pageNumber}" th:class="${page == pageNumber} ? 'page-link active' : 'page-link'"></a>
                     </li>
                     <li class="page-item" th:class="${page == totalPages} ? 'page-item disabled' : 'page-item'">
                         <a class="page-link" th:href="@{'/admin/product/list?page=' + ${nextPage} + '&type=' + ${type} + '&keyword=' + ${keyword} }">다음</a>

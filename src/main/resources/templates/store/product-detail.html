@@ -133,17 +133,16 @@
             background-size: 100%;
             box-sizing: border-box;
         }
-
     </style>
     <link href="/assets/css/star.css" rel="stylesheet"/>
+
 </head>
 <div layout:fragment="content" class="container my-3 mt-4">
     <div class="container">
         <div class="row">
             <!-- 상품 이미지 -->
             <div class="col-md-5" style="height: 400px;">
-                <img th:if="${product.imageName == 'default.jpg'}" th:src="@{|/images/product/default.jpg|}" width="525" height="400">
-                <img th:if="${product.imageName != 'default.jpg'}" th:src="@{${product.imageName}}" width="525" height="400">
+                <img th:src="@{${product.imageName}}" width="525" height="400">
             </div>
             <div class="col-md-7 ps-6">
                 <span class="fs-1" id="product-span" th:attr="data-this-productId=${id}" th:text="${product.name}">정말정말좋은 침대</span>
@@ -296,19 +295,19 @@
                     </div>
                 </div>
                 <!-- 리뷰를 적을 상품을 선택하는 select바 -->
-                <select class="form-select reply-select" id="review-select">
-                    <option hidden>상품을 선택하세요</option>
-                    <option id="product-name-review" name="option"
-                            th:value="${productDetail.id}"
-                            th:each="productDetail, loop : ${productDetail}"
-                            th:text="${product.name} + '/' + ${productDetail.size} + '/' + ${productDetail.color}"
-                            th:attr="data-name=${product.name},
-                            data-size=${productDetail.size},
-                            data-color=${productDetail.color},
-                            data-product-detail-id=${productDetail.id},
-                            data-product-id=${product.id}">갈색침대
-                    </option>
-                </select>
+<!--                <select class="form-select reply-select" id="review-select">-->
+<!--                    <option hidden>상품을 선택하세요</option>-->
+<!--                    <option id="product-name-review" name="option"-->
+<!--                            th:value="${productDetail.id}"-->
+<!--                            th:each="productDetail, loop : ${productDetail}"-->
+<!--                            th:text="${product.name} + '/' + ${productDetail.size} + '/' + ${productDetail.color}"-->
+<!--                            th:attr="data-name=${product.name},-->
+<!--                            data-size=${productDetail.size},-->
+<!--                            data-color=${productDetail.color},-->
+<!--                            data-product-detail-id=${productDetail.id},-->
+<!--                            data-product-id=${product.id}">갈색침대-->
+<!--                    </option>-->
+<!--                </select>-->
                 <div class="bg-body-tertiary product-rating">
                     <div class="row">
                         <div class="col-md-6">
@@ -350,12 +349,12 @@
                                         도움이 돼요
                                         <span class="badge rounded-fill bg-primary" th:text="${productReview.voteCount}">상품추천수</span>
                                     </a>
-                                    <a th:href="@{/store/replyModify/${productReview.id}}"
-                                       sec:authorize="isAuthenticated()"
-                                       th:if="${#authentication.principal.username == productReview.email}"
-                                       class="btn btn-sm btn-warning">수정</a>
+<!--                                    <a th:href="@{|/store/replyModify/${productReview.id}?productId=${product.id}|}"-->
+<!--                                       sec:authorize="isAuthenticated()"-->
+<!--                                       th:if="${#authentication.principal.username == productReview.email}"-->
+<!--                                       class="btn btn-sm btn-warning">수정</a>-->
 
-                                    <a th:href="@{/post/replyDelete/${productReview.id}}"
+                                    <a th:href="@{|/store/replyDelete/${productReview.id}/${product.id}|}"
                                        sec:authorize="isAuthenticated()"
                                        th:if="${#authentication.principal.username == productReview.email}"
                                        class="btn btn-sm btn-danger">삭제</a>
@@ -410,6 +409,7 @@
                                 </th:block>
                             </div>
                             <div>
+                                <img th:src="@{${productReview.imageName}}" width="200" height="120">
                                 <p class="card-text ps-2" style="white-space: pre-line;" th:text="${productReview.content}">댓글내용</p>
                             </div>
                         </div>
@@ -507,7 +507,7 @@
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="exampleModalLabel1">상품리뷰</h1>
+                                <h1 class="modal-title fs-5" id="exampleModalLabel1">문의등록</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                         aria-label="Close"></button>
                             </div>
@@ -572,25 +572,6 @@
                     -->
                 </div>
             </div>
-            <!-- 장바구니 버튼 클릭시 열리는 모달창 -->
-            <div class="modal" tabindex="-1" id="modal-form-cart">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="modal-title-member">장바구니 이동폼</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">쇼핑 계속하기</button>
-                            <button type="button" class="btn btn-primary">장바구니 이동</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <hr>
             <!-- 다른상품 추천하는 부분 -->
             <h3 class="fw-bolder">비슷한 상품들</h3>
             <div id="order-product-main">
@@ -657,9 +638,6 @@
             totalprice += price
         }
 
-        console.log(totalprice)
-        console.log(price)
-        console.log(discount)
         let name = $option.attr("data-name");
         let size = $option.attr("data-size");
         let color = $option.attr("data-color");
@@ -808,9 +786,7 @@
         const page = $(this).attr("data-qna-page");
         const id = $("span[id=product-span]").attr("data-this-productId");
         const data = {id, page}
-        console.log(data)
         $.getJSON("/store/qnalist", data, function(response) {
-            console.log(response);
             let items = response.items;
             let paging = response.paging;
             $("div[id=qnaCard]").empty();
@@ -907,7 +883,6 @@
         const page = $("ul[id=reviewpaging]").attr("data-review-currentPage")
         const rating = $(this).val();
         const data = {id, page, rating}
-        console.log(data)
         getproductreview(data)
     })
 
@@ -916,7 +891,6 @@
         const page = $("ul[id=reviewpaging]").attr("data-review-currentPage")
         const sort = "vote"
         const data = {id, page, sort}
-        console.log(data)
         getproductreview(data)
     })
 
@@ -925,13 +899,11 @@
         const page = $("ul[id=reviewpaging]").attr("data-review-currentPage")
         const sort = "latest"
         const data = {id, page, sort}
-        console.log(data)
         getproductreview(data)
     })
 
     function getproductreview(data) {
         $.getJSON("/store/reviewlist", data, function(response) {
-            console.log(response);
             let items = response.items;
             let paging = response.paging;
             $("div[id=reviewCard]").empty();
@@ -994,14 +966,6 @@
                             `;
                 }
 
-                let modify = '';
-                if (item.email === item.loginEmail) {
-                    modify = `
-                        <a href="@{/store/replyModify/${item.id}"
-                                           class="btn btn-sm btn-warning">수정</a>
-                    `;
-                }
-
                 let Delete = '';
                 if (item.email === item.loginEmail) {
                     Delete = `
@@ -1022,7 +986,6 @@
                                         도움이 돼요
                                         <span class="badge rounded-fill bg-primary">${item.voteCount}</span>
                                     </a>
-                                    ${modify}
                                     ${Delete}
                                 </div>
                             </div>
@@ -1031,6 +994,7 @@
                                 ${rating}
                             </div>
                             <div>
+                                <img src="${item.imageName}" width="200" height="120">
                                 <p class="card-text ps-2" style="white-space: pre-line;">${item.content}</p>
                             </div>
                         </div>

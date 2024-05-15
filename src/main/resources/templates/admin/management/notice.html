@@ -68,7 +68,7 @@
                         <td th:text="${notice.createByUser.nickname}">홍길동</td>
                         <td th:text="${#dates.format(notice.updateDate, 'yyyy-MM-dd')}">2024년 4월 11일</td>
                         <td th:text="${notice.updateByUser.nickname}">김유신</td>
-                        <td th:text="${notice.priority}"></td>
+                        <td th:text="${notice.priority == 1 ? '필독' : '일반'}"></td>
                     </tr>
                     </tbody>
                 </table>
@@ -194,6 +194,9 @@
                         $tr.find("td:eq(5)").text(notice.updateDate);
                         $tr.find("td:eq(7)").text(notice.priority);
                         alert("공지사항이 수정되었습니다.");
+                    },
+                    error: function() {
+                        alert("공지사항 수정 실패했습니다. 확인 후 다시 시도해주십시오.");
                     }
                 });
             } else {
@@ -205,6 +208,9 @@
                     success: function() {
                         location.reload();
                         alert("공지사항이 등록 되었습니다.");
+                    },
+                    error: function() {
+                        alert("공지사항 등록 실패했습니다. 확인 후 다시 시도해주십시오.");
                     }
                 });
             }
@@ -227,6 +233,9 @@
                     // 페이지 새로고침
                     location.reload();
                     alert('공지사항이 삭제되었습니다.');
+                },
+                error: function() {
+                    alert("공지사항 삭제 실패했습니다. 확인 후 다시 시도해주십시오.");
                 }
             });
         });

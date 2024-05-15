@@ -89,7 +89,7 @@
                                                 <a th:href="@{/store/detail/{id}(id=${item.productId})}" class="link-underline link-underline-opacity-0 text-dark" target="_blank">
                                                     <div th:id="div-cart-id- + ${item.cartId == 0 ? 0 : item.cartId}"
                                                          th:attr="data-cart-id=${item.cartId == 0 ? 0 : item.cartId}">
-                                                        <img th:src="@{/images/home/banner3.jpg}" style="width: 80px; height: 80px">
+                                                        <img th:src="@{${item.imageName}}" style="width: 80px; height: 80px">
                                                     </div>
                                                 </a>
                                                 <div class="ms-3 text-start">

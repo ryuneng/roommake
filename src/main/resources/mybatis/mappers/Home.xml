@@ -2,17 +2,21 @@
 <!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.roommake.home.mapper.HomeMapper">
 
-    <select id="getNewProducts" resultType="com.roommake.product.vo.Product">
+    <select id="getNewProducts" resultType="com.roommake.product.dto.ProductDto">
         select
-            product_id          as id,
-            product_name        as name,
-            product_price       as price,
-            product_discount    as discount,
-            product_create_date as createDate
+            p.product_id          as id,
+            p.product_name        as name,
+            p.product_price       as price,
+            p.product_discount    as discount,
+            p.product_create_date as createDate,
+            (select pi.product_image_name
+             from product_image pi
+             where pi.product_id = p.product_id
+             limit 1) as imageName
         from
-            product
+            product p
         order by
-            product_create_date desc limit 4
+            p.product_create_date desc limit 4
     </select>
 
     <select id="getCommPostsByCategoryId" parameterType="int" resultType="com.roommake.community.vo.Community">
@@ -35,4 +39,13 @@
             comm_view_count desc limit 4
     </select>
 
+    <select id="cartCountByUserId" parameterType="int" resultType="int">
+        select
+            count(c.cart_id)
+        from
+            cart c join user u
+        on
+            c.user_id = u.user_id
+        and c.user_id = #{id}
+    </select>
 </mapper>

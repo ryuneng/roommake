@@ -175,10 +175,17 @@
                         $tr.find("td:eq(6) span").text(banner.status);
                         $tr.find("td:eq(7)").text(banner.user.id);
                         $tr.find("td:eq(8)").text(banner.createDate);
+                        // 기존 이미지 지운 후 바뀐 이미지 넣기
+                        $('#div-banner-image').remove();
+                        let imageTag = '<div class="form-group mb-3" id="div-banner-image">';
+                        imageTag += '<div class="mb-2"><span style="font-size: 17px">저장된 사진</span></div>';
+                        imageTag += '<img src="' + banner.imageUploadName + '" style="height: 150px; object-fit: cover">';
+                        imageTag += '</div>';
+                        $('#banner-image-file').after(imageTag);
                         alert("배너가 수정되었습니다.");
                     },
                     error: function() {
-                        alert("오류가 발생했습니다. 자세한 내용은 사이트로 문의하여 주십시오.");
+                        alert("배너 수정이 실패했습니다. 확인 후 다시 시도해주십시오.");
                     }
                 });
             } else {
@@ -194,7 +201,7 @@
                         location.reload();
                     },
                     error: function() {
-                        alert("오류가 발생했습니다. 자세한 내용은 사이트로 문의하여 주십시오.");
+                        alert("배너 등록이 실패했습니다. 확인 후 다시 시도해주십시오.");
                     }
                 })
             }
@@ -244,7 +251,7 @@
                     alert("배너가 삭제되었습니다.");
                 },
                 error: function() {
-                    alert("오류가 발생했습니다. 자세한 내용은 사이트로 문의하여 주십시오.");
+                    alert("배너 삭제가 실패했습니다. 확인 후 다시 시도해주십시오.");
                 }
             });
         })

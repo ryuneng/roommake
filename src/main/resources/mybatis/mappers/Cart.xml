@@ -14,7 +14,11 @@
             pd.product_detail_id    as productDetailId,
             pd.product_detail_size  as size,
             pd.product_detail_color as color,
-            pd.product_detail_stock as stock
+            pd.product_detail_stock as stock,
+            (select pi.product_image_name
+             from product_image pi
+             where pi.product_id = p.product_id
+             limit 1) as imageName
         from
             cart c join product p join product_detail pd
         on

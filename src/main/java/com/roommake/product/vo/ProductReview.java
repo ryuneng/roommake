@@ -20,6 +20,8 @@ public class ProductReview {
     private Date createDate;       // 리뷰 등록일
     private Date updateDate;       // 리뷰 수정일
     private Date deleteDate;       // 리뷰 삭제일
+    private String deleteYn;
     private int rating;            // 상품 별점
     private int voteCount;         // 상품 추천 누적수
+    private String productReviewImage; // 상품리뷰 이미지
 }

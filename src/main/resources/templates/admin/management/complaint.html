@@ -191,6 +191,9 @@
             contentType: 'application/json',
             success: function() {
                 location.reload();
+            },
+            error: function() {
+                alert("신고 처리에 실패했습니다. 확인 후 다시 시도해주십시오.");
             }
         })
     })
@@ -208,6 +211,9 @@
             contentType: 'application/json',
             success: function() {
                 location.reload();
+            },
+            error: function() {
+                alert("신고 처리에 실패했습니다. 확인 후 다시 시도해주십시오.");
             }
         })
     })
@@ -225,6 +231,9 @@
             contentType: 'application/json',
             success: function() {
                 location.reload();
+            },
+            error: function() {
+                alert("신고 삭제에 실패했습니다. 확인 후 다시 시도해주십시오.");
             }
         })
     })
@@ -242,6 +251,9 @@
             contentType: 'application/json',
             success: function() {
                 location.reload();
+            },
+            error: function() {
+                alert("신고 취소에 실패했습니다. 확인 후 다시 시도해주십시오.");
             }
         })
     })

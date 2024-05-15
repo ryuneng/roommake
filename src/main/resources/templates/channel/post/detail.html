@@ -86,7 +86,7 @@
             <a th:href="@{#}" style="text-decoration: none">
                 <div class="d-flex align-items-center">
                     <div style="width: 50px; height: 50px; overflow: hidden; border-radius: 50%; margin-right: 10px;">
-                        <img th:src="@{post.user.profilePhoto}" style="width: 100%; height: 100%;" alt="작성자 프로필 사진">
+                        <img th:src="@{${post.user.profilePhoto}}" style="width: 100%; height: 100%;" alt="작성자 프로필 사진">
                     </div>
                     <!-- 작성자 닉네임, 소개 -->
                     <div>
@@ -107,7 +107,7 @@
             <div sec:authorize="!isAuthenticated()">
                 <a th:href="@{/user/login}" class="btn btn-outline-primary">팔로우</a>
             </div>
-            <div sec:authorize="isAuthenticated()">
+            <div sec:authorize="isAuthenticated()" th:if="${#authentication.principal.id != post.user.id}">
                 <button id="btn-writer-follow" class="btn btn-outline-primary"
                         th:if="${!postWriterFollow}" th:attr="data-writer-id=${post.user.id}">팔로우
                 </button>
@@ -544,8 +544,8 @@
             {
                 title: '채널글 상세보기',
                 link: {
-                    mobileWebUrl: 'http://localhost/channel/post/detail/[[${post.id}]]',
-                    webUrl: 'http://localhost/channel/post/detail/[[${post.id}]]'
+                    mobileWebUrl: 'http://43.202.27.255/channel/post/detail/[[${post.id}]]',
+                    webUrl: 'http://43.202.27.255/post/detail/[[${post.id}]]'
                 },
             },
         ],

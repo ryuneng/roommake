@@ -78,7 +78,11 @@
             pd.product_detail_color     as "productDetail.color",
             oi.order_item_count         as amount,
             oi.order_item_price         as price,
-            oi.order_status_id          as "orderStatus.id"
+            oi.order_status_id          as "orderStatus.id",
+            (select pi.product_image_name
+             from product_image pi
+             where pi.product_id = p.product_id
+                limit 1) as imageName
         from
             order_item oi
         join

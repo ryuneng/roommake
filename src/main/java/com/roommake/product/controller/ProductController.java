@@ -9,6 +9,7 @@ import com.roommake.cart.dto.CartListDto;
 import com.roommake.cart.service.CartService;
 import com.roommake.dto.Criteria;
 import com.roommake.dto.ListDto;
+import com.roommake.dto.Message;
 import com.roommake.product.dto.*;
 import com.roommake.product.service.ProductService;
 import com.roommake.product.vo.*;
@@ -16,6 +17,8 @@ import com.roommake.resolver.Login;
 import com.roommake.user.security.LoginUser;
 import com.roommake.user.security.UserDetailsImpl;
 import com.roommake.user.service.UserService;
+import com.roommake.user.vo.User;
+import com.roommake.utils.S3Uploader;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +27,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +45,8 @@ public class ProductController {
     private final ProductService productService;
     private final QnaService qnaService;
     private final CartService cartService;
+    private final S3Uploader s3Uploader;
+    private final UserService userService;
 
     // 상품홈으로 이동하는 메소드
     @GetMapping("/home")
@@ -173,8 +181,6 @@ public class ProductController {
         Product product = productService.getProductById(id);
         QnaCategory qnaCategory = qnaService.getQnaCategory(categoryId);
 
-        System.out.println(secret);
-
         Qna qna = new Qna();
         qna.setProduct(product);
         qna.setTitle(title);
@@ -187,18 +193,46 @@ public class ProductController {
         return String.format("redirect:/store/detail/%d", id);
     }
 
-//    @PostMapping("/replyCreate/{id}")
-//    @PreAuthorize("isAuthenticated()")
-//    public String creatReply(@PathVariable int id, @RequestParam("reviewStar") int reviewStar, @RequestParam("content") String content, @Login LoginUser loginuser) {
-//
-//        ProductReviewDto productReviewDto = new ProductReviewDto();
-//        productReviewDto.setReviewStar(reviewStar);
-//        productReviewDto.setContent(content);
-//
-//        ProductReview productReview = productService.creatReply(id, productReviewDto, loginuser.getId());
-//
-//        return null;
-//    }
+    @PostMapping("/replyCreate/{orderItemId}/{productId}")
+    @PreAuthorize("isAuthenticated()")
+    public String creatReply(@PathVariable int orderItemId,
+                             @PathVariable int productId,
+                             @RequestParam("reviewStar") int reviewStar,
+                             @RequestParam("content") String content,
+                             @RequestParam("imageFile") MultipartFile imageFile,
+                             @Login LoginUser loginuser) {
+        ProductReviewForm productReviewForm = new ProductReviewForm();
+        productReviewForm.setOrderItemId(orderItemId);
+        productReviewForm.setReviewStar(reviewStar);
+        productReviewForm.setContent(content);
+
+        ProductReview productReview = productService.getProductReviewIdByuserIdorderId(orderItemId, loginuser.getId());
+
+        if (productReview != null) {
+
+            return "redirect:/user/myorder?error=existreview";
+        } else {
+
+            String imageName = s3Uploader.saveFile(imageFile);
+            if ("default".equals(imageName)) {
+                imageName = "https://roommake.s3.ap-northeast-2.amazonaws.com/3786ebc5-2ab9-4567-971d-9adfb097a153.jpg";
+            }
+            productService.creatReply(productReviewForm, imageName, loginuser.getId());
+
+            return String.format("redirect:/store/detail/%d", productId);
+        }
+    }
+
+    @GetMapping("/replyDelete/{reviewId}/{productId}")
+    @PreAuthorize("isAuthenticated()")
+    public String creatDelete(@PathVariable int reviewId,
+                              @PathVariable int productId,
+                              @Login LoginUser loginuser) {
+
+        productService.deleteReply(reviewId, loginuser.getId());
+
+        return String.format("redirect:/store/detail/%d", productId);
+    }
 
     @GetMapping("/category")
     @ResponseBody

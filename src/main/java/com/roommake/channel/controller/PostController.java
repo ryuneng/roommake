@@ -80,7 +80,7 @@ public class PostController {
             return "channel/post/form";
         }
         String imageName = s3Uploader.saveFile(postForm.getImageFile());
-        if (imageName == "") {
+        if ("default".equals(imageName)) {
             imageName = "https://roommake.s3.ap-northeast-2.amazonaws.com/1907caf0-6983-4c7e-948d-9ef1170902f2.jpg";
         }
         postService.createPost(postForm, channelId, loginUser.getId(), imageName);
@@ -124,9 +124,9 @@ public class PostController {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .build();
-        String imageName = post.getImageName();
+
+        model.addAttribute("imageName", post.getImageName());
         model.addAttribute("postForm", postForm);
-        model.addAttribute("imageName", imageName);
         model.addAttribute("postId", postId);
 
         return "channel/post/form";
@@ -144,7 +144,7 @@ public class PostController {
             throw new RuntimeException("다른 사용자의 글은 수정할 수 없습니다.");
         }
         String imageName = post.getImageName();
-        if (postForm.getImageFile() != null) {
+        if (!postForm.getImageFile().isEmpty()) {
             imageName = s3Uploader.saveFile(postForm.getImageFile());
         }
         postService.modifyPost(postForm, imageName, post);

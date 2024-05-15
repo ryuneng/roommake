@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.user.mapper.UserGradeMapper">
+
+    <!-- 유저 누적 결제금액 변경 -->
+    <update id="modifyUserActualPrice">
+        update
+            user
+        set
+            user_actual_payment_amount = ifnull(
+                    (select SUM(order_payment_price)
+                    from `order`
+                    where `order`.user_id = user.user_id
+                    and date(`order`.order_update_date) = date_sub(curdate(), interval -1 day)
+         group by `order`.user_id
+        ), 0)
+        where
+            user.user_id in (select user_id from `order`)
+    </update>
+
+    <update id="modifyUserGrade">
+        update
+            user
+        set
+            user_grade_id = case
+                when user_actual_payment_amount >= 1000000 then 4
+                when user_actual_payment_amount >= 500000 then 3
+                when user_actual_payment_amount >= 300000 then 2
+                else 1
+            end
+    </update>
+</mapper>

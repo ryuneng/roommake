@@ -54,4 +54,6 @@ public interface OrderMapper {
     UserGrade getUserGradeById(int id);
 
     void updateConfirmOrder();
+
+    List<Order> getOrdersByStatus();
 }

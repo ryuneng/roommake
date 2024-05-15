@@ -18,4 +18,5 @@ public class OrderItem {
     private int amount;                  // 상품수량
     private int price;                   // 상품가격
     private OrderStatus orderStatus;     // 주문상세상태
+    private String imageName;            // 상품 이미지명
 }

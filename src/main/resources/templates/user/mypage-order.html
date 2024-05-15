@@ -7,26 +7,30 @@
         <form id="form">
             <input type="hidden" name="page" th:value="${param.page}"/>
             <div class="row">
-                <!-- 첫번째 행 (추천코드, 포인트, 구매등급)-->
+                <!-- 첫번째 행 (추천코드, 포인트, 회원등급) -->
                 <div class="col" style="border: 1px solid lightgray; text-align: center; display: flex; align-items: center; justify-content: center;">
                     <p style="font-weight: bold; margin: 0;">나의 추천코드
                         <span th:text="${orderInfo.getUniqueRecommendCode()}" style="color: grey;">XQRW12T3</span>
                     </p>
                 </div>
-                <div class="col" style="border: 1px solid lightgray; text-align: center; padding: 20px;">
-                    <i class="bi bi bi-coin" style="color: grey;"></i>
-                    <span style="color: black; font-weight: bold;">포인트
-                        <span th:text="${orderInfo.getPoint()}" style="color: cornflowerblue;">1,000</span>P
-                    </span>
+                <div class="col" style="border: 1px solid lightgray; text-align: center; padding: 20px; display: flex; align-items: center; justify-content: center;">
+                    <a th:href="@{/user/point}" class="text-decoration-none">
+                        <i class="bi bi bi-coin" style="color: grey;"></i>
+                        <span style="color: black; font-weight: bold;">포인트
+                            <span th:text="${#numbers.formatInteger(orderInfo.getPoint(), 1, 'COMMA')}" style="color: cornflowerblue;">1,000</span>P
+                        </span>
+                    </a>
                 </div>
                 <div class="col" style="border: 1px solid lightgray; text-align: center; padding: 20px;">
-                    <i class="bi bi-patch-check" style="color: grey;"></i>
-                    <span style="color: black; font-weight: bold;">구매등급
-                        <span th:text="${orderInfo.getUserGradeName()}" style="color: cornflowerblue;">BRONZE</span>
-                    </span>
+                    <button type="button" class="btn" onclick="showUserGrade()">
+                        <i class="bi bi-patch-check" style="color: grey;"></i>
+                        <span style="color: black; font-weight: bold;">회원등급
+                            <span th:text="${orderInfo.getUserGradeName()}" style="color: cornflowerblue;">BRONZE</span>
+                        </span>
+                    </button>
                 </div>
             </div>
-            <!-- 상단 주문상태 영역 시작 -->
+            <!-- 두번째 행의 주문상태 영역 시작 -->
             <div class="row mt-5 mb-2">
                 <div class="col d-flex justify-content-start align-items-center" id="btn-order-status">
                     <input type="hidden" name="statusId" th:value="${param.statusId}"/>
@@ -37,8 +41,8 @@
                     <button type="button" id="btn-status-id-5" data-order-status="5" class="btn btn-sm btn-outline-secondary me-2 btn-status">취소</button>
                 </div>
             </div>
-            <!-- 상단 주문상태 영역 끝 -->
-            <!-- 날짜 필터 영역 시작 -->
+            <!-- 두번째 행의 주문상태 영역 끝 -->
+            <!-- 두번째 행의 날짜 필터 영역 시작 -->
             <div class="row mt-2 mb-5">
                 <div class="col d-flex justify-content-start align-items-center">
                     <button type="button" id="btn-all-order-date" class="btn btn-sm btn-secondary me-2 btn-range">최대(5년)</button>
@@ -53,7 +57,7 @@
                     <button type="button" id="btn-range-order-date" class="btn btn-sm btn-secondary" style="height: 30px;">조회</button>
                 </div>
             </div>
-            <!-- 날짜 필터 영역 끝 -->
+            <!-- 두번째 행의 날짜 필터 영역 끝 -->
             <!-- 주문 리스트 시작 -->
             <div class="row mt-3 small">
                 <div class="col">
@@ -83,7 +87,7 @@
                             <td>
                                 <div th:each="item : ${order.orderItems}" class="mb-2">
                                     <a th:href="@{/store/detail/{id}(id=${item.product.id})}" class="link-underline link-underline-opacity-0 text-dark">
-                                        <img th:src="@{/images/home/banner3.jpg}" style="width: 80px; height: 80px">
+                                        <img th:src="@{${item.imageName}}" style="width: 80px; height: 80px">
                                     </a>
                                     <div style="display: inline-block; vertical-align: top;">
                                         <p th:text="${item.product.name}">상품명</p>
@@ -142,7 +146,77 @@
         </form>
     </div>
 </div>
+<div layout:fragment="modal" class="modal" tabindex="-1" id="modal-user-grade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="text-end">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="text-center mb-4">
+                    <h4 class="fw-bold">회원등급 안내</h4>
+                </div>
+                <table class="table mb-4">
+                    <colgroup>
+                        <col style="width: 25%">
+                        <col style="width: 50%">
+                        <col style="width: 25%">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>등급</th>
+                        <th>결제금액</th>
+                        <th>적립률(혜택)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>BRONZE</td>
+                        <td>~ 300,000원</td>
+                        <td>1%</td>
+                    </tr>
+                    <tr>
+                        <td>SILVER</td>
+                        <td>300,000 ~ 500,000원</td>
+                        <td>3%</td>
+                    </tr>
+                    <tr>
+                        <td>GOLD</td>
+                        <td>500,000 ~ 1,000,000원</td>
+                        <td>5%</td>
+                    </tr>
+                    <tr>
+                        <td>VIP</td>
+                        <td>1,000,000원 ~</td>
+                        <td>10%</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="text-secondary" style="font-size: small">
+                    <ul>
+                        <li class="mb-1">회원등급은 최근 3개월 기준 실 결제금액에 따라 결정됩니다.</li>
+                        <li class="mb-1">변경된 회원등급은 매월 1일 반영됩니다.</li>
+                        <li class="mb-1">회원등급 기준 및 혜택은 룸메이크 운영 정책에 따라 변경될 수 있습니다.</li>
+                        <li class="mb-1">포인트 적립은 구매확정 시, 등급에 따라 차등지급됩니다.</li>
+                        <li>실 결제금액 = 상품금액 - 상품 할인금액 - 포인트 사용금액</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script layout:fragment="script" type="text/javascript">
+    const gradeModal = new bootstrap.Modal($('#modal-user-grade'));
+
+    let query = new URLSearchParams(location.search)
+    let paramValue = query.get("error");
+    if (paramValue === 'existreview') {
+        alert("한 상품에 하나의 리뷰만 등록할 수 있습니다");
+    }
+
+    function showUserGrade() {
+        gradeModal.show();
+    }
 
     // 상단 주문상태별 조회
     $("#btn-order-status button").click(function(event) {

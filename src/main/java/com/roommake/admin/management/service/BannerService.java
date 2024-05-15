@@ -8,10 +8,12 @@ import com.roommake.dto.Criteria;
 import com.roommake.dto.ListDto;
 import com.roommake.dto.Pagination;
 import com.roommake.user.vo.User;
+import com.roommake.utils.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -22,20 +24,22 @@ import java.util.List;
 public class BannerService {
 
     private final BannerMapper bannerMapper;
+    private final S3Uploader s3Uploader;
 
     /**
      * 새로 만들 배너 정보를 form으로 입력받아 저장한다.
      *
      * @param bannerForm 저장할 배너 정보가 담긴 form객체
-     * @param imageName  배너에 저장될 imageName
      * @param userId     저장한 유저
      */
-    public void createBanner(BannerForm bannerForm, String imageName, int userId) {
+    public void createBanner(BannerForm bannerForm, int userId) {
         User user = User.builder().id(userId).build();
 
         String originName = "default";
-        if (!bannerForm.getImageFile().isEmpty()) {
+        String imageName = "https://roommake.s3.ap-northeast-2.amazonaws.com/c9b205fe-0178-4a07-998b-ed4cbafacefb.jpeg";    // 디폴트 주소
+        if (bannerForm.getImageFile() != null && !bannerForm.getImageFile().isEmpty()) {
             originName = bannerForm.getImageFile().getOriginalFilename();
+            imageName = s3Uploader.saveFile(bannerForm.getImageFile());
         }
 
         Banner banner = Banner.builder()
@@ -51,6 +55,7 @@ public class BannerService {
         bannerMapper.createBanner(banner);
     }
 
+    @Transactional(readOnly = true)
     public Banner getBannerById(int id) {
 
         return bannerMapper.getBannerById(id);
@@ -61,11 +66,10 @@ public class BannerService {
      *
      * @param id         수정할 배너 id
      * @param bannerForm 수정될 내용이 담긴 form 객체
-     * @param imageName  수정될 imageName
      * @param userId     수정한 유저
      * @return 수정된 배너 객체
      */
-    public Banner modifyBanner(int id, BannerForm bannerForm, String imageName, int userId) {
+    public Banner modifyBanner(int id, BannerForm bannerForm, int userId) {
 
         Banner banner = bannerMapper.getBannerById(id);
         User user = User.builder().id(userId).build();
@@ -76,9 +80,9 @@ public class BannerService {
         Date currentDate = new Date();
         banner.setStatus(getBannerStatus(bannerForm, currentDate));
 
-        if (bannerForm.getImageFile() != null) {
+        if (bannerForm.getImageFile() != null && !bannerForm.getImageFile().isEmpty()) {
             banner.setImageOriginName(bannerForm.getImageFile().getOriginalFilename());
-            banner.setImageUploadName(imageName);
+            banner.setImageUploadName(s3Uploader.saveFile(bannerForm.getImageFile()));
         }
         banner.setDescription(bannerForm.getDescription());
         banner.setUrl(bannerForm.getUrl());
@@ -126,6 +130,7 @@ public class BannerService {
      * @param criteria 배너를 가져올 조건이 담긴 객체
      * @return 배너 리스트
      */
+    @Transactional(readOnly = true)
     public ListDto<Banner> getBanners(Criteria criteria) {
 
         int totalRows = bannerMapper.getTotalRows(criteria);

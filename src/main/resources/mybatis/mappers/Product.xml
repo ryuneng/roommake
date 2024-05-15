@@ -368,7 +368,8 @@
             createDate,
             voteCount,
             nickname,
-            email
+            email,
+            imageName
         from
             (select
                 r.product_review_id             as id,
@@ -378,6 +379,7 @@
                 r.product_review_vote_count     as voteCount,
                 u.user_nickname                 as nickname,
                 u.user_email                    as email,
+                r.product_review_image          as imageName,
                 @rownum := @rownum +1 as row_num
             from
                 (select @rownum := 0) r,
@@ -386,6 +388,7 @@
                 left join user u on r.user_id = u.user_id
             where
                 i.product_id = #{productId}
+                and r.product_review_delete_yn = 'N'
             order by
                 <choose>
                     <when test="'latest' == sort">
@@ -394,6 +397,9 @@
                     <when test="'vote' == sort">
                         r.product_review_vote_count desc
                     </when>
+                    <otherwise>
+                        r.product_review_create_date desc
+                    </otherwise>
                 </choose>
             ) as productReview
         where
@@ -410,7 +416,9 @@
             product_review_delete_date  as deleteDate,
             product_review_rating       as rating,
             product_review_vote_count   as voteCount,
-            user_id                     as "user.id"
+            user_id                     as "user.id",
+            product_review_image        as productReviewImage
+
         from
             product_review
         where
@@ -424,6 +432,7 @@
             product_review r, order_item i, user u
         where
             r.order_item_id = i.order_item_id
+          and r.product_review_delete_yn = 'N'
           and r.user_id = u.user_id
           and i.product_id = #{id};
     </select>
@@ -435,6 +444,7 @@
             product_review r, order_item i, user u
         where
             r.order_item_id = i.order_item_id
+          and r.product_review_delete_yn = 'N'
           and r.user_id = u.user_id
           and i.product_id = #{id}
     </select>
@@ -680,6 +690,7 @@
             product_review r, order_item i, user u
         where
             r.order_item_id = i.order_item_id
+          and r.product_review_delete_yn = 'N'
           and r.user_id = u.user_id
           and i.product_id =#{id}
     </select>
@@ -749,4 +760,80 @@
           and r.user_id = u.user_id
           and i.product_id = #{productId}
     </select>
+
+    <select id="getOrderItemById" parameterType="int" resultType="com.roommake.order.vo.OrderItem">
+        select
+            order_id                    as "order.id",
+            order_item_count            as amount,
+            order_item_id               as id,
+            order_item_price            as price,
+            order_status_id             as "orderStatus.id",
+            product_detail_id           as "productDetail.id",
+            product_id                  as "product.id"
+        from
+            order_item
+        where
+            order_item_id = #{orderItemId}
+    </select>
+
+    <insert id="createProductReview" parameterType="com.roommake.product.vo.ProductReview">
+        insert into product_review
+            (user_id, order_item_id, product_review_content, product_review_rating, product_review_image)
+        values
+            (#{user.id}, #{orderItem.id}, #{content}, #{rating}, #{productReviewImage})
+    </insert>
+
+    <update id="deleteProductReview" parameterType="com.roommake.product.vo.ProductReview">
+        update product_review
+        set product_review_delete_yn = 'Y'
+        where
+            product_review_id = #{id}
+            and user_id = #{user.id}
+    </update>
+
+    <insert id="createPlusPointHistory">
+        insert into plus_point_history
+            (plus_point_amount, user_id, point_type_id, point_reason)
+        values (#{amount}, #{userId}, #{typeId}, #{pointReason})
+    </insert>
+
+    <insert id="insertProductTag">
+        insert into product_tag
+        values (#{productId}, #{prodTagCategoryId})
+    </insert>
+
+    <select id="getProductReviewIdByuserIdorderId" resultType="com.roommake.product.vo.ProductReview">
+        select
+            order_item_id               as "orderItem.id",
+            product_review_content      as content,
+            product_review_create_date  as createDate,
+            product_review_delete_date  as deleteDate,
+            product_review_delete_yn    as deleteYn,
+            product_review_id           as id,
+            product_review_image        as productReviewImage,
+            product_review_rating       as rating,
+            product_review_update_date  as updateDate,
+            product_review_vote_count   as voteCount,
+            user_id                     as "user.id"
+        from
+            product_review
+        where
+            user_id = #{userId}
+          and order_item_id = #{orderItemId}
+    </select>
+
+    <update id="addPlusPoint">
+        update user
+        set user_point = user_point + #{point}
+        where
+            user_id = #{userId}
+    </update>
+
+    <update id="addMinusPoint">
+        update user
+        set user_point = user_point - #{point}
+        where
+            user_id = #{userId}
+    </update>
+
 </mapper>

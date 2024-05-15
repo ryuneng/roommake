@@ -12,7 +12,11 @@
             pd.product_detail_id    as productDetailId,
             pd.product_detail_size  as size,
             pd.product_detail_color as color,
-            pd.product_detail_stock as stock
+            pd.product_detail_stock as stock,
+            (select pi.product_image_name
+             from product_image pi
+             where pi.product_id = p.product_id
+             limit 1) as imageName
         from
             product p join product_detail pd
         on
@@ -160,7 +164,11 @@
             pd.product_detail_color as color,
             pd.product_detail_stock as stock,
             os.order_status_id      as itemStatusId,
-            os.order_status_name    as itemStatusName
+            os.order_status_name    as itemStatusName,
+            (select pi.product_image_name
+             from product_image pi
+             where pi.product_id = p.product_id
+             limit 1) as imageName
         from
             order_item oi join `order` o join product p join product_detail pd join order_status os
         on
@@ -174,7 +182,7 @@
     <update id="updateConfirmOrderItemById" parameterType="int">
         update
             order_item
-        set order_status_id = 4
+        set order_status_id = 4, order_item_update_date = current_timestamp
         where order_item_id = #{id}
     </update>
 
@@ -216,4 +224,16 @@
                 having min(oi.order_status_id) = 4
             );
     </update>
+
+    <select id="getOrdersByStatus" parameterType="int" resultType="com.roommake.order.vo.Order">
+        select
+            order_id        as id,
+            user_id         as "user.id",
+            order_status_id as "status.id"
+        from
+            `order`
+        where
+            order_status_id = 3
+        and order_create_date &lt; current_date - interval 7 day
+    </select>
 </mapper>

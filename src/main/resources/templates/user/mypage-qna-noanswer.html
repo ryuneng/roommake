@@ -48,6 +48,9 @@
                                 <i class="bi bi-question-circle" style="font-size: 1.2em; margin-right: 4px;"></i>
                                 <span th:text="${qna.title}"></span>
                             </div>
+                            <div>
+                                <span th:text="${qna.content}"></span>
+                            </div>
                             <!-- 삭제 버튼 -->
                             <a th:href="@{|/user/myqna/delete/noAnswer/${qna.id}|}" class="btn btn-secondary btn-sm mt-2 text-end">삭제</a>
                         </div>

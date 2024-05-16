@@ -1,0 +1,559 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 반품/교환신청</title>
+    <style layout:fragment="style">
+        .btn.btn-xs {
+            --bs-btn-padding-y: .25rem;
+            --bs-btn-padding-x: .35rem;
+            --bs-btn-font-size: .75rem;
+        }
+    </style>
+</head>
+<div layout:fragment="content" class="container my-3 mt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <h4 class="fw-bold text-center mb-5">반품/교환신청</h4>
+                <form id="form-claim" method="get">
+                    <!-- 1. 반품/교환 선택, 상품 영역 시작 -->
+                    <div class="row mb-1">
+                        <!-- 1-1. 반품/교환 선택 영역 시작-->
+                        <div th:id="div-order-id- + ${dto.orderId}"
+                             th:attr="data-order-id=${dto.orderId}"
+                             class="col-6 mb-5">
+                            <div class="mb-5 pb-3">
+                                <div class="d-flex justify-content-start mb-2" style="font-size: 17px">
+                                    <div class="d-flex align-items-center ms-3 mb-2">
+                                        <input type="radio" name="claim" value="return" checked>
+                                        <label class="ms-2">반품</label>
+                                    </div>
+                                    <div class="d-flex align-items-center ms-3 mb-2">
+                                        <input type="radio" name="claim" value="exchange">
+                                        <label class="ms-2">교환</label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="form-group mb-1">
+                                        <select name="reasonType" class="form-select text-secondary" style="width: 500px">
+                                            <option value="0" hidden>사유를 선택해주세요</option>
+                                            <option th:each="reason, loop : ${reasons}"
+                                                    th:id="option-reason-id- + ${reason.id}"
+                                                    th:attr="data-option-reason-id=${reason.id}"
+                                                    th:value="${reason.id}"
+                                                    th:text="${reason.name}">
+                                                구매의사취소(단순변심)
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div hidden="hidden" id="div-detailed-reason" style="width: 500px">
+                                        <textarea name="detailedReason" class="form-control" placeholder="* 필수입력 (상세사유를 입력하세요)" style="width: 500px; height: 100px;"></textarea>
+                                        <p class="text-end text-secondary" style="font-size: small">
+                                            <span id="span-reason-count">0</span>/150
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="small mt-3">
+                                    <div class="mb-1">• 동일 상품, 옵션 교환 외의 경우에는 환불 후 다시 주문해주세요.</div>
+                                    <div class="mb-1">• 차액이 발생할 경우 고객센터로 문의주세요.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 1-2. 상품 영역 시작 -->
+                        <div class="col-6">
+                            <div th:id="div-item-id- + ${dto.item.orderItemId}"
+                                 th:attr="data-item-id=${dto.item.orderItemId}"
+                                 class="text-start fw-bold" style="font-size: 17px">상품 정보
+                            </div>
+                            <hr>
+                            <table class="table text-center" style="font-size: small">
+                                <tbody class="align-middle">
+                                <tr>
+                                    <td>
+                                        <div class="d-flex w-100 justify-content-start">
+                                            <a th:href="@{/store/detail/{id}(id=${dto.item.productId})}" class="link-underline link-underline-opacity-0 text-dark">
+                                                <div>
+                                                    <img th:src="@{${dto.item.imageName}}" style="width: 80px; height: 80px">
+                                                </div>
+                                            </a>
+                                            <div class="ms-3 text-start">
+                                                <div>
+                                                    <div th:text="${dto.item.name}" style="display: -webkit-box;
+                                                                  overflow: hidden;
+                                                                  text-overflow: ellipsis;
+                                                                  -webkit-box-orient: vertical;
+                                                                  -webkit-line-clamp: 1;">
+                                                        LED조명 통서랍 수납침대 SSQ(매트리스 선택)
+                                                    </div>
+                                                    <div>
+                                                        <span th:text="${#numbers.formatInteger(dto.item.price, 1, 'COMMA')}">189,000</span>원
+                                                    </div>
+                                                    <div class="d-flex justify-content-start">
+                                                        <div id="div-before-detail"
+                                                             th:attr="data-before-detail-id=${dto.detail.id}"
+                                                             class="text-secondary mt-2 me-2" style="font-size: 12px">
+                                                            사이즈: <span th:text="${dto.item.size}">슈퍼싱글SS 프레임만</span>
+                                                            / 색상: <span th:text="${dto.item.color}">화이트</span>
+                                                            | <span th:text="${dto.item.amount}">2</span>개
+                                                        </div>
+                                                        <div id="div-after-detail"
+                                                             hidden="hidden"
+                                                             th:attr="data-after-detail-id=${dto.detail.id}"
+                                                             class="text-secondary mt-2" style="font-size: 12px">
+                                                            ➡️
+                                                            사이즈: <span id="span-after-size" th:text="${dto.item.size}">슈퍼싱글SS 프레임만</span>
+                                                            / 색상: <span id="span-after-color" th:text="${dto.item.color}">화이트</span>
+                                                            | <span th:text="${dto.item.amount}">2</span>개
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 mb-3 d-flex justify-content-start" style="display: none">
+                                                    <select class="form-select form-select-sm me-3" id="product-option">
+                                                        <option value="0" hidden>변경할 옵션을 선택하세요</option>
+                                                        <option th:value="${detail.id}"
+                                                                th:each="detail, loop : ${dto.details}"
+                                                                th:text="${detail.size} + ' / ' + ${detail.color}"
+                                                                th:attr="data-name=${dto.item.name},
+                                                                data-size=${detail.size},
+                                                                data-color=${detail.color},
+                                                                data-product-id=${dto.item.productId}">갈색침대
+                                                        </option>
+                                                    </select>
+                                                    <button type="button" class="btn btn-xs"
+                                                            style="border-color: gray; width: 90px"
+                                                            id="btn-modify-option"
+                                                            th:attr="data-product-id=${dto.item.productId}">
+                                                        옵션변경
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- 상품 영역 끝 -->
+                    </div>
+                    <!-- 반품/교환 선택, 상품 영역 끝 -->
+
+                    <!-- 2. 회수지 정보, 환불 정보, 상품 재배송 정보 영역 시작 -->
+                    <div class="row mb-5 pb-3">
+                        <!-- 2-1. 회수지 정보 시작 -->
+                        <div class="col-6">
+                            <div class="text-start fw-bold" style="font-size: 17px">상품 회수지 정보</div>
+                            <hr>
+                            <div>
+                                <div id="collection-delivery-id"
+                                     th:attr="data-collection-delivery-id=${dto.delivery.id}"
+                                     class="mb-4 pb-2">
+                                    <div class="d-flex justify-content-start align-items-center mb-1">
+                                        <div id="div-collection-id" th:attr="data-delivery-id=${dto.delivery.id}" class="me-3 fw-bold">
+                                            배송지명 | <span id="span-collection-name" th:text="${dto.delivery.name}"></span>
+                                        </div>
+                                        <button id="btn-collection-delivery" type="button" class="btn btn-xs" style="border-color: gray">변경</button>
+                                    </div>
+                                    <div class="mb-1 small">
+                                        (<span id="span-collection-zipcode" th:text="${dto.delivery.zipcode}">(03134)</span>)
+                                        <span id="span-collection-address" th:text="${dto.delivery.address1} + ' ' + ${dto.delivery.address2}">서울특별시 종로구 율곡로10길 105 디아망 4F</span>
+                                    </div>
+                                    <div class="mb-2 small">
+                                        <span id="span-collection-recipient" th:text="${dto.delivery.recipient}">수령인</span> |
+                                        <span id="span-collection-phone" th:text="${dto.delivery.phone}">010-1234-5678</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="me-3 mb-2 fw-bold">회수요청사항</div>
+                                    <div>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <input name="collectionRequest" type="radio" value="문 앞" checked/>
+                                            <span class="ms-2 small">문 앞</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <input name="collectionRequest" type="radio" value="경비실"/>
+                                            <span class="ms-2 small">경비실</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <input name="collectionRequest" type="radio" value="그 외"/>
+                                            <span class="ms-2 small">그 외 장소 (예: 계단 밑 옥상 등)</span>
+                                        </div>
+                                        <div hidden="hidden" id="div-collection-memo" style="width: 500px">
+                                            <textarea name="collectionMemo" class="form-control" placeholder="* 필수입력 (반품 상품을 보관할 장소를 입력하세요)" style="width: 500px; height: 100px;"></textarea>
+                                            <p class="text-end text-secondary" style="font-size: small">
+                                                <span id="span-collection-count">0</span>/150
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 회수지 정보 영역 끝 -->
+                        <div class="col-6">
+                            <!-- 2-2. 환불 정보 영역 시작 -->
+                            <div id="div-refund-info"
+                                 th:attr="data-payment-id=${dto.item.getItemPrice()}"
+                                 class="pb-3">
+                                <div class="text-start fw-bold" style="font-size: 17px">환불 정보</div>
+                                <hr>
+                                <div class="d-flex justify-content-between fw-bold mb-3">
+                                    <div>환불예정금액</div>
+                                    <div>
+                                        <span th:text="${#numbers.formatInteger(dto.item.getItemPrice(), 1, 'COMMA')}">283,800</span>원
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div style="font-size: 15px">
+                                        <div class="d-flex justify-content-between small mb-1 text-secondary">
+                                            <div>주문금액</div>
+                                            <div>
+                                                <span th:text="${#numbers.formatInteger(dto.item.getItemPrice(), 1, 'COMMA')}">284,800</span>원
+                                            </div>
+                                        </div>
+                                        <!--<div class="d-flex justify-content-between small mb-1 text-secondary">
+                                            <div>차감금액</div>
+                                            <div>0원</div>
+                                        </div>
+                                        <div class="d-flex justify-content-between small mb-1 text-secondary">
+                                            <div>포인트 사용</div>
+                                            <div>- 1,000원</div>
+                                        </div>-->
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between fw-bold mb-5">
+                                    <div>환불수단</div>
+                                    <div th:text="${dto.payment.method}">카카오페이</div>
+                                </div>
+                            </div>
+                            <!-- 환불 정보 영역 끝 -->
+                            <!-- 2-3. 상품 재배송 정보 영역 시작 -->
+                            <div id="div-redelivery-info">
+                                <div class="text-start fw-bold" style="font-size: 17px">상품 재배송 정보</div>
+                                <hr>
+                                <div id="re-delivery-id"
+                                     th:attr="data-re-delivery-id=${dto.delivery.id}">
+                                    <div class="d-flex justify-content-start align-items-center mb-1">
+                                        <div id="div-delivery-id" th:attr="data-delivery-id=${dto.delivery.id}" class="me-3 fw-bold">
+                                            배송지명 | <span id="span-delivery-name" th:text="${dto.delivery.name}"></span>
+                                        </div>
+                                        <button id="btn-re-delivery" type="button" class="btn btn-xs" style="border-color: gray">변경</button>
+                                    </div>
+                                    <div class="mb-1 small">
+                                        (<span id="span-delivery-zipcode" th:text="${dto.delivery.zipcode}">(03134)</span>)
+                                        <span id="span-delivery-address" th:text="${dto.delivery.address1} + ' ' + ${dto.delivery.address2}">서울특별시 종로구 율곡로10길 105 디아망 4F</span>
+                                    </div>
+                                    <div class="mb-2 small">
+                                        <span id="span-delivery-recipient" th:text="${dto.delivery.recipient}">수령인</span> |
+                                        <span id="span-delivery-phone" th:text="${dto.delivery.phone}">010-1234-5678</span>
+                                    </div>
+                                    <div class="form-group mb-1">
+                                        <select name="deliveryMemo" class="form-select text-secondary" style="width: 500px">
+                                            <option value="0">배송메모를 선택해주세요</option>
+                                            <option value="1">문 앞에 놓아주세요</option>
+                                            <option value="2">배송 전에 미리 연락주세요</option>
+                                            <option value="3">부재 시 경비실에 맡겨주세요</option>
+                                            <option value="4">부재 시 전화 주시거나 문자 남겨주세요</option>
+                                            <option value="5">직접 입력</option>
+                                        </select>
+                                    </div>
+                                    <div hidden="hidden" id="div-delivery-memo" style="width: 500px">
+                                        <textarea name="memo" type="text" class="form-control" placeholder="배송 요청사항을 입력해주세요" style="width: 500px"></textarea>
+                                        <p class="text-end text-secondary" style="font-size: small">
+                                            <span id="span-text-count">0</span>/50
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 상품 재배송 정보 영역 끝 -->
+                        </div>
+                    </div>
+                    <!-- 회수지 정보, 환불 정보, 상품 재배송 정보 영역 끝 -->
+                    <div class="text-center bg-white mb-3">
+                        <button id="btn-submit-return" type="button" class="btn w-50 btn-outline-dark">신청하기</button>
+                        <button id="btn-submit-exchange" type="button" class="btn w-50 btn-outline-dark">신청하기</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" layout:fragment="script">
+    // 반품교환 라디오버튼 선택에 따라 일부 정보 표시 및 숨김 처리
+    $(":radio[name=claim]").change(function() {
+        let type = $(this).val();
+        if (type == ('return')) {
+            $("#div-redelivery-info").hide();
+            $("#div-refund-info").show();
+            $("#btn-submit-exchange").hide();
+            $("#btn-submit-return").show();
+            $("#product-option").hide();
+            $("button[id=btn-modify-option]").hide();
+        } else if (type == ('exchange')) {
+            $("#div-refund-info").hide();
+            $("#div-redelivery-info").show();
+            $("#btn-submit-return").hide();
+            $("#btn-submit-exchange").show();
+            $("#product-option").show();
+            $("button[id=btn-modify-option]").show();
+        }
+    });
+
+    $(":radio[value=return]").trigger('change');
+
+    // 상세사유 입력 란 표시
+    $("select[name=reasonType]").change(function() {
+        if ($(this).val() == 7) {
+            $("#div-detailed-reason").removeAttr("hidden");
+        } else {
+            $("#div-detailed-reason").attr("hidden", "hidden");
+        }
+    });
+
+    // 상세사유 글자수 카운트
+    $("textarea[name=detailedReason]").keyup(function() {
+        let text = $(this).val();
+        let len = text.length;
+        if (len >= 150) {
+            $(this).val(text.substring(0, 150));
+        }
+
+        $("#span-reason-count").text(len);
+    });
+
+    // 회수요청사항 그외장소 입력 란 표시
+    $(":radio[name=collectionRequest]").change(function() {
+        if ($(this).val() == '그 외') {
+            $("#div-collection-memo").removeAttr("hidden");
+        } else {
+            $("#div-collection-memo").attr("hidden", "hidden");
+        }
+    });
+
+    // 회수요청사항 글자수 카운트
+    $("textarea[name=collectionMemo]").keyup(function() {
+        let text = $(this).val();
+        let len = text.length;
+        if (len >= 150) {
+            $(this).val(text.substring(0, 150));
+        }
+
+        $("#span-collection-count").text(len);
+    });
+
+    // 반품신청 버튼 클릭
+    $(function() {
+        $("#btn-submit-return").click(function(e) {
+            if ($("select[name=reasonType] :selected").val() == 7) {
+                if ($("textarea[name=detailedReason]").val() == '') {
+                    alert("상세사유를 입력해주세요.");
+                    return false;
+                }
+            } else if ($("select[name=reasonType] :selected").val() == 0) {
+                alert("사유를 선택해주세요.");
+                return false;
+            }
+
+            if ($(":radio[name=collectionRequest]:checked").val() == '그 외') {
+                if ($("textarea[name=collectionMemo]").val() == '') {
+                    alert("보관할 장소를 입력해주세요.")
+                    return false;
+                }
+            }
+
+            // 사유 직접입력 시 상세사유 저장
+            let detailedReason;
+            if ($("select[name=reasonType] :selected").val() == 7) {
+                detailedReason = $("textarea[name=detailedReason]").val();
+            } else {
+                detailedReason = null;
+            }
+
+            // 회수요청사항 저장
+            let collectionMemo;
+            if ($(":radio[name=collectionRequest]:checked").val() == '그 외') {
+                collectionMemo = $("textarea[name=collectionMemo]").val();
+            } else {
+                collectionMemo = $(":radio[name=collectionRequest]:checked").val();
+            }
+
+            let itemId = $("div[id^=div-item-id]").attr("data-item-id");
+
+            let data = {
+                type: $(":radio[name=claim]:checked").val(),
+                orderId: $("div[id^=div-order-id]").attr("data-order-id"),
+                orderItemId: itemId,
+                paymentId: $("#div-refund-info").attr("data-payment-id"),
+                collectionDeliveryId: $("#collection-delivery-id").attr("data-collection-delivery-id"),
+                reasonId: $("select[name=reasonType] :selected").val(),
+                detailedReason: detailedReason,
+                collectionMemo: collectionMemo
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/order/claim/submit-form',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function(response) {
+                    location.href = '/order/claim/return-completed/' + itemId;
+                }
+            });
+        });
+    });
+
+    // 교환신청 버튼 클릭
+    $(function() {
+        // 배송메모 직접입력 란 표시
+        $("select[name=deliveryMemo]").change(function() {
+            if ($(this).val() == 5) {
+                $("#div-delivery-memo").removeAttr("hidden");
+            } else {
+                $("#div-delivery-memo").attr("hidden", "hidden");
+            }
+        });
+
+        // 배송메모 글자수 카운트
+        $("textarea[name=memo]").keyup(function() {
+            let text = $(this).val();
+            let len = text.length;
+            if (len >= 50) {
+                $(this).val(text.substring(0, 50));
+            }
+
+            $("#span-text-count").text(len);
+        });
+
+        // 옵션변경 버튼 클릭
+        $("#btn-modify-option").click(function() {
+            $("#div-after-detail").removeAttr("hidden");
+
+            $("#product-option :selected").val();
+
+            $("#div-after-detail").attr("data-after-detail-id", ($("#product-option :selected").val()));
+            $("#span-after-size").text($("#product-option :selected").attr("data-size"));
+            $("#span-after-color").text($("#product-option :selected").attr("data-color"));
+        });
+
+        $("#btn-submit-exchange").click(function(e) {
+            if ($("select[name=reasonType] :selected").val() == 7) {
+                if ($("textarea[name=detailedReason]").val() == '') {
+                    alert("상세사유를 입력해주세요.");
+                    return false;
+                }
+            } else if ($("select[name=reasonType] :selected").val() == 0) {
+                alert("사유를 선택해주세요.");
+                return false;
+            }
+
+            if ($(":radio[name=collectionRequest]:checked").val() == '그 외') {
+                if ($("textarea[name=collectionMemo]").val() == '') {
+                    alert("보관할 장소를 입력해주세요.")
+                    return false;
+                }
+            }
+
+            // 사유 직접입력 시 상세사유 저장
+            let detailedReason;
+            if ($("select[name=reasonType] :selected").val() == 7) {
+                detailedReason = $("textarea[name=detailedReason]").val();
+            } else {
+                detailedReason = null;
+            }
+
+            // 회수요청사항 저장
+            let collectionMemo;
+            if ($(":radio[name=collectionRequest]:checked").val() == '그 외') {
+                collectionMemo = $("textarea[name=collectionMemo]").val();
+            } else {
+                collectionMemo = $(":radio[name=collectionRequest]:checked").val();
+            }
+
+            // 배송메모 직접입력 시 textarea 내용으로 저장
+            let deliveryMemo;
+            if ($("select[name=deliveryMemo] :selected").val() == 5) {
+                if ($("textarea[name=memo]").val() == '') {
+                    alert("배송 요청사항을 입력해주세요.")
+                    return false;
+                }
+                deliveryMemo = $("textarea[name=memo]").val();
+            } else if ($("select[name=deliveryMemo] :selected").val() == 0) {
+                deliveryMemo = null;
+            } else {
+                deliveryMemo = $("select[name=deliveryMemo] :selected").text();
+            }
+
+            let itemId = $("div[id^=div-item-id]").attr("data-item-id");
+
+            let data = {
+                type: $(":radio[name=claim]:checked").val(),
+                orderId: $("div[id^=div-order-id]").attr("data-order-id"),
+                orderItemId: itemId,
+                beforeDetailId: $("#div-before-detail").attr("data-before-detail-id"),
+                afterDetailId: $("#div-after-detail").attr("data-after-detail-id"),
+                collectionDeliveryId: $("#collection-delivery-id").attr("data-collection-delivery-id"),
+                reDeliveryId: $("#re-delivery-id").attr("data-re-delivery-id"),
+                deliveryMemo: deliveryMemo,
+                reasonId: $("select[name=reasonType] :selected").val(),
+                detailedReason: detailedReason,
+                collectionMemo: collectionMemo
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/order/claim/submit-form',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function(response) {
+                    location.href = '/order/claim/exchange-completed/' + itemId;
+                }
+            });
+        });
+    });
+
+    // 재배송지 리스트 팝업창
+    $("#btn-re-delivery").click(function() {
+        let type = "base";
+        window.open("/order/delivery/list/" + type, "_blank", "width=600,height=700,top=70,left=100");
+    });
+
+    // 재배송지 변경 업데이트
+    function updateDelivery(deliveryId) {
+        $.ajax({
+            type: 'POST',
+            url: '/order/updateDelivery',
+            data: {deliveryId: deliveryId},
+            success: function(response) {
+                $("#re-delivery-id").attr("data-re-delivery-id", response.id);
+                $("#div-delivery-id").attr("data-delivery-id", response.id);
+                $("#span-delivery-name").text(response.name);
+                $("#span-delivery-zipcode").text(response.zipcode);
+                $("#span-delivery-address").text(response.address1 + " " + response.address2);
+                $("#span-delivery-recipient").text(response.recipient);
+                $("#span-delivery-phone").text(response.phone);
+            }
+        });
+    }
+
+    // 회수지 리스트 팝업창
+    $("#btn-collection-delivery").click(function() {
+        let type = "collection";
+        window.open("/order/delivery/list/" + type, "_blank", "width=600,height=700,top=70,left=100");
+    });
+
+    // 회수지 변경 업데이트
+    function updateCollection(deliveryId) {
+        $.ajax({
+            type: 'POST',
+            url: '/order/claim/updateCollection',
+            data: {deliveryId: deliveryId},
+            success: function(response) {
+                $("#collection-delivery-id").attr("data-collection-delivery-id", response.id);
+                $("#div-collection-id").attr("data-delivery-id", response.id);
+                $("#span-collection-name").text(response.name);
+                $("#span-collection-zipcode").text(response.zipcode);
+                $("#span-collection-address").text(response.address1 + " " + response.address2);
+                $("#span-collection-recipient").text(response.recipient);
+                $("#span-collection-phone").text(response.phone);
+            }
+        });
+    }
+</script>
+</html>

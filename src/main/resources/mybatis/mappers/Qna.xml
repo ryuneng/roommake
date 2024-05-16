@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.admin.management.mapper.QnaMapper">
+    <insert id="createQna" parameterType="com.roommake.admin.management.vo.Qna">
+        insert into
+            qna
+            (qna_category_id, qna_title, qna_content, user_id, qna_private_yn)
+        values
+            (#{category.id}, #{title}, #{content}, #{user.id}, #{privateYn})
+    </insert>
+
+    <update id="updateAnswer" parameterType="com.roommake.admin.management.vo.Qna">
+        update
+            qna
+        <set>
+            qna_update_date         = #{updateDate},
+            qna_delete_yn           = #{deleteYn},
+            <if test="answer != null">
+                qna_answer_writer   = #{answerWriter.id},
+                qna_answer          = #{answer},
+                qna_answer_yn       = #{answerYn},
+            </if>
+            <if test=' "Y" == deleteYn '>
+                qna_delete_date      = #{deleteDate}
+            </if>
+        </set>
+        where
+            qna_id = #{id}
+    </update>
+
+    <select id="getQnas" parameterType="com.roommake.dto.Criteria" resultType="com.roommake.admin.management.vo.Qna">
+        select
+            qna_id                  as id,
+            qna_category_id         as "category.id",
+            qna_category_name       as "category.name",
+            qna_title               as title,
+            user_id                 as "user.id",
+            user_nickname           as "user.nickname",
+            qna_private_yn          as privateYn,
+            qna_create_date         as createDate,
+            qna_update_date         as updateDate,
+            qna_delete_yn           as deleteYn,
+            qna_answer_writer       as "answerWriter.id",
+            answer_writer_nickname  as "answerWriter.nickname",
+            qna_answer_yn           as answerYn,
+            product_id              as "product.id",
+            product_name            as "product.name"
+        from
+            (select
+                q.qna_id,
+                q.qna_category_id,
+                c.qna_category_name,
+                q.qna_title,
+                q.user_id,
+                u1.user_nickname    as user_nickname,
+                q.qna_private_yn,
+                q.qna_create_date,
+                q.qna_update_date,
+                q.qna_delete_yn,
+                q.qna_answer_writer,
+                u2.user_nickname    as answer_writer_nickname,
+                q.qna_answer_yn,
+                q.product_id,
+                p.product_name,
+                @rownum := @rownum + 1 as row_num
+            from
+                (select @rownum := 0) r,
+                qna q
+                left join qna_category c on q.qna_category_id = c.qna_category_id
+                left join user u1 on q.user_id = u1.user_id
+                left join user u2 on q.qna_answer_writer = u2.user_id
+                left join product p on q.product_id = p.product_id
+            <where>
+                <if test="'title' == opt">
+                    and q.qna_title like CONCAT('%', #{keyword}, '%')
+                </if>
+                <if test="'content' == opt">
+                    and q.qna_content like CONCAT('%', #{keyword}, '%')
+                </if>
+                <if test='filt != "all"'>
+                    and q.qna_category_id = #{filt}
+                </if>
+                <if test="sort != 'all'">
+                    and q.qna_answer_yn = #{sort}
+                </if>
+                    and q.qna_delete_yn = 'N'
+            </where>
+            order by
+                q.qna_id desc
+            ) as qna
+        where
+            row_num between #{begin} and #{end}
+    </select>
+
+    <select id="getNoAnswerQnas" resultType="com.roommake.admin.management.vo.Qna">
+        select
+            qna_id                  as id,
+            c.qna_category_id       as "category.id",
+            c.qna_category_name     as "category.name",
+            qna_title               as title,
+            u.user_id               as "user.id",
+            user_nickname           as "user.nickname",
+            qna_private_yn          as privateYn,
+            qna_create_date         as createDate,
+            qna_update_date         as updateDate,
+            qna_delete_yn           as deleteYn,
+            qna_answer_yn           as answerYn,
+            q.product_id            as "product.id",
+            p.product_name          as "product.name"
+        from
+            qna q
+                left join qna_category c on q.qna_category_id = c.qna_category_id
+                left join user u on q.user_id = u.user_id
+                left join product p on q.product_id = p.product_id
+        where
+            q.qna_answer_yn = 'N'
+        and qna_delete_yn = 'N'
+        order by
+            qna_id desc
+    </select>
+
+    <select id="getTotalRows" parameterType="com.roommake.dto.Criteria" resultType="int">
+        select
+            count(*)
+        from
+            qna
+        <where>
+            <if test='filt != "all"'>
+                and qna_category_id = #{filt}
+            </if>
+            <if test="sort != 'all'">
+                and qna_answer_yn = #{sort}
+            </if>
+            <if test="'title' == opt">
+                and qna_title like CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="'content' == opt">
+                and qna_content like CONCAT('%', #{keyword}, '%')
+            </if>
+            and qna_delete_yn = 'N'
+        </where>
+    </select>
+
+    <select id="getQnaById" parameterType="int" resultType="com.roommake.admin.management.vo.Qna">
+        select
+            qna_id              as id,
+            q.qna_category_id   as "category.id",
+            c.qna_category_name as "category.name",
+            qna_title           as title,
+            qna_content         as content,
+            q.user_id           as "user.id",
+            u.user_nickname     as "user.nickname",
+            u.user_email        as "user.email",
+            qna_private_yn      as "privateYn",
+            qna_create_date     as createDate,
+            qna_update_date     as updateDate,
+            qna_delete_yn       as deleteYn,
+            qna_answer_writer   as "answerWriter.id",
+            qna_answer          as answer,
+            qna_answer_yn       as answerYn,
+            q.product_id        as "product.id",
+            p.product_name      as "product.name"
+        from
+            qna q
+            left join qna_category c on q.qna_category_id = c.qna_category_id
+            left join user u on q.user_id = u.user_id
+            left join product p on q.product_id = p.product_id
+        where
+            qna_id = #{id}
+        and qna_delete_yn = 'N'
+        order by
+            qna_id desc
+    </select>
+
+    <select id="getQnaCategories" resultType="com.roommake.admin.management.vo.QnaCategory">
+        select
+            qna_category_id     as id,
+            qna_category_name   as name
+        from
+            qna_category
+        order by
+            qna_category_id asc
+    </select>
+
+    <select id="getQnaCategory" parameterType="int" resultType="com.roommake.admin.management.vo.QnaCategory">
+        select
+            qna_category_id     as id,
+            qna_category_name   as name
+        from
+            qna_category
+        where
+            qna_category_id = #{id}
+    </select>
+
+    <select id="getAnswerQnasByUserId" resultType="com.roommake.admin.management.vo.Qna">
+        select
+            qna_id                      as id,
+            q.qna_category_id           as "category.id",
+            c.qna_category_name         as "category.name",
+            qna_title                   as title,
+            qna_content                 as content,
+            q.user_id                   as "user.id",
+            u1.user_nickname            as "user.nickname",
+            qna_private_yn              as privateYn,
+            qna_create_date             as createDate,
+            qna_update_date             as updateDate,
+            qna_delete_yn               as deleteYn,
+            qna_answer                  as answer,
+            q.qna_answer_writer         as "answerWriter.id",
+            u2.user_nickname            as "answerWriter.nickname",
+            qna_answer_yn               as answerYn,
+            q.product_id                as "product.id",
+            p.product_name              as "product.name"
+        from
+            qna q
+            left join qna_category c on q.qna_category_id = c.qna_category_id
+            left join user u1 on q.user_id = u1.user_id
+            left join user u2 on q.qna_answer_writer = u2.user_id
+            left join product p on q.product_id = p.product_id
+        where
+            q.qna_answer_yn = 'Y'
+        and q.qna_delete_yn = 'N'
+        and q.user_id = ${userId}
+        order by
+            q.qna_id desc
+        <if test='start > 0'>
+            limit 5 offset #{start}
+        </if>
+    </select>
+    <select id="getNoAnswerQnasByUserId" resultType="com.roommake.admin.management.vo.Qna">
+        select
+            qna_id                      as id,
+            q.qna_category_id           as "category.id",
+            c.qna_category_name         as "category.name",
+            qna_title                   as title,
+            qna_content                 as content,
+            q.user_id                   as "user.id",
+            u1.user_nickname            as "user.nickname",
+            qna_private_yn              as privateYn,
+            qna_create_date             as createDate,
+            qna_update_date             as updateDate,
+            qna_delete_yn               as deleteYn,
+            qna_answer_yn               as answerYn,
+            q.product_id                as "product.id",
+            p.product_name              as "product.name"
+        from
+            qna q
+                left join qna_category c on q.qna_category_id = c.qna_category_id
+                left join user u1 on q.user_id = u1.user_id
+                left join product p on q.product_id = p.product_id
+        where
+            q.qna_answer_yn = 'N'
+        and q.qna_delete_yn = 'N'
+        and q.user_id = ${userId}
+        order by
+            q.qna_id desc
+        <if test='start > 0'>
+            limit 5 offset #{start}
+        </if>
+    </select>
+
+    <select id="getTotalQnaRowsByUserId" resultType="int">
+            select
+                count(*) as count
+            from
+                qna
+            where
+                user_id = #{userId}
+            and qna_answer_yn = #{answer}
+            and qna_delete_yn = 'N'
+    </select>
+</mapper>

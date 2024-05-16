@@ -1,0 +1,108 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 취소상세</title>
+</head>
+<div layout:fragment="content" class="container my-3 mt-4">
+    <div class="container">
+        <div class="row">
+            <h4 class="fw-bold text-center mb-4">취소상세</h4>
+            <div class="d-flex justify-content-start mb-5 small">
+                <div class="me-5">
+                    <span class="fw-bold me-1">취소번호</span>
+                    <span th:text="${dto.orderCancelId}" class="text-secondary">202404071720583</span>
+                </div>
+                <div>
+                    <span class="fw-bold me-1">취소일자</span>
+                    <span th:text="${#dates.format(dto.createDate, 'yyyy.MM.dd HH:mm')}" class="text-secondary">2024.04.09 14:45</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12 mb-5">
+                    <!-- 1. 취소상품 영역 시작 -->
+                    <div class="row mb-5">
+                        <div class="col-12 mb-5" style="font-size: small">
+                            <div class="d-flex justify-content-start align-items-center">
+                                <h5 class="fw-bold me-3">취소상품</h5>
+                            </div>
+                            <hr class="mb-1">
+                            <table class="table text-center">
+                                <tbody class="align-middle">
+                                <tr th:each="item : ${dto.items}">
+                                    <td>
+                                        <div class="d-flex w-100 justify-content-start">
+                                            <a th:href="@{/store/detail/{id}(id=${item.productId})}" class="link-underline link-underline-opacity-0 text-dark">
+                                                <div>
+                                                    <img th:src="@{${item.imageName}}" style="width: 80px; height: 80px">
+                                                </div>
+                                            </a>
+                                            <div class="ms-3 text-start">
+                                                <div>
+                                                    <div th:text="${item.name}" style="display: -webkit-box;
+                                                          overflow: hidden;
+                                                          text-overflow: ellipsis;
+                                                          -webkit-box-orient: vertical;
+                                                          -webkit-line-clamp: 1;
+                                                          font-size: 15px;">
+                                                        봄맞이 먼지없는 항균 차렵이불세트 SS/Q 12컬러
+                                                    </div>
+                                                    <div class="text-secondary mt-2" style="font-size: 12px">
+                                                        사이즈: <span th:text="${item.size}">슈퍼싱글SS 프레임만</span>
+                                                        / 색상: <span th:text="${item.color}">화이트</span>
+                                                    </div>
+                                                    <div><span th:text="${item.amount}">1</span>개</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 취소상품 영역 끝 -->
+
+                    <!-- 2. 환불 정보, 취소 사유 영역 시작 -->
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <h5 class="fw-bold">환불 정보</h5>
+                            <hr>
+                            <div class="mb-3">
+                                <div style="font-size: 15px">
+                                    <div class="d-flex justify-content-between small mb-1 text-secondary">
+                                        <div>주문금액</div>
+                                        <div>
+                                            <span th:text="${#numbers.formatInteger(dto.payment.price, 1, 'COMMA')}">
+                                                95,800
+                                            </span>원
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between small mb-1 text-secondary">
+                                        <div>반환 포인트</div>
+                                        <div><span th:text="${#numbers.formatInteger(dto.payment.usePoint, 1, 'COMMA')}">1,000</span> P</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold mb-2">
+                                <div>환불금액</div>
+                                <div>
+                                    <span th:text="${#numbers.formatInteger(dto.refund.amount, 1, 'COMMA')}">95,800</span>원
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-5">
+                                <div>환불수단</div>
+                                <div th:text="${dto.payment.method}">카카오페이</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="fw-bold">취소 사유</h5>
+                            <hr>
+                            <div th:text="${dto.reason.name}" class="small">단순변심</div>
+                        </div>
+                    </div>
+                    <!-- 환불 정보, 취소 사유 영역 끝 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

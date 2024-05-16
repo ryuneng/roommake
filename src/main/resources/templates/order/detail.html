@@ -1,0 +1,461 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 주문상세</title>
+    <style layout:fragment="style">
+        .btn.btn-xs {
+            --bs-btn-padding-y: .25rem;
+            --bs-btn-padding-x: .35rem;
+            --bs-btn-font-size: .75rem;
+        }
+
+        #myform fieldset {
+            display: inline-block;
+            direction: rtl;
+            border: 0;
+        }
+
+        #myform fieldset legend {
+            text-align: right;
+        }
+
+        #myform input[type=radio] {
+            display: none;
+        }
+
+        #myform label {
+            font-size: 3em;
+            color: transparent;
+            text-shadow: 0 0 0 #f0f0f0;
+        }
+
+        #myform label:hover {
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+
+        #myform label:hover ~ label {
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+
+        #myform input[type=radio]:checked ~ label {
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+
+        #reviewContents {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: solid 1.5px #D3D3D3;
+            border-radius: 5px;
+            font-size: 16px;
+            resize: none;
+        }
+
+        /* 상뷰리뷰 별점을 나타내는 css */
+        .star_rating {
+            width: 100%;
+            box-sizing: border-box;
+            display: inline-flex;
+            float: left;
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .star_rating .star {
+            width: 25px;
+            height: 25px;
+            margin-right: 10px;
+            display: inline-block;
+            background: url('https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FE2bww%2FbtsviSSBz4Q%2F5UYnwSWgTlFt6CEFZ1L3Q0%2Fimg.png') no-repeat;
+            background-size: 100%;
+            box-sizing: border-box;
+        }
+
+        .star_rating .star.on {
+            width: 25px;
+            height: 25px;
+            margin-right: 10px;
+            display: inline-block;
+            background: url('https://blog.kakaocdn.net/dn/b2d6gV/btsvbDoal87/XH5b17uLeEJcBP3RV3FyDk/img.png') no-repeat;
+            background-size: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+    <link href="/assets/css/star.css" rel="stylesheet"/>
+</head>
+<div layout:fragment="content" class="container my-3 mt-4">
+    <div class="container">
+        <div class="row">
+            <h4 class="fw-bold text-center mb-4">주문상세</h4>
+            <div class="d-flex justify-content-start mb-5 small">
+                <div class="me-5">
+                    <span class="fw-bold me-1">주문번호</span>
+                    <span th:text="${dto.orderId}" class="text-secondary">202404071720583</span>
+                </div>
+                <div>
+                    <span class="fw-bold me-1">주문일자</span>
+                    <span th:text="${#dates.format(dto.createDate, 'yyyy.MM.dd HH:mm')}" class="text-secondary">2024.04.07 14:45</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12 mb-5">
+                    <!-- 1. 주문상품 영역 시작 -->
+                    <div class="row mb-5">
+                        <div class="col-12 mb-5" style="font-size: small">
+                            <div class="d-flex justify-content-start align-items-center">
+                                <h5 class="fw-bold me-3">주문상품 <span th:text="${dto.items.size()}">2</span>건</h5>
+                                <a th:if="${dto.statusId == 1}"
+                                   th:href="@{|/order/claim/cancel-form/${dto.orderId}|}"
+                                   class="btn btn-xs btn-outline-secondary me-3">
+                                    전체주문취소
+                                </a>
+                                <div th:if="${dto.statusId == 2 or dto.statusId == 3}" style="font-size: 16px; font-weight: bold">
+                                    <span class="text-danger">🚀 송장번호 : </span>
+                                    <span th:text="${dto.invoiceNumber}"></span>
+                                </div>
+                            </div>
+                            <hr class="mb-1">
+                            <table class="table text-center">
+                                <thead>
+                                <tr>
+                                    <th style="width: 60%">상품정보</th>
+                                    <th style="width: 5%">수량</th>
+                                    <th style="width: 13%">가격</th>
+                                    <th style="width: 12%">주문상태</th>
+                                    <th style="width: 10%"></th>
+                                </tr>
+                                </thead>
+                                <tbody class="align-middle">
+                                <!-- 첫번째 상품 시작 -->
+                                <tr th:each="item : ${dto.items}">
+                                    <!-- 상품정보 영역 시작 -->
+                                    <td>
+                                        <div class="d-flex w-100 justify-content-start">
+                                            <a th:href="@{/store/detail/{id}(id=${item.productId})}" class="link-underline link-underline-opacity-0 text-dark">
+                                                <div>
+                                                    <img th:src="@{${item.imageName}}" style="width: 80px; height: 80px">
+                                                </div>
+                                            </a>
+                                            <div class="ms-3 text-start">
+                                                <div>
+                                                    <div th:text="${item.name}" style="display: -webkit-box;
+                                                          overflow: hidden;
+                                                          text-overflow: ellipsis;
+                                                          -webkit-box-orient: vertical;
+                                                          -webkit-line-clamp: 1;">
+                                                        LED조명 통서랍 수납침대 SSQ(매트리스 선택)
+                                                    </div>
+                                                    <div>
+                                                        <span th:text="${#numbers.formatInteger(item.price, 1, 'COMMA')}">189,000</span>원
+                                                    </div>
+                                                    <div class="text-secondary mt-2" style="font-size: 12px">
+                                                        사이즈: <span th:text="${item.size}">슈퍼싱글SS 프레임만</span>
+                                                        / 색상: <span th:text="${item.color}">화이트</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <!-- 상품정보 영역 끝 -->
+                                    <!-- 주문상태 영역 시작 -->
+                                    <td><span th:text="${item.amount}">1</span>개</td>
+                                    <td>
+                                        <span th:text="${#numbers.formatInteger(item.getItemPrice(), 1, 'COMMA')}">189,000</span>원
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <div th:text="${item.itemStatusName}">상품준비중</div>
+                                        </div>
+                                    </td>
+                                    <!-- 주문상태 영역 끝 -->
+                                    <!-- 우측 버튼 영역 시작 -->
+                                    <!-- 1) 상품준비중 -->
+                                    <td th:if="${item.itemStatusId == 1}">
+                                        <div>
+                                            <a th:href="@{|/order/claim/cancel-form/${dto.orderId}/${item.orderItemId}|}" class="btn btn-xs btn-outline-secondary mb-1">주문취소</a>
+                                        </div>
+                                    </td>
+                                    <!-- 2) 배송중-->
+                                    <td th:if="${item.itemStatusId == 2}">
+                                        <!--<div>
+                                            <a th:href="@{#}" type="button" class="btn btn-xs btn-outline-secondary mb-1">배송조회</a>
+                                        </div>-->
+                                        <div>
+                                            <a th:href="@{|/order/claim/return-exchange-form/${dto.orderId}/${item.orderItemId}|}" type="button" class="btn btn-xs btn-outline-secondary mb-1">반품/교환</a>
+                                        </div>
+                                    </td>
+                                    <!-- 3) 배송완료 -->
+                                    <td th:if="${item.itemStatusId == 3}">
+                                        <div>
+                                            <button th:id="${'btn-confirm-order-' + item.orderItemId}"
+                                                    th:attr="data-order-item-id=${item.orderItemId},
+                                                            data-order-id=${item.orderId},
+                                                            data-order-item-price=${item.itemPrice}"
+                                                    class="btn btn-xs btn-outline-secondary mb-1">
+                                                구매확정
+                                            </button>
+                                        </div>
+                                        <!--<div>
+                                            <a th:href="@{#}" type="button" class="btn btn-xs btn-outline-secondary mb-1">배송조회</a>
+                                        </div>-->
+                                        <div>
+                                            <a th:href="@{|/order/claim/return-exchange-form/${dto.orderId}/${item.orderItemId}|}" type="button" class="btn btn-xs btn-outline-secondary mb-1">반품/교환</a>
+                                        </div>
+                                    </td>
+                                    <!-- 4) 구매확정-->
+                                    <td th:if="${item.itemStatusId == 4}">
+                                        <button type="button" id="orderReviewBtn" class="btn btn-xs btn-outline-secondary mb-1" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                                                th:attr="data-orderItem-name=${item.name},
+                                                         data-orderItem-size=${item.size},
+                                                         data-orderItem-color=${item.color},
+                                                         data-orderItem-id=${item.orderItemId},
+                                                         data-product-id=${item.productId}">
+                                            리뷰작성
+                                        </button>
+                                        <div>
+                                            <a th:href="@{|/order/claim/return-exchange-form/${dto.orderId}/${item.orderItemId}|}" type="button" class="btn btn-xs btn-outline-secondary mb-1">반품/교환</a>
+                                        </div>
+                                    </td>
+                                    <!-- 5) 취소완료 -->
+                                    <td th:if="${item.itemStatusId == 5}">
+                                        <div>
+                                            <a th:href="@{|/order/claim/cancel-detail/${dto.orderId}|}" type="button" class="btn btn-xs btn-outline-secondary mb-1">취소상세</a>
+                                        </div>
+                                    </td>
+                                    <!-- 6) 반품신청-->
+                                    <td th:if="${item.itemStatusId == 6}">
+                                        <div>
+                                            <a th:href="@{|/order/claim/return-detail/${item.orderItemId}|}" type="button" class="btn btn-xs btn-outline-secondary mb-1">반품상세</a>
+                                        </div>
+                                        <!--<div>
+                                            <a th:href="@{#}" type="button" class="btn btn-xs btn-outline-secondary mb-1">수거조회</a>
+                                        </div>-->
+                                    </td>
+                                    <!-- 7) 반품완료 -->
+                                    <td th:if="${item.itemStatusId == 7}">
+                                        <div>
+                                            <a th:href="@{|/order/claim/return-detail/${item.orderItemId}|}" type="button" class="btn btn-xs btn-outline-secondary mb-1">반품상세</a>
+                                        </div>
+                                    </td>
+                                    <!-- 8) 교환신청 -->
+                                    <td th:if="${item.itemStatusId == 8}">
+                                        <div>
+                                            <a th:href="@{|/order/claim/exchange-detail/${item.orderItemId}|}" type="button" class="btn btn-xs btn-outline-secondary mb-1">교환상세</a>
+                                        </div>
+                                        <!--<div>
+                                            <a th:href="@{#}" type="button" class="btn btn-xs btn-outline-secondary mb-1">수거조회</a>
+                                        </div>-->
+                                        <!--<div>
+                                            <a th:href="@{#}" type="button" class="btn btn-xs btn-outline-secondary mb-1">재배송조회</a>
+                                        </div>-->
+                                    </td>
+                                    <!-- 9) 교환완료 -->
+                                    <td th:if="${item.itemStatusId == 9}">
+                                        <div>
+                                            <a th:href="@{|/order/claim/exchange-detail/${item.orderItemId}|}" type="button" class="btn btn-xs btn-outline-secondary mb-1">교환상세</a>
+                                        </div>
+                                        <!--<div>
+                                            <a th:href="@{#}" type="button" class="btn btn-xs btn-outline-secondary mb-1">재배송조회</a>
+                                        </div>-->
+                                    </td>
+                                    <!-- 우측 버튼 영역 끝 -->
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div>
+                                <ul>
+                                    <li>배송지 변경이나 부분취소를 원하시면 전체주문취소 후 다시 주문해주세요.</li>
+                                    <li>주문취소는 결제완료, 상품준비중 상태에만 가능합니다.</li>
+                                    <li>배송완료 후 7일이 지난 경우에는 자동으로 상품 구매확정이 진행됩니다.</li>
+                                    <li>구매확정 시 포인트가 적립되며, 회원등급에 따라 차등지급됩니다.</li>
+                                    <li>리뷰 작성 시 100포인트가 적립됩니다.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 주문상품 영역 끝 -->
+
+                    <!-- 2. 배송지 정보, 결제 정보 영역 시작 -->
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <h5 class="fw-bold">배송지 정보</h5>
+                            <hr>
+                            <div class="d-flex justify-content-start small">
+                                <div class="me-5 text-secondary">
+                                    <div class="mb-1">수령인</div>
+                                    <div class="mb-1">연락처</div>
+                                    <div class="mb-1">주소</div>
+                                    <div class="mb-1">배송메모</div>
+                                </div>
+                                <div>
+                                    <div id="div-delivery-recipient" th:text="${dto.delivery.recipient}" class="mb-1">이*메</div>
+                                    <div id="div-delivery-phone" th:text="${dto.delivery.phone}" class="mb-1">010-****-5678</div>
+                                    <div class="mb-1">
+                                        (<span th:text="${dto.delivery.zipcode}">(03134)</span>)
+                                        <span th:text="${dto.delivery.address1}">서울특별시 종로구 율곡로10길 105</span>
+                                        <span id="span-delivery-address" th:text="${dto.delivery.address2}">디아망 4F</span>
+                                    </div>
+                                    <div th:text="${dto.deliveryMemo}" class="mb-1">문 앞에 놓아주세요</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="fw-bold">결제 정보</h5>
+                            <hr>
+                            <div class="mb-3">
+                                <div style="font-size: 15px">
+                                    <!--<div class="d-flex justify-content-between small mb-1 text-secondary">
+                                        <div>총 상품금액</div>
+                                        <div>334,800원</div>
+                                    </div>
+                                    <div class="d-flex justify-content-between small mb-1 text-secondary">
+                                        <div>총 할인금액</div>
+                                        <div>- 50,000원</div>
+                                    </div>-->
+                                    <div class="d-flex justify-content-between small mb-1 text-secondary">
+                                        <div>포인트 사용</div>
+                                        <div><span th:text="${#numbers.formatInteger(dto.usePoint, 1, 'COMMA')}">1,000</span> P</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold mb-2">
+                                <div>총 결제금액</div>
+                                <div><span th:text="${#numbers.formatInteger(dto.totalPrice, 1, 'COMMA')}">283,800</span>원</div>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold mb-5">
+                                <div>결제수단</div>
+                                <div th:text="${dto.payment.method}">카카오페이</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 배송지 정보, 결제 정보 영역 끝 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 신규댓글등록 모달창 -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">상품리뷰</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <span id="reviewItemName" class="position-relative">상품이름</span>
+                    <div class="text-secondary mt-2" style="font-size: 12px">
+                        사이즈: <span id="reviewItemSize">슈퍼싱글SS 프레임만</span>
+                        / 색상: <span id="reviewItemColor">화이트</span>
+                    </div>
+                    <form class="mb-3 visually" name="myform" id="myform" method="post" enctype="multipart/form-data" action="create">
+                        <fieldset>
+                            <span class="text-bold">별점을 선택해주세요</span>
+                            <input type="radio" name="reviewStar" value="5" id="rate1"><label
+                                for="rate1">★</label>
+                            <input type="radio" name="reviewStar" value="4" id="rate2"><label
+                                for="rate2">★</label>
+                            <input type="radio" name="reviewStar" value="3" id="rate3"><label
+                                for="rate3">★</label>
+                            <input type="radio" name="reviewStar" value="2" id="rate4"><label
+                                for="rate4">★</label>
+                            <input type="radio" name="reviewStar" value="1" id="rate5"><label
+                                for="rate5">★</label>
+                        </fieldset>
+                        <div>
+                            <textarea class="col-auto form-control" type="text" id="reviewContents" name="content"
+                                      placeholder="리뷰를 적어주세요"></textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <input type="file" class="form-control" name="imageFile"/>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">리뷰등록</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" layout:fragment="script">
+    $(function() {
+        // 구매확정
+        $("button[id^=btn-confirm-order]").click(function() {
+            let result = confirm("구매를 확정하시겠어요?");
+            if (result) {
+                let orderId = $(this).attr("data-order-id");
+                let orderItemId = $(this).attr("data-order-item-id");
+                let orderPrice = $(this).attr("data-order-item-price");
+                let url = `/order/confirm` + `/${orderId}` + `/${orderItemId}` + `/${orderPrice}`;
+                $.get(url, function(msg) {
+                    alert(msg);
+                    location.reload();
+                })
+
+            }
+        });
+    });
+
+    // 이름 마스킹처리
+    const maskingName = (name) => {
+        if (name.length > 2) {
+            const originName = name.split('');
+            originName.forEach((splitName, i) => {
+                if (i === 0 || i === originName.length - 1) {
+                    return;
+                }
+                originName[i] = '*';
+            });
+            return originName.join('');
+        } else {
+            const pattern = /.$/;
+            return name.replace(pattern, '*');
+        }
+    };
+
+    let originalName = $("#div-delivery-recipient").text();
+    let maskedName = maskingName(originalName);
+    $("#div-delivery-recipient").text(maskedName);
+
+    // 휴대폰 마스킹처리
+    const maskingPhone = (phone) => {
+        return (
+            phone.substring(0, 3) +
+            '****' +
+            phone.substring(phone.length - 4, phone.length)
+        );
+    };
+
+    let originalPhone = $("#div-delivery-phone").text();
+    let maskedPhone = maskingPhone(originalPhone);
+    $("#div-delivery-phone").text(maskedPhone);
+
+    // 주소 마스킹처리
+    const maskingAddress = (address) => {
+        if (address.length > 0) {
+            return address.replace(/./g, '*');
+        } else {
+            return '';
+        }
+    };
+
+    let originalAddress = $("#span-delivery-address").text();
+    let maskedAddress = maskingAddress(originalAddress);
+    $("#span-delivery-address").text(maskedAddress);
+
+    $("button[id=orderReviewBtn]").click(function() {
+        let name = $(this).attr("data-orderItem-name")
+        let size = $(this).attr("data-orderItem-size")
+        let color = $(this).attr("data-orderItem-color")
+        let id = $(this).attr("data-orderItem-id")
+        let productId = $(this).attr("data-product-id")
+        $("span[id=reviewItemName]").text(name)
+        $("span[id=reviewItemSize]").text(size)
+        $("span[id=reviewItemColor] ").text(color)
+        $("form[id=myform]").attr('action', `/store/replyCreate/${id}/${productId}`)
+
+    })
+</script>
+</html>

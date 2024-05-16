@@ -1,0 +1,35 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns: layout:decorate="~{layout/base-admin}" th:with="menu='order'">
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h1>교환상세정보</h1>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>교환주문번호</th>
+                    <th>상품이름</th>
+                    <th>교환전 상세번호</th>
+                    <th>교환후 상세번호</th>
+                    <th>상품 재배송지</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td th:text="${exchange.productId}"></td>
+                    <td th:text="${exchange.productName}"></td>
+                    <td th:text="${exchange.beforeId}"></td>
+                    <td th:text="${exchange.afterId}"></td>
+                    <td th:text="${exchange.deliveryAddress}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a class="btn btn-primary me-md-2" th:href="@{/admin/order/exchange/{id}(id=${exchange.exchangeId})}">교환승인</a>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

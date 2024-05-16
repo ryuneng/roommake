@@ -1,0 +1,174 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 교환상세</title>
+</head>
+<div layout:fragment="content" class="container my-3 mt-4">
+    <div class="container">
+        <div class="row">
+            <h4 class="fw-bold text-center mb-4">교환상세</h4>
+            <div class="d-flex justify-content-start mb-5 small">
+                <div class="me-5">
+                    <span class="fw-bold me-1">교환번호</span>
+                    <span th:text="${dto.exchangeId}" class="text-secondary">202404071720583</span>
+                </div>
+                <div>
+                    <span class="fw-bold me-1">교환일자</span>
+                    <span th:text="${#dates.format(dto.createDate, 'yyyy.MM.dd HH:mm')}" class="text-secondary">2024.04.11 14:45</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12">
+                    <!-- 1. 교환 상품 영역 시작 -->
+                    <div class="row mb-5">
+                        <div class="col-12 mb-5" style="font-size: small">
+                            <div class="d-flex justify-content-start align-items-center">
+                                <h5 class="fw-bold me-3">교환 상품</h5>
+                            </div>
+                            <hr class="mb-1">
+                            <table class="table text-center">
+                                <tbody class="align-middle">
+                                <tr>
+                                    <td>
+                                        <div class="d-flex w-100 justify-content-start">
+                                            <a th:href="@{/store/detail/{id}(id=${dto.item.productId})}" class="link-underline link-underline-opacity-0 text-dark">
+                                                <div>
+                                                    <img th:src="@{${dto.item.imageName}}" style="width: 80px; height: 80px">
+                                                </div>
+                                            </a>
+                                            <div class="ms-3 text-start">
+                                                <div>
+                                                    <div th:text="${dto.item.name}" style="display: -webkit-box;
+                                                          overflow: hidden;
+                                                          text-overflow: ellipsis;
+                                                          -webkit-box-orient: vertical;
+                                                          -webkit-line-clamp: 1;
+                                                          font-size: 15px;">
+                                                        봄맞이 먼지없는 항균 차렵이불세트 SS/Q 12컬러
+                                                    </div>
+                                                    <div class="mt-2 mb-1">
+                                                        <span class="text-secondary" style="font-size: 12px">
+                                                            사이즈: <span th:text="${dto.exchangeDetail.beforeProductDetail.size}">슈퍼싱글SS 프레임만</span>
+                                                            / 색상: <span th:text="${dto.exchangeDetail.beforeProductDetail.color}">화이트</span>
+                                                        </span>
+                                                        <span class="me-1">➡️</span>
+                                                        <span class="text-secondary" style="font-size: 12px">
+                                                            사이즈: <span th:text="${dto.exchangeDetail.afterProductDetail.size}">슈퍼싱글SS 프레임만</span>
+                                                            / 색상: <span th:text="${dto.exchangeDetail.afterProductDetail.color}">화이트</span>
+                                                        </span>
+                                                    </div>
+                                                    <div><span th:text="${dto.item.amount}">1</span>개</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 교환 상품 영역 끝 -->
+                    <!-- 2. 회수지/재배송 정보, 교환 사유 영역 시작 -->
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <h5 class="fw-bold">회수지/재배송 정보</h5>
+                            <hr>
+                            <div class="d-flex justify-content-start small mb-4">
+                                <div class="me-5 text-secondary">
+                                    <div class="mb-1">회수지</div>
+                                    <div class="mb-1">요청사항</div>
+                                </div>
+                                <div>
+                                    <div class="mb-1">
+                                        (<span th:text="${dto.collectionDelivery.zipcode}">(03134)</span>)
+                                        <span th:text="${dto.collectionDelivery.address1}">서울특별시 종로구 율곡로10길 105</span>
+                                        <span id="span-collection-address" th:text="${dto.collectionDelivery.address2}">*****</span>
+                                    </div>
+                                    <div th:text="${dto.collectionMemo}"></div>
+                                </div>
+                            </div>
+                            <h6 class="fw-bold mb-3">재배송지</h6>
+                            <div class="d-flex justify-content-start small">
+                                <div class="me-5 text-secondary">
+                                    <div class="mb-1">수령인</div>
+                                    <div class="mb-1">연락처</div>
+                                    <div class="mb-1">주소</div>
+                                    <div class="mb-1">배송메모</div>
+                                </div>
+                                <div>
+                                    <div id="div-delivery-recipient" th:text="${dto.reDelivery.recipient}" class="mb-1">이*메</div>
+                                    <div id="div-delivery-phone" th:text="${dto.reDelivery.phone}" class="mb-1">010-****-5678</div>
+                                    <div class="mb-1">
+                                        (<span th:text="${dto.reDelivery.zipcode}">(03134)</span>)
+                                        <span th:text="${dto.reDelivery.address1}">서울특별시 종로구 율곡로10길 105</span>
+                                        <span id="span-delivery-address" th:text="${dto.reDelivery.address2}">*****</span>
+                                    </div>
+                                    <div th:text="${dto.deliveryMemo}" class="mb-1">문 앞에 놓아주세요</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="fw-bold">교환 사유</h5>
+                            <hr>
+                            <div th:if="${dto.detailedReason == null}" th:text="${dto.reason.name}" class="small">선택한 사유</div>
+                            <div th:if="${dto.detailedReason != null}" th:text="${dto.detailedReason}" class="small">상세사유</div>
+                        </div>
+                    </div>
+                    <!-- 회수지/재배송 정보, 교환 사유 영역 끝 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" layout:fragment="script">
+    // 이름 마스킹처리
+    const maskingName = (name) => {
+        if (name.length > 2) {
+            const originName = name.split('');
+            originName.forEach((splitName, i) => {
+                if (i === 0 || i === originName.length - 1) {
+                    return;
+                }
+                originName[i] = '*';
+            });
+            return originName.join('');
+        } else {
+            const pattern = /.$/;
+            return name.replace(pattern, '*');
+        }
+    };
+
+    let originalName = $("#div-delivery-recipient").text();
+    let maskedName = maskingName(originalName);
+    $("#div-delivery-recipient").text(maskedName);
+
+    // 휴대폰 마스킹처리
+    const maskingPhone = (phone) => {
+        return (
+            phone.substring(0, 3) +
+            '****' +
+            phone.substring(phone.length - 4, phone.length)
+        );
+    };
+
+    let originalPhone = $("#div-delivery-phone").text();
+    let maskedPhone = maskingPhone(originalPhone);
+    $("#div-delivery-phone").text(maskedPhone);
+
+    // 주소 마스킹처리
+    const maskingAddress = (address) => {
+        if (address.length > 0) {
+            return address.replace(/./g, '*');
+        } else {
+            return '';
+        }
+    };
+
+    let originalCollection = $("#span-collection-address").text(); // 회수지
+    let maskedCollection = maskingAddress(originalCollection);
+    $("#span-collection-address").text(maskedCollection);
+
+    let originalAddress = $("#span-delivery-address").text();      // 재배송지
+    let maskedAddress = maskingAddress(originalAddress);
+    $("#span-delivery-address").text(maskedAddress);
+</script>
+</html>

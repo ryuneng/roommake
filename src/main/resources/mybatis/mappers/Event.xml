@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.event.mapper.EventMapper">
+
+    <insert id="addDailyCheckPoint" parameterType="com.roommake.user.vo.PlusPointHistory">
+        insert into plus_point_history
+            (plus_point_amount, user_id, point_type_id, point_reason)
+        values
+            (#{amount}, #{user.id}, #{pointType.id}, #{pointReason})
+    </insert>
+
+    <update id="addDailyCheckPointToUser" parameterType="com.roommake.user.vo.PlusPointHistory">
+        update
+            user
+        set
+            user_point = user_point + #{amount}
+        where
+            user_id = #{user.id}
+    </update>
+
+    <insert id="createAttendance" parameterType="int">
+        insert into attendance
+            (user_id, attendance_date)
+        values
+            (#{userId}, current_timestamp);
+    </insert>
+
+    <select id="getAttendance" parameterType="int" resultType="com.roommake.event.vo.Attendance">
+        select
+            user_id             as userId,
+            attendance_date     as attendenceDate
+        from
+            attendance
+        where
+            user_id = #{userId}
+            and date_format(attendance_date, '%Y-%m-%d') = curdate();
+    </select>
+
+</mapper>

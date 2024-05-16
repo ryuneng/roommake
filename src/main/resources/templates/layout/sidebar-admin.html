@@ -1,0 +1,101 @@
+<div th:fragment="sidebar-admin-fragment">
+    <div class="card" th:if="${menu eq 'management'}">
+        <div class="card-header">
+            관리
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/management/notice}" style="text-decoration:none;color: black">공지</a>
+            </li>
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/management/faq}" style="text-decoration:none;color: black">자주묻는질문</a>
+            </li>
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/management/qna}" style="text-decoration:none;color: black">문의사항</a>
+            </li>
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/management/banner}" style="text-decoration:none;color: black">배너</a>
+            </li>
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/management/complaint}" style="text-decoration:none;color: black">신고</a>
+            </li>
+        </ul>
+    </div>
+    <div class="card" th:if="${menu eq 'product'}">
+        <div class="card-header">
+            상품
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/product/list}" style="text-decoration:none;color: black">상품리스트</a>
+            </li>
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/product/create}" style="text-decoration:none;color: black">상품등록</a>
+            </li>
+        </ul>
+    </div>
+    <div class="card" th:if="${menu eq 'order'}">
+        <div class="card-header">
+            주문
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/order/item}" style="text-decoration:none;color: black">주문리스트</a>
+            </li>
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/order/refund}" style="text-decoration:none;color: black">상품환불</a>
+            </li>
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/order/exchange}" style="text-decoration:none;color: black">상품교환</a>
+            </li>
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/order/item-return}" style="text-decoration:none;color: black">상품반품</a>
+            </li>
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/order/orderCancel}" style="text-decoration:none;color: black">상품취소</a>
+            </li>
+        </ul>
+    </div>
+    <!--    <div class="card" th:if="${menu eq 'sales'}">-->
+    <!--        <div class="card-header">-->
+    <!--            매출-->
+    <!--        </div>-->
+    <!--        <ul class="list-group list-group-flush">-->
+    <!--            <li class="list-group-item" style="list-style: none">-->
+    <!--                <a th:href="@{/admin/sales/sales}" style="text-decoration:none;color: black">매출</a>-->
+    <!--            </li>-->
+    <!--        </ul>-->
+    <!--    </div>-->
+    <div class="card" th:if="${menu eq 'user'}">
+        <div class="card-header">
+            회원
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/user/userList}" style="text-decoration:none;color: black">회원 리스트</a>
+            </li>
+            <!--            <li class="list-group-item" style="list-style: none">-->
+            <!--                <a th:href="@{/admin/user/point}" style="text-decoration:none;color: black">포인트 관리</a>-->
+            <!--            </li>-->
+            <!--            <li class="list-group-item" style="list-style: none">-->
+            <!--                <a th:href="@{/admin/user/grade}" style="text-decoration:none;color: black">등급 설정</a>-->
+            <!--            </li>-->
+        </ul>
+    </div>
+    <div class="card" th:if="${menu eq 'community'}">
+        <div class="card-header">
+            게시글
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item" style="list-style: none">
+                <a th:href="@{/admin/community/commList?commCatId=1}" style="text-decoration:none;color: black">게시글 리스트</a>
+            </li>
+            <!--            <li class="list-group-item" style="list-style: none">-->
+            <!--                <a th:href="@{/admin/community/channel}" style="text-decoration:none;color: black">채널 목록</a>-->
+            <!--            </li>-->
+        </ul>
+    </div>
+</div>
+<script>
+
+</script>

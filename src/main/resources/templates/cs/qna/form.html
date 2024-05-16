@@ -1,0 +1,83 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <!-- 컨트롤러에서 전달한 메세지 띄우기 -->
+    <th:block th:if="${message != null}">
+        <th:block th:if="${message.message != null and message.message != ''}">
+            <script>
+                top.alert("[[${message.message}]]");
+            </script>
+        </th:block>
+    </th:block>
+    <style>
+        a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .list-group-item {
+            border-bottom: none;
+        }
+    </style>
+    <title>룸메이크 | 문의사항</title>
+</head>
+<div layout:fragment="content" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div class="cs-sidebar">
+                <div class="card">
+                    <h5 class="card-header ">고객센터</h5>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/notice/list}">공지사항</a>
+                                <ul class="submenu list-group list-group-flush">
+                                    <li class="list-group-item"><a th:href="@{/cs/notice/list}">전체 공지사항</a></li>
+                                </ul>
+                            </li>
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/faq/list}">자주묻는질문</a>
+                                <ul class="submenu list-group list-group-flush">
+                                    <li class="list-group-item"><a th:href="@{/cs/faq/list}" value="all">전체</a></li>
+                                    <th:block th:each="faqCat : ${faqCategories}">
+                                        <li class="list-group-item"><a th:href="@{/cs/faq/list(filt=${faqCat.id})}" th:text="${faqCat.name}">배송</a></li>
+                                    </th:block>
+                                </ul>
+                            </li>
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/qna/form}">문의사항</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-10">
+            <h4>문의하기</h4>
+            <hr>
+            <form method="post" action="/cs/qna/create">
+                <div class="form-group mb-3">
+                    <label class="me-2 my-2">문의 카테고리</label>
+                    <select class="form-select w-25" name="categoryId">
+                        <th:block th:each="qnaCat : ${qnaCategories}">
+                            <option name="categoryId" id="categoryId" th:value="${qnaCat.id}" th:text="${qnaCat.name}">상품</option>
+                        </th:block>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">제목</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">내용</label>
+                    <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="secret" name="secret" value="Y">
+                    <label class="form-check-label">비공개 여부</label>
+                </div>
+                <button type="submit" class="btn btn-primary">등록</button>
+            </form>
+        </div>
+    </div>
+</div>
+</html>

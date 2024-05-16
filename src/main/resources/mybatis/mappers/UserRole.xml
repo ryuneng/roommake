@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.user.mapper.UserRoleMapper">
+
+    <!-- 유저 권한 등록 -->
+    <insert id="createUserRole" parameterType="com.roommake.user.vo.UserRole">
+        INSERT INTO user_role (user_id, user_role_name)
+        VALUES (#{user.id}, #{name})
+    </insert>
+
+    <!-- 유저 권한 삭제-->
+    <delete id="deleteUserRole" parameterType="com.roommake.user.vo.UserRole">
+        DELETE
+        FROM user_role
+        WHERE user_id = #{user.id}
+          AND user_role_name = #{name}
+    </delete>
+
+    <!--유저 번호로 권한 조회-->
+    <select id="getUserRolesByUserId" parameterType="int" resultType="com.roommake.user.vo.UserRole">
+        SELECT user_role_id   as id,
+               user_id        as "user.id",
+               user_role_name as name
+        FROM user_role
+        WHERE user_id = #{value}
+    </select>
+</mapper>

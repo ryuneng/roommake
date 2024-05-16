@@ -1,0 +1,539 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 장바구니</title>
+    <style layout:fragment="style">
+        .btn.btn-xs {
+            --bs-btn-padding-y: .25rem;
+            --bs-btn-padding-x: .35rem;
+            --bs-btn-font-size: .75rem;
+        }
+
+        .sticky {
+            position: sticky;
+            top: 100px;
+        }
+    </style>
+</head>
+<div layout:fragment="content" class="container my-3 mt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <h4 class="fw-bold text-center mb-4">장바구니</h4>
+            </div>
+            <form method="post">
+                <div class="row mb-3">
+                    <!-- 좌측 영역 시작 -->
+                    <div class="col-9 mb-5" style="font-size: small">
+                        <!-- 상품목록 영역 시작 -->
+                        <table class="table text-center" id="table-cart">
+                            <thead>
+                            <tr>
+                                <th style="width: 3%"><input type="checkbox" id="checkbox-all"></th>
+                                <th style="width: 8%"></th>
+                                <th style="width: 57%">상품정보</th>
+                                <th style="width: 12%">수량</th>
+                                <th style="width: 15%">가격</th>
+                                <th style="width: 5%">삭제</th>
+                            </tr>
+                            </thead>
+                            <tbody class="align-middle">
+                            <tr th:each="item: ${dto.items}">
+                                <td>
+                                    <input type="checkbox"
+                                           th:id="checkbox-cart- + ${item.cartId}"
+                                           name="cartCheckbox"
+                                           th:value="${item.cartId}"
+                                           th:attr="data-product-detail-id=${item.productDetailId}, data-product-id=${item.productId}">
+                                </td>
+                                <td th:text="${itemStat.count}" id="item-no">1</td>
+                                <!-- 상품정보 영역 시작 -->
+                                <td>
+                                    <div class="d-flex w-100 justify-content-start">
+                                        <a th:href="@{/store/detail/{id}(id=${item.productId})}" class="link-underline link-underline-opacity-0 text-dark" target="_blank">
+                                            <div>
+                                                <img th:src="@{${item.imageName}}" style="width: 80px; height: 80px">
+                                            </div>
+                                        </a>
+                                        <div class="ms-3 text-start">
+                                            <div>
+                                                <div style="display: -webkit-box;
+                                                              overflow: hidden;
+                                                              text-overflow: ellipsis;
+                                                              -webkit-box-orient: vertical;
+                                                              -webkit-line-clamp: 1;" th:text="${item.name}">
+                                                    LED조명 통서랍 수납침대 SSQ(매트리스 선택)
+                                                </div>
+                                                <div>
+                                                    <span>
+                                                        <span th:class="${item.price != item.discountedPrice ? 'text-secondary text-decoration-line-through' : ''}"
+                                                              th:id="item-price- + ${item.productDetailId}"
+                                                              th:attr="data-item-price=${item.price}"
+                                                              th:text="${#numbers.formatInteger(item.price, 1, 'COMMA')}">
+                                                            189,000
+                                                        </span>원
+                                                    </span>
+                                                    <span th:if="${item.price != item.discountedPrice}" class="text-danger">
+                                                        <span th:text="${#numbers.formatInteger(item.discountedPrice, 1, 'COMMA')}">
+                                                            170,000
+                                                        </span>원
+                                                    </span>
+                                                </div>
+                                                <div class="text-secondary mt-2" style="font-size: 12px">
+                                                    사이즈 선택:
+                                                    <span th:id="item-size- + ${item.productDetailId}"
+                                                          th:attr="data-detail-size=${item.size}"
+                                                          th:text="${item.size}">
+                                                        슈퍼싱글SS
+                                                    </span>
+                                                    / 색상 선택:
+                                                    <span th:id="item-color- + ${item.productDetailId}"
+                                                          th:attr="data-detail-color=${item.color}"
+                                                          th:text="${item.color}">
+                                                        화이트
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-2">
+                                                <button type="button" class="btn btn-xs" style="border-color: gray;"
+                                                        th:id="btn-show-options- + ${item.productDetailId}"
+                                                        th:attr="data-product-id=${item.productId}">
+                                                    옵션변경
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <!-- 상품정보 영역 끝 -->
+                                <td>
+                                    <div class="d-flex justify-content-center">
+                                        <input th:id="'amount-' + ${item.productDetailId}"
+                                               th:value="${item.amount}"
+                                               type="text"
+                                               min="1"
+                                               class="me-2"
+                                               style="width: 50%"
+                                               name="amount"/>
+                                        <button type="button"
+                                                th:id="'btn-update-amount-' + ${item.productDetailId}"
+                                                th:value="${item.cartId}"
+                                                th:attr="data-item-id=${item.productDetailId}"
+                                                class="btn btn-xs"
+                                                style="border-color: gray;">
+                                            변경
+                                        </button>
+                                    </div>
+                                </td>
+                                <td class="fw-bold">
+                                    <span th:id="item-order-price- + ${item.productDetailId}"
+                                          th:attr="data-item-order-price=${item.itemPrice},
+                                                data-item-discount=${item.discount},
+                                                data-item-discounted-price=${item.discountedPrice},
+                                                data-amount=${item.amount}"
+                                          th:text="${#numbers.formatInteger(item.discountedPrice * item.amount, 1, 'COMMA')}">
+                                        189,000
+                                    </span>원
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-xs text-secondary" th:id="'btn-del-' + ${item.cartId}">x</button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <!-- 상품목록 영역 끝 -->
+
+                        <!-- 상품목록 하단 기타 영역 시작 -->
+                        <div id="div-carts-del" class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <button type="button" class="btn btn-xs" style="border-color: gray" id="btn-del-items">선택삭제</button>
+                            </div>
+                            <div>
+                                전상품 무료배송
+                            </div>
+                        </div>
+                        <div>
+                            <ul>
+                                <li>장바구니 상품은 30일간 보관 후 삭제됩니다.</li>
+                            </ul>
+                        </div>
+                        <!-- 상품목록 하단 기타 영역 끝 -->
+                    </div>
+                    <!-- 좌측 영역 끝 -->
+
+                    <!-- 우측 주문 금액정보 영역 시작 -->
+                    <div class="col-3">
+                        <div class="card sticky">
+                            <div class="card-body">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td>총 상품금액</td>
+                                        <td class="text-end">
+                                            <span th:id="total-item-price"
+                                                  th:attr="data-total-item-price=${dto.totalItemPrice}"
+                                                  th:text="${#numbers.formatInteger(dto.totalItemPrice, 1, 'COMMA')}"
+                                                  class="fw-bold">
+                                                334,800
+                                            </span>원
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>총 할인금액</td>
+                                        <td class="text-end">
+                                            <span th:id="total-discounted-price"
+                                                  th:attr="data-total-discounted-price=${dto.totalDiscountedPrice}"
+                                                  class="fw-bold">
+                                                0
+                                            </span>원
+                                        </td>
+                                    </tr>
+                                    <tr class="align-middle">
+                                        <td class="fw-bold">총 결제금액</td>
+                                        <td class="text-end text-danger" style="font-size: larger">
+                                            <span th:id="total-pay-price"
+                                                  th:attr="data-total-pay-price=${dto.totalPayPrice}"
+                                                  th:text="${#numbers.formatInteger(dto.totalPayPrice, 1, 'COMMA')}"
+                                                  class="fw-bold">
+                                                284,800
+                                            </span>원
+                                        </td>
+                                    </tr>
+                                </table>
+                                <div class="text-center bg-white mb-3">
+                                    <button type="button" class="btn btn-dark w-100" id="btn-order">주문하기</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 주문 금액정보 영역 끝 -->
+                </div>
+            </form>
+        </div>
+    </div>
+    <form id="form" action="/order/form"></form>
+</div>
+<div layout:fragment="modal" class="modal" id="modal-modify-option">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <span class="text-end">
+                <button type="button" class="btn-close mt-3 me-2" data-bs-dismiss="modal" aria-label="Close"></button>
+            </span>
+            <div class="text-center mb-2">
+                <h5 class="modal-title fw-bold mb-2 w-100">옵션 변경</h5>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="cartId"/>
+                <div class="form-group mb-3">
+                    <div id="div-product-options" class="mb-3">
+                        <select class="form-select mb-2" id="product-option" name="productOption">
+
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>상품금액</span>
+                        <span class="fs-5"><strong id="product-option-price">100,000</strong>원</span>
+                    </div>
+                </div>
+                <div id="div-change-option" class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-dark w-50 me-3" data-bs-dismiss="modal" aria-label="Close">취소</button>
+                    <button id="btn-change-option" class="btn btn-primary w-50 ms-3">확인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" layout:fragment="script">
+    $(function() {
+        // 전체선택 체크박스 체크/해제에 따라 모든 상품 체크/해제
+        $("#checkbox-all").change(function() {
+            let currentCheckedStatus = $(this).prop('checked');
+            $(":checkbox[name=cartCheckbox]").prop("checked", currentCheckedStatus);
+            setPriceSummary();
+        });
+
+        // 개별 상품 체크 갯수에 따라 전체선택 체크박스 체크/해제
+        $("#table-cart tbody").on("change", ':checkbox[name=cartCheckbox]', function() {
+            // 상품 체크박스 전체 갯수 조회
+            let len = $(":checkbox[name=cartCheckbox]").length;
+            // 상품 체크박스 중에서 체크된 갯수 조회
+            let checkedLen = $(":checkbox[name=cartCheckbox]:checked").length;
+
+            if (len === checkedLen) {
+                $("#checkbox-all").prop('checked', true);
+            } else {
+                $("#checkbox-all").prop('checked', false);
+            }
+            setPriceSummary();
+        });
+
+        // 전체선택 체크박스 트리거
+        $("#checkbox-all").trigger('click');
+    });
+
+    // 수량변경 이벤트 핸들러
+    $('#table-cart tbody').on('click', 'button[id^=btn-update-amount]', function() {
+        let cartId = $(this).val();
+        let amount = $(this).prev("input[id^=amount-]").val();
+
+        $.get("/cart/update-amount", {cartId: cartId, amount: amount}, function(result) {
+            refreshCart(result);
+        });
+    });
+
+    // 개별삭제 버튼(x) 클릭 시 실행될 이벤트 핸들러 등록
+    $('#table-cart tbody').on('click', 'button[id^=btn-del-]', function() {
+        if (confirm("상품을 장바구니에서 삭제할까요?") == true) {
+            let cartId = $(this).closest("tr").find(":checkbox").val();
+
+            $.get("/cart/delete", {cartId: cartId}, function(result) {
+                refreshCart(result);
+            });
+        } else {
+            return false;
+        }
+    });
+
+    // 선택삭제 버튼(여러개) 클릭 시 실행될 이벤트 핸들러
+    $('#div-carts-del div').on('click', 'button[id=btn-del-items]', function() {
+        let checkedCheckboxes = $("input[id^=checkbox-cart]:checked");
+        if (checkedCheckboxes.length == 0) {
+            alert("삭제할 상품을 선택해주세요.");
+            return;
+        }
+        if (confirm("선택한 여러개의 상품을 장바구니에서 삭제할까요?") == true) {
+            checkedCheckboxes.each(function() {
+                let cartId = $(this).val();
+
+                $.get("/cart/delete", {cartId: cartId}, function(result) {
+                    refreshCart(result);
+                });
+            });
+        } else {
+            return false;
+        }
+    });
+
+    // 옵션변경 모달
+    const optionModal = new bootstrap.Modal($('#modal-modify-option'));
+
+    $("#table-cart tbody").on('click', 'button[id^=btn-show-options]', function() {
+        let cartId = $(this).closest("tr").find(":checkbox").val();
+        $("input[name=cartId]").val(cartId);
+
+        showOptionList($(this).attr("data-product-id"));
+    });
+
+    // 옵션 목록 표시
+    async function showOptionList(productId) {
+        let response = await fetch("/cart/option/" + productId);
+        let details = await response.json();
+
+        let $select = $("#product-option").empty();
+        $select.append(`<option hidden>옵션을 선택하세요</option>`);
+        // 셀렉트박스에 옵션 목록 추가
+        $.each(details, function(index, item) {
+            let option = `<option id="option-detail-${item.productDetailId}"
+                                  data-detail-size="${item.size}"
+                                  data-detail-color="${item.color}"
+                                  data-detail-id="${item.productDetailId}"
+                                  value="${item.productDetailId}">${item.name} ${item.size} / ${item.color}</option>`;
+            $select.append(option);
+        });
+
+        // 옵션변경 모달에 상품금액 값 표시
+        let productPrice = details[0].price;
+        $("#product-option-price").text(details[0].price.toLocaleString());
+
+        optionModal.show();
+    }
+
+    // 옵션변경 확인 클릭 시 실행될 이벤트 핸들러
+    $('#div-change-option').on('click', 'button[id=btn-change-option]', function() {
+        let cartId = $("input[name=cartId]").val();
+        let productDetailId = $('#product-option option:selected').val();
+
+        $.get("/cart/update-option", {cartId: cartId, productDetailId: productDetailId}, function(result) {
+            optionModal.hide();
+            refreshCart(result);
+        });
+    });
+
+    preventInput();
+
+    function preventInput() {
+        // 수량 변경 시 정수 외 입력 제한
+        $("input[id^=amount-]").keyup(function() {
+            if (!/^[0-9]*$/.test($(this).val())) {
+                $(this).val("");
+            }
+        });
+
+        // 빈 문자열이나 0 입력 시 알림
+        $("button[id^=btn-update-amount-]").click(function() {
+            let inputVal = $("input[id^=amount-]").val();
+            if (inputVal === "" || /^0+$/.test(inputVal)) {
+                alert("수량을 입력해주세요.");
+                return false;
+            }
+        });
+    }
+
+    // 상품 선택, 수량 및 옵션 변경, 삭제 작업 후 장바구니 목록 화면 갱신
+    function refreshCart(cartItems) {
+        let $tbody = $("#table-cart tbody").empty();
+
+        $.each(cartItems, function(index, item) {
+            let itemPriceStyle = item.price != item.discountedPrice ? 'text-secondary text-decoration-line-through' : '';
+            let discountedPrice = item.price != item.discountedPrice ? (item.discountedPrice).toLocaleString() + '원' : '';
+
+            let tr = `
+            <tr>
+                <td>
+                    <input type="checkbox"
+                           id="checkbox-cart-${item.cartId}"
+                           name="cartCheckbox" value="${item.cartId}"
+                           data-product-detail-id="${item.productDetailId}"
+                           data-product-id="${item.productId}"
+                           checked>
+                </td>
+                <td id="item-no">${index + 1}</td>
+                <!-- 상품정보 영역 시작 -->
+                <td>
+                    <div class="d-flex w-100 justify-content-start">
+                        <a href="/store/detail/${item.productId}" class="link-underline link-underline-opacity-0 text-dark" target="_blank">
+                            <div>
+                                <img src="${item.imageName}" style="width: 80px; height: 80px">
+                            </div>
+                        </a>
+                        <div class="ms-3 text-start">
+                            <div>
+                                <div style="display: -webkit-box;
+                                              overflow: hidden;
+                                              text-overflow: ellipsis;
+                                              -webkit-box-orient: vertical;
+                                              -webkit-line-clamp: 1;">
+                                    ${item.name}
+                                </div>
+                                <div>
+                                    <span class="${itemPriceStyle}"
+                                          id="item-price-${item.productDetailId}"
+                                         data-item-price="${item.price}">
+                                        ${item.price.toLocaleString()}원
+                                    </span>
+                                    <span class="text-danger">
+                                        ${discountedPrice}
+                                    </span>
+                                </div>
+                                <div class="text-secondary mt-2" style="font-size: 12px">
+                                    사이즈 선택:
+                                    <span id="item-size-${item.productDetailId}"
+                                          data-detail-size="${item.size}" >
+                                        ${item.size}
+                                    </span>
+                                    / 색상 선택:
+                                    <span id="item-color-${item.productDetailId}"
+                                          data-detail-color="${item.color}" >
+                                        ${item.color}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-xs" style="border-color: gray;" id="btn-show-options-${item.productDetailId}" data-product-id="${item.productId}">
+                                    옵션변경
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <!-- 상품정보 영역 끝 -->
+                <td>
+                    <div class="d-flex justify-content-center">
+                        <input id="amount-${item.productDetailId}"
+                               value="${item.amount}"
+                               type="text"
+                               min="1"
+                               class="me-2"
+                               style="width: 50%"
+                               name="amount"/>
+                        <button type="button"
+                                id="btn-update-amount-${item.productDetailId}"
+                                value="${item.cartId}"
+                                data-item-id="${item.productDetailId}"
+                                class="btn btn-xs"
+                                style="border-color: gray;">
+                            변경
+                        </button>
+                    </div>
+                </td>
+                <td class="fw-bold">
+                    <span id="item-order-price-${item.productDetailId}"
+                         data-item-order-price="${item.itemPrice}"
+                         data-item-discount="${item.discount}"
+                         data-item-discounted-price="${item.discountedPrice}"
+                         data-amount="${item.amount}">
+                        ${(item.discountedPrice * item.amount).toLocaleString()}</span>원
+                </td>
+                <td>
+                    <button type="button" class="btn btn-xs text-secondary" id="btn-del-${item.cartId}">x</button>
+                </td>
+            </tr>
+        `;
+            $tbody.append(tr);
+        });
+
+        setPriceSummary();
+        preventInput();
+    }
+
+    // 우측 주문 금액정보 값 갱신
+    function setPriceSummary() {
+        let totalItemPrice = 0;  // 총 상품금액
+        let totalDiscountedPrice = 0;
+
+        $("#table-cart tbody tr:has(:checkbox:checked) td:nth-child(5) span").each(function() {
+
+            let itemPrice = parseInt($(this).attr("data-item-order-price"));     // 모든 상품의 금액 합계
+            let discountRate = parseInt($(this).attr("data-item-discount"));
+            let discountedPrice = 0;
+
+            if (discountRate > 0) {
+                discountedPrice = itemPrice * discountRate / 100;
+            }
+
+            totalDiscountedPrice += discountedPrice;
+            totalItemPrice += itemPrice;
+        });
+        let totalPayPrice = totalItemPrice - totalDiscountedPrice;
+
+        $('#total-item-price').text(totalItemPrice.toLocaleString());    // 총 상품금액 값 갱신
+        $('#total-pay-price').text(totalPayPrice.toLocaleString());      // 총 결제금액 값 갱신
+        $('#total-discounted-price').text(totalDiscountedPrice.toLocaleString()); // 총 할인금액 값 갱신
+    }
+
+    // 주문하기로 상품번호, 상품상세번호, 상품수량 값 넘기기
+    $("#btn-order").click(function() {
+        let inputVal = $("input[id^=amount-]").val();
+        if (inputVal === "" || /^0+$/.test(inputVal)) {
+            alert("수량을 입력해주세요.");
+            return false;
+        }
+
+        $("tbody :checkbox:checked").each(function() {
+            let productId = $(this).attr("data-product-id");
+            let productDetailId = $(this).attr("data-product-detail-id");
+            let amount = $(this).closest("tr").find("input[name=amount]").val();
+            let cartId = $(this).val();
+
+            let input1 = `<input type="hidden" name="id" value="${productId}">`;
+            let input2 = `<input type="hidden" name="productDetailId" value="${productDetailId}">`;
+            let input3 = `<input type="hidden" name="amount" value="${amount}">`;
+            let input4 = `<input type="hidden" name="cartId" value="${cartId}">`;
+
+            $("#form").append(input1);
+            $("#form").append(input2);
+            $("#form").append(input3);
+            $("#form").append(input4);
+
+            $("#form").trigger("submit");
+        });
+    });
+</script>
+</html>

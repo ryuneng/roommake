@@ -1,0 +1,87 @@
+<html lang="ko" layout:decorate="~{layout/mypage-base}" th:with="category='나의쇼핑'" th:attr="data-category='나의쇼핑',data-sub-category='포인트'">
+<div class="container my-4" layout:fragment="content">
+    <div class="container my-3">
+        <!-- 첫 번째 행 박스 -->
+        <div class="bg-light p-3">
+            <div class="text-center">
+                <div class="fw-bold fs-4">사용 가능한 포인트</div>
+                <div class="fw-bold fs-3" style="color: cornflowerblue"><span th:text="${#numbers.formatInteger(balance, 1, 'COMMA')}"></span> P</div>
+                <!--                <div class="bg-body text-muted p-2" style="background-color: #cad5de4d !important; width: 50%; margin: 0 auto;">30일 이내 소멸 예정 포인트 <span class="fw-bold">14 P</span></div>-->
+            </div>
+        </div>
+        <form id="form-point-history" action="/user/point" method="get">
+            <input type="hidden" name="page">
+            <!-- 룸메이크 포인트 사용 안내 -->
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <h4>포인트 내역</h4>
+                <hr>
+                <!--            <a href="#" style="color: inherit; text-decoration: none;">룸메이크 포인트 사용 안내</a>-->
+            </div>
+            <div th:if="${pointHistoryList.isEmpty()}" class="p-3 bg-light text-center" style="font-weight: bold; font-size: large;">
+                포인트 내역이 없습니다.
+            </div>
+            <!-- 리스트 아이템 -->
+            <th:block th:each="pointHistory : ${pointHistoryList}">
+                <div th:if="${#strings.equals(pointHistory.category, 'plus')}" class="d-flex justify-content-between mt-3">
+                    <div class="text-muted" style="width: 200px; align-self: center;" th:text="${#dates.format(pointHistory.createDate, 'yyyy-MM-dd')}"></div>
+                    <div style="width: 100%; text-align: center; text-align: start">
+                <span style="background-color: cornflowerblue; color: #ffffff; padding: 1px 8px; border-radius: 4px; margin-right: 10px;"
+                      th:text="${pointHistory.parentTypeName}"></span>
+                        <strong th:text="${pointHistory.typeName}"></strong><br>
+                        <span class="text-muted mt-1" th:text="${pointHistory.reason}"></span><br>
+                    </div>
+                    <div class="fs-4 fw-bold me-3" style="align-self: center; color: cornflowerblue">
+                        +<span th:text="${#numbers.formatInteger(pointHistory.amount, 1, 'COMMA')}"></span>P
+                    </div>
+                </div>
+                <div th:if="${#strings.equals(pointHistory.category, 'minus')}" class="d-flex justify-content-between mt-3">
+                    <div class="text-muted" style="width: 200px; align-self: center;" th:text="${#dates.format(pointHistory.createDate, 'yyyy-MM-dd')}"></div>
+                    <div style="width: 100%; text-align: center; text-align: start">
+                <span style="background-color: #f05650; color: #ffffff; padding: 1px 8px; border-radius: 4px; margin-right: 10px;"
+                      th:text="${pointHistory.parentTypeName}"></span>
+                        <strong th:text="${pointHistory.typeName}"></strong><br>
+                        <span class="text-muted mt-1" th:text="${pointHistory.reason}"></span><br>
+                    </div>
+                    <div class="fs-4 fw-bold me-3" style="align-self: center; color: #f05650">
+                        -<span th:text="${#numbers.formatInteger(pointHistory.amount, 1, 'COMMA')}"></span>P
+                    </div>
+                </div>
+                <hr>
+            </th:block>
+            <!-- 페이징 처리 -->
+            <div class="row mt-3 mb-3">
+                <div class="col-12">
+                    <div th:if="${paging.totalRows ne 0 }">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                    <a th:href="@{|/user/point?page=${paging.currentPage - 1}|}" class="page-link"
+                                       th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                                </li>
+                                <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                    <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                        <a th:href="@{|/user/point?page=${num}|}" class="page-link"
+                                           th:onclick="|changePage(${num}, event)|" th:text="${num}"></a>
+                                    </li>
+                                </th:block>
+
+                                <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                    <a th:href="@{|/user/point?page=${paging.currentPage + 1}|}" class="page-link"
+                                       th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script layout:fragment="script">
+    function changePage(page, event) {
+        event.preventDefault();
+        $("input[name=page]").val(page);
+        $('[id^="form-"]').submit();
+    }
+</script>
+</html>

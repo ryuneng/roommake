@@ -1,0 +1,65 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <style>
+        a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .list-group-item {
+            border-bottom: none;
+        }
+    </style>
+    <title>룸메이크 | 자주묻는질문</title>
+</head>
+<div layout:fragment="content" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div class="cs-sidebar">
+                <div class="card">
+                    <h5 class="card-header ">고객센터</h5>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/notice/list}">공지사항</a>
+                                <ul class="submenu list-group list-group-flush">
+                                    <li class="list-group-item"><a th:href="@{/cs/notice/list}">전체 공지사항</a></li>
+                                </ul>
+                            </li>
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/faq/list}">자주묻는질문</a>
+                                <ul class="submenu list-group list-group-flush">
+                                    <li class="list-group-item"><a th:href="@{/cs/faq/list}" value="all">전체</a></li>
+                                    <th:block th:each="faqCat : ${faqCategories}">
+                                        <li class="list-group-item"><a th:href="@{/cs/faq/list(filt=${faqCat.id})}" th:text="${faqCat.name}">배송</a></li>
+                                    </th:block>
+                                </ul>
+                            </li>
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/qna/form}">문의사항</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 자주묻는질문 리스트 -->
+        <div class="col-10">
+            <h3 class="mb-3">자주묻는질문</h3>
+            <div class="accordion" id="accordionExample">
+                <th:block th:each="faq : ${faqs}">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" th:id="'heading' + ${faq.id}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" th:attr="data-bs-target='#collapse' + ${faq.id}" aria-expanded="false" aria-controls="'collapse' + ${faq.id}"
+                                    th:text="${faq.title}"></button>
+                        </h2>
+                        <div th:id="'collapse' + ${faq.id}" class="accordion-collapse collapse bg-light" aria-labelledby="'heading' + ${faq.id}" data-bs-parent="#accordionExample">
+                            <div class="accordion-body" th:text="${faq.content}"></div>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

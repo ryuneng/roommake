@@ -1,0 +1,334 @@
+<html lang="ko" layout:decorate="~{layout/mypage-base}" th:with="category='설정'" th:attr="data-category='설정',data-sub-category='회원정보수정'">
+<div class="container my-10 mt-4" layout:fragment="content">
+    <div class="container mt-5" style="max-width: 800px">
+        <form class="p-3" th:action="@{/user/setting}" method="post" th:object="${userSettingForm}" id="settingForm" enctype="multipart/form-data">
+            <div class="text-center mt-5" style="margin: 0 10px;">
+                <!-- 프로필 이미지 -->
+                <div style="position: relative; width: 120px; height: 120px; margin: 0 auto;">
+                    <img id="profileImage" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer; border-radius: 50%;"
+                         th:src="${userSettingForm.profilePhotoUrl == 'default.jpg' ? '/images/mypage/default.jpg' : userSettingForm.profilePhotoUrl}">
+                    <input type="file" id="profilePhotoInput" name="image" style="display: none;" accept="image/*">
+                    <i class="bi bi-camera-fill" style="position: absolute; bottom: 10px; right: 10px; font-size: 24px;"></i>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <!-- 닉네임 -->
+                        <div class="form-group mb-3">
+                            <label for="nickname">닉네임 <span style="color: red;" class="required-star">*</span></label>
+                            <input type="text" class="form-control" id="nickname" th:field="*{nickname}" placeholder="2~20자 이내로 입력해주세요." value="${userSettingForm.nickname}" required pattern="^\S(.*\S)?$"/>
+                            <small id="nicknameError" class="text-danger"></small>
+                            <small class="text-danger" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></small>
+                        </div>
+                        <!-- 이메일 -->
+                        <div class="form-group mb-3">
+                            <label for="email">이메일 <span style="color: red;" class="required-star">*</span></label>
+                            <input type="text" class="form-control" id="email" th:field="*{email}" placeholder="이메일을 입력해주세요" value="${userSettingForm.email}" disabled required/>
+                            <small id="emailError" class="text-danger"></small>
+                            <small class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
+                        </div>
+                        <!-- 이메일 인증 버튼 및 인증 코드 입력란-->
+                        <div class="mb-4">
+                            <button type="button" class="btn btn-outline-primary w-100" style="width: 100%; margin: auto;" id="emailEditBtn">이메일 변경하기</button>
+                            <div id="emailVerification" style="display: none; position: relative;" class="my-3">
+                                <input type="text" class="form-control" id="verificationCode" placeholder="인증코드 입력" style="padding-right: 60px;">
+                                <div style="position: absolute; top: 20%; right: 10px; transform: translateY(-50%); color: red;">
+                                    <span id="timer">03:00</span>
+                                </div>
+                                <small class="text-danger" id="verificationCodeError" style="display:none;">잘못된 인증 코드입니다.</small>
+                                <button type="button" class="btn btn-primary w-100 mt-2" style="margin-top: 8px;" id="confirmVerificationBtn">확인</button>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="form-group my-3 mt-4">
+                        <label for="birthday">생년월일</label>
+                        <input type="date" class="form-control" id="birthday" name="birthday" placeholder="생년월일을 선택해주세요."/>
+                    </div>
+                    <div class="form-group my-3 mt-4">
+                        <label for="introduction">1줄 소개</label>
+                        <input type="text" class="form-control" id="introduction" name="introduction" placeholder="짧은 글로 자신을 소개해보세요. (최대 50자)" maxlength="50"/>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="sns">SNS 링크</label>
+                        <input type="text" class="form-control" id="sns" name="sns" placeholder="https://www.example.com"/>
+                        <small id="snsError" class="text-danger"></small>
+                    </div>
+                    <!-- 버튼 -->
+                    <div class="mb-5 d-flex justify-content-between">
+                        <a href="/user/withdraw" id="btnWithdraw" class="btn btn-outline-secondary flex-grow-1 me-2">탈퇴</a>
+                        <button type="button" class="btn btn-outline-secondary flex-grow-1 mx-2" id="btnCancel">취소</button>
+                        <button type="submit" class="btn btn-primary flex-grow-1 ms-2">회원정보 수정</button>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="userPoint" th:value="${userPoint}">
+        </form>
+    </div>
+</div>
+<script layout:fragment="script" type="text/javascript">
+    $(document).ready(function() {
+        var originalEmail = $('#email').val();
+        var userPoint = parseInt($('#userPoint').text());
+
+        $('#emailEditBtn').click(function() {
+            $('#email').prop('disabled', false);
+            $(this).text('이메일 인증하기').removeClass('btn-outline-primary').addClass('btn-secondary').prop('disabled', true);
+        });
+
+        $('#email').on('keyup', function() {
+            var isValid = validateFullEmail(); // 유효성 검사 실행
+            if (isValid && $('#email').val().trim() !== originalEmail) {
+                $('#emailEditBtn').prop('disabled', false).removeClass('btn-secondary').addClass('btn-outline-primary');
+            } else {
+                $('#emailEditBtn').prop('disabled', true).addClass('btn-secondary').removeClass('btn-outline-primary');
+                return false;
+            }
+
+            var email = $('#email').val().trim();
+            if (email !== originalEmail) {
+                checkEmailDuplicate(email);
+            }
+        });
+
+        function validateFullEmail() {
+            var email = $("#email").val().trim();
+            if (!email) {
+                $("#emailError").text("필수 입력 항목입니다.");
+                return false;
+            } else {
+                $("#emailError").text("");
+            }
+
+            var emailPattern = /^[^\s@]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailPattern.test(email)) {
+                $("#emailError").text("이메일 형식이 올바르지 않습니다.");
+                return false;
+            } else {
+                $("#emailError").text("");
+                return true;
+            }
+        }
+
+        // 이메일 중복 검사 함수
+        function checkEmailDuplicate(email) {
+            $.ajax({
+                url: '/user/check-email',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({email: email}),
+                success: function(response) {
+                    if (response.exists) {
+                        $("#emailError").text("이미 가입된 계정입니다.");
+                        $('#emailEditBtn').prop('disabled', true).addClass('btn-secondary').removeClass('btn-outline-primary');
+                    } else {
+                        $("#emailError").text("");
+                        $('#emailEditBtn').prop('disabled', false).removeClass('btn-secondary').addClass('btn-outline-primary');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $("#emailError").text("서버 오류로 인증이 불가능합니다.");
+                    $('#emailEditBtn').prop('disabled', true).addClass('btn-secondary').removeClass('btn-outline-primary');
+                }
+            });
+        }
+
+        $('#emailEditBtn').click(function() {
+            if (validateFullEmail()) {
+                var email = $("#email").val().trim();
+                if (email !== originalEmail) {
+                    requestEmailVerification(email);
+                }
+            }
+        });
+
+        function requestEmailVerification(email) {
+            $.ajax({
+                url: '/send-verification-code',
+                type: 'POST',
+                data: {email: email},
+                success: function(data) {
+                    alert("인증 코드가 전송되었습니다.");
+                    $("#emailVerification").show();
+                    $("#emailEditBtn").removeClass('btn-outline-primary').addClass('btn-primary').prop("disabled", true);
+                },
+                error: function(xhr, status, error) {
+                    alert("인증 코드 전송에 실패했습니다. 오류: " + error);
+                }
+            });
+        }
+
+        $("#confirmVerificationBtn").click(function() {
+            var verificationCode = $("#verificationCode").val().trim();
+            $.ajax({
+                url: '/verify-email',
+                type: 'POST',
+                data: {code: verificationCode, email: $("#email").val().trim()},
+                success: function(response) {
+                    response = JSON.parse(response);
+                    if (response.valid) {
+                        alert("인증에 성공하였습니다.");
+                        $("#emailVerification").hide();
+                        $("#verificationCode").val('');
+                        $("#confirmVerificationBtn").hide();
+                        $("#emailEditBtn").text("이메일 인증 완료").prop('disabled', true);
+                    } else {
+                        alert("인증에 실패하였습니다. 잘못된 인증 코드입니다.");
+                    }
+                },
+                error: function() {
+                    alert("인증 과정에서 문제가 발생했습니다.");
+                }
+            });
+        });
+
+        function startTimer(duration, display) {
+            var timer = duration, minutes, seconds;
+            var intervalId = setInterval(function() {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.text(minutes + ":" + seconds);
+
+                if (--timer < 0) {
+                    clearInterval(intervalId); // 타이머 중지
+                    alert("인증 시간이 초과되었습니다.");
+                    $("#verifyEmailBtn").prop("disabled", false);
+                    $("#emailVerification").hide();
+                }
+            }, 1000);
+        }
+
+        var duration = 180;                         // 타이머 시간을 설정 (3분)
+        var display = $('#timer');
+        startTimer(duration, display);
+
+        var originalNickname = $('#nickname').val();
+
+        $('#nickname').on('keyup', function() {
+            var nickname = $(this).val().trim();
+            if (validateNickname(nickname)) {          // 닉네임 유효성 검사 실행
+                if (nickname !== originalNickname) {
+                    checkNicknameDuplicate(nickname);  // 닉네임 중복 검사
+                }
+            }
+        });
+
+        // 닉네임 유효성 검사
+        function validateNickname(nickname) {
+            if (!nickname) {
+                $("#nicknameError").text("필수 입력 항목입니다.");
+                return false;
+            } else if (nickname.length < 2 || nickname.length > 20) {
+                $("#nicknameError").text("2글자 이상, 20글자 이하만 가능합니다.");
+                return false;
+            } else if (!/^[ㄱ-ㅎ가-힣a-z0-9-_]{2,20}$/.test(nickname)) {
+                $("#nicknameError").text("공백, 특수문자를 제외한 2~20자리여야 합니다.");
+                return false;
+            } else {
+                $("#nicknameError").text("");
+                return true;
+            }
+        }
+
+        // 닉네임 중복 검사
+        function checkNicknameDuplicate(nickname) {
+            $.ajax({
+                url: '/user/check-duplicate-nickname',
+                type: 'POST',
+                data: {nickname: nickname},
+                success: function(response) {
+                    console.log(response)
+                    if (!response) {
+                        $("#nicknameError").text("이미 사용 중인 닉네임입니다.");
+                    } else {
+                        $("#nicknameError").text("");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $("#nicknameError").text("서버 오류, 다시 시도해 주세요.");
+                }
+            });
+        }
+
+        // 이미지 클릭 시 파일 선택 창 열기
+        $('#profileImage').click(function() {
+            $('#profilePhotoInput').click();
+        });
+
+        // 이미지 파일 선택 시 이미지 미리보기
+        $('#profilePhotoInput').change(function(event) {
+            var file = event.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#profileImage').attr('src', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        $('#sns').on('keyup', function() {
+            var snsUrl = $(this).val().trim();
+            if (snsUrl === '') {
+                $('#snsError').text('');
+            } else if (!isValidUrl(snsUrl)) {
+                $('#snsError').text('올바른 URL 형식이 아닙니다.');
+            } else {
+                $('#snsError').text('');
+            }
+        });
+
+        function isValidUrl(url) {
+            if (url == '') {
+                return true;
+            }
+            // URL 형식이 맞는지 검사하는 정규식
+            var urlPattern = /^[^\s].+\.[^\s]{2,}$/;
+            return urlPattern.test(url);
+        }
+
+        // 폼 제출 이벤트 핸들러
+        $("#settingForm").submit(function(event) {
+            var originalNickname = $('#nickname').val();
+            var snsUrl = $(this).val().trim();
+
+            let result1 = validateNickname(originalNickname);
+            let result2 = validateFullEmail(email);
+            let result3 = isValidUrl(snsUrl);
+
+            return result1 && result2 && result3;
+        });
+
+        $('#btnWithdraw').click(function(e) {
+            e.preventDefault(); // 기본 이벤트 방지
+
+            let point = $("#userPoint").val();
+            if (confirm(`현재 적립금은 ${point}입니다. 탈퇴하면 적립금이 삭제됩니다. 정말로 탈퇴하시겠습니까?`)) {
+                $.ajax({
+                    url: '/user/withdraw',
+                    type: 'POST',
+                    data: {_csrf: $('meta[name="csrf-token"]').attr('content')},
+                    success: function() {
+                        alert("탈퇴 처리되었습니다. 그동안 이용해주셔서 감사합니다.");
+                        window.location.href = 'http://43.202.27.255/';
+                    },
+                    error: function() {
+                        alert("탈퇴 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
+                    }
+                });
+            }
+        });
+
+        // 취소 버튼 이벤트
+        $('#btnCancel').click(function() {
+            window.location.href = 'http://43.202.27.255/'; // 메인 페이지로 이동
+        });
+    });
+
+</script>
+</html>

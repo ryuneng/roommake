@@ -1,0 +1,41 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='user'">
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h4>포인트 관리</h4>
+
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>일자</th>
+                        <th>회원번호</th>
+                        <th>유형</th>
+                        <th>포인트금액</th>
+                        <th>누적 잔액</th>
+                        <th>상세 사유</th>
+                    </tr>
+                    <tr>
+                        <td>2024년 4월 1일</td>
+                        <td>34235</td>
+                        <td>적립</td>
+                        <td>300</td>
+                        <td>350</td>
+                        <td>구매확정으로 인한 적립금</td>
+                    </tr>
+                    <tr>
+                        <td>2024년 4월 2일</td>
+                        <td>34235</td>
+                        <td>사용</td>
+                        <td>200</td>
+                        <td>150</td>
+                        <td>상품 결제시 사용</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+</html>

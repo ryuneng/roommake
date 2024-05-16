@@ -1,0 +1,140 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 반품상세</title>
+</head>
+<div layout:fragment="content" class="container my-3 mt-4">
+    <div class="container">
+        <div class="row">
+            <h4 class="fw-bold text-center mb-4">반품상세</h4>
+            <div class="d-flex justify-content-start mb-5 small">
+                <div class="me-5">
+                    <span class="fw-bold me-1">반품번호</span>
+                    <span th:text="${dto.itemReturnId}" class="text-secondary">202404071720583</span>
+                </div>
+                <div>
+                    <span class="fw-bold me-1">반품일자</span>
+                    <span th:text="${#dates.format(dto.createDate, 'yyyy.MM.dd HH:mm')}" class="text-secondary">2024.04.11 14:45</span>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12 mb-5">
+                    <!-- 1. 반품상품 영역 시작 -->
+                    <div class="row mb-5">
+                        <div class="col-12 mb-5" style="font-size: small">
+                            <div class="d-flex justify-content-start align-items-center">
+                                <h5 class="fw-bold me-3">반품상품</h5>
+                            </div>
+                            <hr class="mb-1">
+                            <table class="table text-center">
+                                <tbody class="align-middle">
+                                <tr>
+                                    <td>
+                                        <div class="d-flex w-100 justify-content-start">
+                                            <a th:href="@{/store/detail/{id}(id=${dto.item.productId})}" class="link-underline link-underline-opacity-0 text-dark">
+                                                <div>
+                                                    <img th:src="@{${dto.item.imageName}}" style="width: 80px; height: 80px">
+                                                </div>
+                                            </a>
+                                            <div class="ms-3 text-start">
+                                                <div>
+                                                    <div th:text="${dto.item.name}" style="display: -webkit-box;
+                                                          overflow: hidden;
+                                                          text-overflow: ellipsis;
+                                                          -webkit-box-orient: vertical;
+                                                          -webkit-line-clamp: 1;
+                                                          font-size: 15px;">
+                                                        봄맞이 먼지없는 항균 차렵이불세트 SS/Q 12컬러
+                                                    </div>
+                                                    <div class="text-secondary mt-2" style="font-size: 12px">
+                                                        사이즈: <span th:text="${dto.item.size}">슈퍼싱글SS 프레임만</span>
+                                                        / 색상: <span th:text="${dto.item.color}">화이트</span>
+                                                    </div>
+                                                    <div><span th:text="${dto.item.amount}">1</span>개</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 반품상품 영역 끝 -->
+
+                    <!-- 2. 회수지 정보 및 반품 사유, 환불 정보 영역 시작 -->
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <div class="mb-5 pb-5">
+                                <h5 class="fw-bold">회수지 정보</h5>
+                                <hr>
+                                <div class="d-flex justify-content-start small">
+                                    <div class="me-5 text-secondary">
+                                        <div class="mb-1">회수지</div>
+                                        <div class="mb-1">요청사항</div>
+                                    </div>
+                                    <div>
+                                        <div class="mb-1">
+                                            (<span th:text="${dto.collectionDelivery.zipcode}">(03134)</span>)
+                                            <span th:text="${dto.collectionDelivery.address1}">서울특별시 종로구 율곡로10길 105</span>
+                                            <span id="span-delivery-address"
+                                                  th:text="${dto.collectionDelivery.address2}">
+                                                디아망 4F
+                                            </span>
+                                        </div>
+                                        <div th:text="${dto.collectionMemo}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <h5 class="fw-bold">환불 정보</h5>
+                            <hr>
+                            <div class="mb-3">
+                                <div style="font-size: 15px">
+                                    <div class="d-flex justify-content-between small mb-1 text-secondary">
+                                        <div>주문금액</div>
+                                        <div>
+                                            <span th:text="${#numbers.formatInteger(dto.item.getItemPrice(), 1, 'COMMA')}">95,800</span>원
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold mb-2">
+                                <div>환불금액</div>
+                                <div>
+                                    <span th:text="${#numbers.formatInteger(dto.item.getItemPrice(), 1, 'COMMA')}">95,800</span>원
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mb-5">
+                                <div>환불수단</div>
+                                <div>카카오페이</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div>
+                                <h5 class="fw-bold">반품 사유</h5>
+                                <hr>
+                                <div th:if="${dto.detailedReason == null}" th:text="${dto.reason.name}" class="small">선택한 사유</div>
+                                <div th:if="${dto.detailedReason != null}" th:text="${dto.detailedReason}" class="small">상세사유</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 회수지 정보 및 반품 사유, 환불 정보 영역 끝 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" layout:fragment="script">
+    // 주소 마스킹처리
+    const maskingAddress = (address) => {
+        if (address.length > 0) {
+            return address.replace(/./g, '*');
+        } else {
+            return '';
+        }
+    };
+
+    let originalAddress = $("#span-delivery-address").text();
+    let maskedAddress = maskingAddress(originalAddress);
+    $("#span-delivery-address").text(maskedAddress);
+</script>
+</html>

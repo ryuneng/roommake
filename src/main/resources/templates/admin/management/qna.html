@@ -1,0 +1,276 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.w3.org/1999/html" layout:decorate="~{layout/base-admin}" th:with="menu='management'">
+<div layout:fragment="content-admin" class="container my-3">
+    <!-- 컨트롤러에서 전달한 메세지 띄우기 -->
+    <th:block th:if="${message != null}">
+        <th:block th:if="${message.message != null and message.message != ''}">
+            <script>
+                top.alert("[[${message.message}]]");
+            </script>
+        </th:block>
+    </th:block>
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h4>고객 문의사항</h4>
+            <hr>
+            <form id="form-qna" method="get" action="/admin/management/qna">
+                <input type="hidden" name="page">
+                <!-- rows, 카테고리별 필터링, 답변여부 선택 영역 -->
+                <div class="my-3 d-flex justify-content-between">
+                    <select class="form-control w-25" name="rows" onchange="changeRows()">
+                        <option value="5" th:selected="${criteria.rows eq 5}">5개씩보기</option>
+                        <option value="10" th:selected="${criteria.rows eq 10 or criteria.rows == null}">10개씩보기</option>
+                        <option value="20" th:selected="${criteria.rows eq 20}">20개씩보기</option>
+                        <option value="50" th:selected="${criteria.rows eq 50}">50개씩보기</option>
+                    </select>
+                    <select class="form-select w-25" name="filt" onchange="changeFilt()">
+                        <option value="all" th:selected="${criteria.filt == null or criteria.filt == 'all'}">전체</option>
+                        <th:block th:each="qnaCat : ${qnaCategories}">
+                            <option th:value="${qnaCat.id}" th:selected="${#strings.equals(criteria.filt, qnaCat.id)}" th:text="${qnaCat.name}">상품</option>
+                        </th:block>
+                    </select>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sort" value="all" th:checked="${criteria.sort eq 'all' or criteria.sort == null}" th:onchange="changeSort()"/>
+                            <label class="form-check-label">전체</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sort" value="N" th:checked="${criteria.sort eq 'N'}" th:onchange="changeSort()"/>
+                            <label class="form-check-label">미답변</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sort" value="Y" th:checked="${criteria.sort eq 'Y'}" th:onchange="changeSort()"/>
+                            <label class="form-check-label">답변완료</label>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-bordered" id="table-qna-list" style="table-layout: fixed;">
+                    <colgroup>
+                        <col style="width: 5%">
+                        <col style="width: 10%">
+                        <col style="width: 10%">
+                        <col style="width: 15%">
+                        <col style="width: 15%">
+                        <col style="width: 10%">
+                        <col style="width: 10%">
+                        <col style="width: 10%">
+                        <col style="width: 10%">
+                        <col style="width: 5%">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>처리상태</th>
+                        <th>카테고리</th>
+                        <th>문의 제품</th>
+                        <th>제목</th>
+                        <th>작성일자</th>
+                        <th>작성자</th>
+                        <th>답변일자</th>
+                        <th>답변작성자</th>
+                        <th>비밀글</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${qnas.isEmpty()}">
+                        <td class="text-center" style="font-weight: bold" colspan="9">문의사항이 없습니다.</td>
+                    </tr>
+                    <tr th:each="qna : ${qnas}" th:attr="id=|qna-${qna.id}|">
+                        <td th:text="${qna.id}">11</td>
+                        <td th:text="${qna.answerYn == 'N' ? '미답변' : '답변완료'}">미답변</td>
+                        <td th:text="${qna.category.name}">재고</td>
+                        <td th:text="${qna.product != null ? qna.product.name : ''}"
+                            style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden;"></td>
+                        <td><a th:href="@{|/qna/detail/${qna.id}|}" th:text="${qna.title}" th:attr="data-qna-id=${qna.id}"
+                               style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">재고확인해주세요</a></td>
+                        <td th:text="${#dates.format(qna.createDate, 'yyyy-MM-dd')}">2024년 4월 10일</td>
+                        <td th:text="${qna.user.nickname}">아무개</td>
+                        <td th:text="${qna.updateDate != null ? #dates.format(qna.updateDate, 'yyyy-MM-dd') : ''}">2024년 4월 11일</td>
+                        <td th:text="${qna.answerWriter != null ? qna.answerWriter.nickname : ''}">김유신</td>
+                        <td th:text="${qna.privateYn}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="row row-cols-lg-auto g-3 mb-3">
+                            <div class="col-4">
+                                <select class="form-select" name="opt">
+                                    <option value="title" th:selected="${#strings.equals(criteria.opt, 'title')}">제목</option>
+                                    <option value="content" th:selected="${#strings.equals(criteria.opt, 'content')}">내용</option>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <input type="text" class="form-control" name="keyword" th:value="${criteria.keyword}"/>
+                            </div>
+                            <div class="col-4">
+                                <button type="submit" class="btn btn-outline-primary">검색</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div th:if="${paging.totalRows ne 0 }">
+                            <nav>
+                                <ul class="pagination d-flex justify-content-center">
+                                    <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                        <a th:href="@{|/admin/management/qna?page=${paging.currentPage - 1}|}" class="page-link"
+                                           th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                                    </li>
+                                    <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                        <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                            <a th:href="@{|/admin/management/qna?page=${num}|}" class="page-link"
+                                               th:onclick="|changePage(${num}, event)|" th:text="${num}"></a>
+                                        </li>
+                                    </th:block>
+                                    <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                        <a th:href="@{|/admin/management/qna?page=${paging.currentPage + 1}|}" class="page-link"
+                                           th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <h5>문의 내용</h5>
+                    <table class="table table-bordered" id="table-qna-detail" style="width: 100%;">
+                        <colgroup>
+                            <col style="width: 25%;">
+                            <col style="width: 25%;">
+                            <col style="width: 25%;">
+                            <col style="width: 25%;">
+                        </colgroup>
+                        <tbody>
+                        <tr>
+                            <th>문의번호</th>
+                            <td id="qna-id"></td>
+                            <th>카테고리</th>
+                            <td id="qna-category"></td>
+                        </tr>
+                        <tr>
+                            <th>작성일자</th>
+                            <td id="qna-create-date"></td>
+                            <th>작성자</th>
+                            <td id="qna-writer"></td>
+                        </tr>
+                        <tr>
+                            <th>답변일자</th>
+                            <td id="qna-answer-date"></td>
+                            <th>답변상태</th>
+                            <td id="qna-answer-status"></td>
+                        </tr>
+                        <tr>
+                            <th>문의 제품 번호</th>
+                            <td id="qna-product-id"></td>
+                            <th>문의 제품 이름</th>
+                            <td id="qna-product-name"></td>
+                        </tr>
+                        <tr>
+                            <th>제목</th>
+                            <td id="qna-title" colspan="3"></td>
+                        </tr>
+                        <tr>
+                            <th>내용</th>
+                            <td id="qna-content" colspan="3"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-6">
+                    <form class="border bg-light p-3" id="no-answer-form" action="/admin/management/qna/updateAnswer" method="post">
+                        <div class="list-group">
+                            <div class="form-group mb-3">
+                                <label class="form-label">미응답 문의</label>
+                                <select class="form-select" name="noAnswerQna" id="cs-list">
+                                    <option value="" id="default-select-title" selected disabled hidden>미응답 문의</option>
+                                    <th:block th:each="noAnswerQna : ${noAnswerQnas}">
+                                        <option name="noAnswerQna" th:id="'noAnswerQna' + ${noAnswerQna.id}" th:value="${noAnswerQna.id}" th:text="${noAnswerQna.title}">상품</option>
+                                    </th:block>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label">답변 내용</label>
+                            <textarea rows="5" name="answer" id="qna-answer-data" class="form-control" placeholder="답변은 수정이 어려우니 신중히 작성해야 합니다."></textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary" id="btn-save-answer">등록</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script">
+    $(function() {
+        // 문의 리스트에서 제목 클릭시 하단에 detail 출력
+        $('#table-qna-list tbody a').click(function(event) {
+            event.preventDefault();
+            let qnaId = $(this).attr("data-qna-id");
+            $.getJSON(`/admin/management/qna/detail/${qnaId}`, function(qna) {
+                $('#qna-id').text(qna.id);
+                $('#qna-category').text(qna.category.name);
+                $('#qna-create-date').text(qna.createDate);
+                $('#qna-writer').text(qna.user.nickname);
+                if (qna.updateDate != null && (qna.answerYn) == "Y") {
+                    $('#qna-answer-date').text(qna.updateDate);
+                    $('#qna-answer-status').text("답변 완료");
+                    $('#no-answer-form').hide();
+                    $('#qna-content').closest("tr").next(".answer-row").remove(); // 이미 존재하는 답변 내용 tr 삭제
+                    $('#qna-content').closest("tr").after(
+                        `<tr class="answer-row">
+                            <th>답변내용</th>
+                            <td colspan="3">${qna.answer}</td>
+                        </tr>`);
+                } else {
+                    $('#qna-answer-date').text("-");
+                    $('#qna-answer-status').text("미응답");
+                    $('#no-answer-form').show();
+                    $('#qna-content').closest("tr").next(".answer-row").remove(); // 답변 내용 tr 삭제
+                }
+                if (qna.product != null) {
+                    $('#qna-product-id').text(qna.product.id);
+                    $('#qna-product-name').text(qna.product.name);
+                }
+                $('#qna-title').text(qna.title);
+                $('#qna-content').text(qna.content);
+                $('#default-select-title').prop('selected', false);
+                $('#noAnswerQna' + qna.id).prop('selected', true);
+                $('#qna-answer-data').text(qna.answer);
+            });
+        });
+
+        // 미응답 문의 select 선택시 좌측 form에 고객문의 내용 detail 출력
+        $('#cs-list').change(function(event) {
+            event.preventDefault();
+            $('#default-select-title').remove('selected');
+            let qnaId = $('option[name=noAnswerQna]:selected').val();
+            $.getJSON(`/admin/management/qna/detail/${qnaId}`, function(qna) {
+                $('#qna-id').text(qna.id);
+                $('#qna-category').text(qna.category.name);
+                $('#qna-create-date').text(qna.createDate);
+                $('#qna-writer').text(qna.user.nickname);
+                if (qna.updateDate != null && (qna.answerYn) == "Y") {
+                    $('#qna-answer-date').text(qna.updateDate);
+                    $('#qna-answer-status').text("답변 완료");
+                } else {
+                    $('#qna-answer-date').text("-");
+                    $('#qna-answer-status').text("미응답");
+                }
+                if (qna.product != null) {
+                    $('#qna-product-id').text(qna.product.id);
+                    $('#qna-product-name').text(qna.product.name);
+                }
+                $('#qna-title').text(qna.title);
+                $('#qna-content').text(qna.content);
+                $('#noAnswerQna' + qna.id).prop('selected', true);
+            });
+        });
+    });
+</script>
+</html>

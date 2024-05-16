@@ -1,0 +1,86 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='product'">
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h1>상품등록</h1>
+            <form class="border bg-light p-3" method="post" action="/admin/product/create" enctype="multipart/form-data">
+                <div class="form-group mb-3">
+                    <label>상품이름</label>
+                    <input type="text" class="form-control" name="name"/>
+                </div>
+                <div class="form-group mb-3">
+                    <label>상품가격</label>
+                    <input type="number" class="form-control" name="price">
+                </div>
+                <div class="form-group mb-3">
+                    카테고리1
+                    <select class="form-select" aria-label="Default select example" name="parentCategoryId">
+                        <option value="" selected disabled> 카테고리를 선택하세요</option>
+                        <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}">가구</option>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    카테고리2
+                    <select class="form-select" aria-label="Default select example" name="categoryId"></select>
+                </div>
+                <div>
+                    <label>할인율</label>
+                    <input type="number" class="form-control" name="discount">
+                </div>
+                <div>
+                    <label>상품이미지</label>
+                    <input type="file" class="form-control" name="imageFiles">
+                </div>
+                <div>
+                    <label>상품이미지</label>
+                    <input type="file" class="form-control" name="imageFiles">
+                </div>
+                <div>
+                    <label>상품이미지</label>
+                    <input type="file" class="form-control" name="imageFiles">
+                </div>
+                <div>
+                    <label>상품이미지</label>
+                    <input type="file" class="form-control" name="imageFiles">
+                </div>
+                <div>
+                    <label>상품설명</label>
+                    <input type="text" class="form-control" name="content">
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="tagCategoryId1" value="1">
+                    <label class="form-check-label" for="inlineCheckbox1">할인</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="tagCategoryId2" value="2">
+                    <label class="form-check-label" for="inlineCheckbox2">내일배송</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox3" name="tagCategoryId3" value="3">
+                    <label class="form-check-label" for="inlineCheckbox3">배송비무료</label>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button class="btn btn-primary me-md-2" type="submit">상품등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script">
+    $("select[name=parentCategoryId]").change(function() {
+        $("select[name=categoryId]").empty();
+        let parentCategoryId = $(this).val();
+        $.getJSON("/admin/product/category", {catId: parentCategoryId}, function(categories) {
+            $.each(categories, function(index, cat) {
+                let option = `
+                    <option value="${cat.id}"> ${cat.name}</option>
+                `
+                $("select[name=categoryId]").append(option);
+            });
+        })
+    });
+</script>
+</html>

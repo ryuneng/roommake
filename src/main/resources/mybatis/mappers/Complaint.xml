@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.admin.management.mapper.ComplaintMapper">
+    <select id="getBoardComplaints" parameterType="String" resultType="com.roommake.admin.management.dto.ComplaintDto">
+        select
+            cpc.post_complaint_id           as id,
+            cpc.post_id                     as contentId,
+            cp.post_title                   as content,
+            cp.user_id                      as contentWriter,
+            cpc.user_id                     as complaintUserId,
+            u1.user_nickname                as complaintUserNickname,
+            cpc.complaint_category_id       as categoryId,
+            cct.complaint_category_content   as categoryContent,
+            cpc.complaint_create_date       as createDate,
+            cpc.complaint_update_date       as updateDate,
+            cpc.post_complaint_yn           as complaintYn,
+            cpc.post_complaint_delete_yn    as deleteYn,
+            (select @type:='post')          as type
+        from
+            channel_post_complaint cpc
+            left join user u1 on cpc.user_id = u1.user_id
+            left join channel_post cp on cpc.post_id = cp.post_id
+            left join complaint_category cct on cpc.complaint_category_id = cct.complaint_category_id
+        where
+            cpc.post_complaint_delete_yn = 'N'
+        <if test="filt != 'all'">
+            and cpc.post_complaint_yn = #{filt}
+        </if>
+        union
+        select
+            cc.comm_complaint_id,
+            cc.comm_id,
+            c.comm_title,
+            c.user_id,
+            cc.user_id,
+            u2.user_nickname,
+            cc.complaint_category_id,
+            cct.complaint_category_content,
+            cc.comm_complaint_create_date,
+            cc.comm_complaint_update_date,
+            cc.comm_complaint_yn,
+            cc.comm_complaint_delete_yn,
+            (select @type:='community')
+        from
+            community_complaint cc
+            left join user u2 on u2.user_id = cc.user_id
+            left join community c on cc.comm_id = c.comm_id
+            left join complaint_category cct on cc.complaint_category_id = cct.complaint_category_id
+        where
+            cc.comm_complaint_delete_yn = 'N'
+        <if test="filt != 'all'">
+            and cc.comm_complaint_yn = #{filt}
+        </if>
+        order by createDate desc
+    </select>
+
+    <select id="getReplyComplaint" parameterType="String" resultType="com.roommake.admin.management.dto.ComplaintDto">
+        select
+            prc.post_reply_complaint_id          as id,
+            prc.post_reply_id                    as contentId,
+            cpr.post_reply_content               as content,
+            cpr.user_id                          as contentWriterId,
+            prc.user_id                          as complaintUserId,
+            u1.user_nickname                     as complaintUserNickname,
+            prc.complaint_category_id            as categoryId,
+            ct.complaint_category_content        as categoryContent,
+            prc.complaint_create_date            as createDate,
+            prc.complaint_update_date            as updateDate,
+            prc.post_reply_complaint_yn          as complaintYn,
+            prc.post_reply_complaint_delete_yn   as deleteYn,
+            (select @type:='postReply')      as type
+        from
+            channel_post_reply_complaint prc
+            left join Roommake.user u1 on prc.user_id = u1.user_id
+            left join channel_post_reply cpr on prc.post_reply_id = cpr.post_reply_id
+            left join complaint_category ct on prc.complaint_category_id = ct.complaint_category_id
+        where
+            prc.post_reply_complaint_delete_yn = 'N'
+        <if test="filt != 'all'">
+            and prc.post_reply_complaint_yn = #{filt}
+        </if>
+        union
+        select
+            crc.comm_reply_complaint_id,
+            crc.community_reply_id,
+            cr.comm_reply_content,
+            cr.user_id,
+            crc.user_id,
+            u2.user_nickname,
+            crc.complaint_category_id,
+            ct.complaint_category_content,
+            crc.complaint_create_date,
+            crc.complaint_update_date,
+            crc.comm_reply_complaint_yn,
+            crc.comm_reply_complaint_delete_yn,
+            (select @type:='commReply')
+        from community_reply_complaint crc
+            left join user u2 on u2.user_id = crc.user_id
+            left join community_reply cr on crc.community_reply_id = cr.comm_reply_id
+            left join complaint_category ct on crc.complaint_category_id = ct.complaint_category_id
+        where
+            crc.comm_reply_complaint_delete_yn = 'N'
+        <if test="filt != 'all'">
+            and crc.comm_reply_complaint_yn = #{filt}
+        </if>
+        order by createDate desc
+    </select>
+
+    <select id="getCommReplyComplaintById" parameterType="int" resultType="com.roommake.admin.management.vo.Complaint">
+        select
+            comm_reply_complaint_id         as id,
+            user_id                         as "user.id",
+            community_reply_id              as contentId,
+            complaint_category_id           as "category.id",
+            complaint_create_date           as createDate,
+            complaint_update_date           as updateDate,
+            comm_reply_complaint_yn         as complaintYn,
+            comm_reply_complaint_delete_yn  as deleteYn
+        from
+            community_reply_complaint
+        where
+            comm_reply_complaint_id = #{id}
+    </select>
+    <select  id="getCommComplaintById" parameterType="int" resultType="com.roommake.admin.management.vo.Complaint">
+        select
+            comm_complaint_id               id,
+            user_id                         "user.id",
+            comm_id                         contentId,
+            complaint_category_id           "category.id",
+            comm_complaint_create_date      createDate,
+            comm_complaint_update_date      updateDate,
+            comm_complaint_yn               complaintYn,
+            comm_complaint_delete_yn        deleteYn
+        from
+            community_complaint
+        where
+            comm_complaint_id = #{id}
+    </select>
+    <select id="getPostReplyComplaintById" parameterType="int" resultType="com.roommake.admin.management.vo.Complaint">
+        select
+            post_reply_complaint_id         id,
+            user_id                         "user.id",
+            post_reply_id                   contentId,
+            complaint_category_id           "category.id",
+            complaint_create_date           createDate,
+            complaint_update_date           updateDate,
+            post_reply_complaint_yn         complaintYn,
+            post_reply_complaint_delete_yn  deleteYn
+        from
+            channel_post_reply_complaint
+        where
+            post_reply_complaint_id = #{id}
+    </select>
+
+    <select id="getPostComplaintById" parameterType="int" resultType="com.roommake.admin.management.vo.Complaint">
+        select
+            post_complaint_id           id,
+            user_id                     "user.id",
+            post_id                     contentId,
+            complaint_category_id       "category.id",
+            complaint_create_date       createDate,
+            complaint_update_date       updateDate,
+            post_complaint_yn           complaintYn,
+            post_complaint_delete_yn    deleteYn
+        from
+            channel_post_complaint
+        where
+            post_complaint_id = #{id}
+    </select>
+
+    <update id="modifyPostComplaint" parameterType="com.roommake.admin.management.vo.Complaint">
+        update
+            channel_post_complaint
+        set
+            post_complaint_yn           = #{complaintYn},
+            post_complaint_delete_yn    = #{deleteYn},
+            complaint_update_date       = #{updateDate}
+        where
+            post_complaint_id = #{id}
+    </update>
+
+    <update id="modifyCommComplaint" parameterType="com.roommake.admin.management.vo.Complaint">
+        update
+            community_complaint
+        set
+            comm_complaint_yn           = #{complaintYn},
+            comm_complaint_delete_yn    = #{deleteYn},
+            comm_complaint_update_date  = #{updateDate}
+        where
+            comm_complaint_id = #{id}
+    </update>
+
+    <update id="modifyPostReplyComplaint" parameterType="com.roommake.admin.management.vo.Complaint">
+        update
+            channel_post_reply_complaint
+        set
+            post_reply_complaint_yn           = #{complaintYn},
+            post_reply_complaint_delete_yn    = #{deleteYn},
+            complaint_update_date             = #{updateDate}
+        where
+            post_reply_complaint_id = #{id}
+    </update>
+
+    <update id="modifyCommReplyComplaint" parameterType="com.roommake.admin.management.vo.Complaint">
+        update
+            community_reply_complaint
+        set
+            comm_reply_complaint_yn         = #{complaintYn},
+            comm_reply_complaint_delete_yn  = #{deleteYn},
+            complaint_update_date           = #{updateDate}
+        where
+            comm_reply_complaint_id = #{id}
+    </update>
+</mapper>

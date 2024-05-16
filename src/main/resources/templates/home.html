@@ -1,10 +1,153 @@
-<!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <title>룸메이크 | 홈</title>
+    <style>
+        .image-wrapper {
+            width: 300px;
+            height: 200px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .image-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+    </style>
 </head>
-<body>
-    <h1>룸메이크 !</h1>
-</body>
+<div layout:fragment="content" class="container my-3 mt-4">
+
+    <!-- 배너이미지 캐러셀 -->
+    <div id="carouselExampleFade" class="carousel slide carousel-fade mb-3">
+        <div class="carousel-inner">
+            <th:block th:each="banner : ${banners}">
+                <div class="carousel-item" style="width: 100%; height: 500px;" th:classappend="${banner.description eq '기본 커뮤니티 배너'} ? 'active' : ''">
+                    <a th:href="@{${banner.url}}">
+                        <div>
+                            <img th:src="@{${banner.imageUploadName}}" class="d-block w-100" alt="...">
+                        </div>
+                        <div class="carousel-caption d-none d-md-block text-start">
+                            <h2 class="fw-bold">ROOMMAKE</h2>
+                            <p>좋아하는 것들로 일상을 가득 채우는 시간</p>
+                        </div>
+                    </a>
+                </div>
+            </th:block>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 신상품목록 -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mt-5 mb-3">
+                <div class="d-flex justify-content-between">
+                    <h5 class="fw-bold mb-4">🔅 신상품</h5>
+                    <a th:href="@{/store/category/1/top}" class="text-decoration-none text-primary">상품 더보기 ></a>
+                </div>
+                <div class="row">
+                    <div class="col-3" th:each="product: ${products}">
+                        <a th:href="@{/store/detail/{id}(id=${product.id})}" class="link-offset-2 link-underline link-underline-opacity-0 text-black">
+                            <div class="card border-0" style="width: 18rem;">
+                                <div class="image-wrapper">
+                                    <img th:src="@{${product.imageName}}" class="card-img-top rounded" alt="...">
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-title small"
+                                       style="display: -webkit-box;
+												overflow: hidden;
+												text-overflow: ellipsis;
+												-webkit-box-orient: vertical;
+												-webkit-line-clamp: 2;"
+                                       th:text="${product.name}">
+                                        LED조명 통서랍 수납침대 SSQ(매트리스 선택)
+                                    </p>
+                                    <div>
+                                        <span class="fw-bold h6" data-th-text="${#numbers.formatInteger(product.price, 1, 'COMMA')}">189,000</span>원
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 집들이 인기글 -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mt-5 mb-3">
+                <div class="d-flex justify-content-between">
+                    <h5 class="fw-bold mb-4">🏠 집들이 인기글</h5>
+                    <a th:href="@{/community/list/1}" class="text-decoration-none text-primary">더보기 ></a>
+                </div>
+                <div class="row">
+                    <div class="col-3" th:each="post : ${housePosts}">
+                        <a th:href="@{/community/detail/{id}(id=${post.id})}" class="link-offset-2 link-underline link-underline-opacity-0 text-black">
+                            <div class="card border-0" style="width: 18rem;">
+                                <div class="image-wrapper">
+                                    <img th:src="@{${post.imageName}}" class="card-img-top rounded" alt="...">
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-title"
+                                       th:text="${post.title}"
+                                       style="display: -webkit-box;
+											overflow: hidden;
+											text-overflow: ellipsis;
+											-webkit-box-orient: vertical;
+											-webkit-line-clamp: 2;">
+                                        부드러운 부부의 시선이 느껴지는! 34평 국민 평형 집꾸미기!
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 노하우 인기글 -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mt-5 mb-5 pb-5">
+                <div class="d-flex justify-content-between">
+                    <h5 class="fw-bold mb-4">💡 노하우 인기글</h5>
+                    <a th:href="@{/community/list/2}" class="text-decoration-none text-primary">더보기 ></a>
+                </div>
+                <div class="row">
+                    <div class="col-3" th:each="post : ${knowhowPosts}">
+                        <a th:href="@{/community/detail/{id}(id=${post.id})}" class="link-offset-2 link-underline link-underline-opacity-0 text-black">
+                            <div class="card border-0" style="width: 18rem;">
+                                <div class="image-wrapper">
+                                    <img th:src="@{${post.imageName}}" class="card-img-top rounded" alt="...">
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-title"
+                                       th:text="${post.title}"
+                                       style="display: -webkit-box;
+											overflow: hidden;
+											text-overflow: ellipsis;
+											-webkit-box-orient: vertical;
+											-webkit-line-clamp: 2;">
+                                        부드러운 부부의 시선이 느껴지는! 34평 국민 평형 집꾸미기!
+                                    </p>
+                                </div>
+                                <!--<div th:utext="${post.content}"></div>-->
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </html>

@@ -1,0 +1,73 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <style>
+        a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .list-group-item {
+            border-bottom: none;
+        }
+    </style>
+    <title>룸메이크 | 공지사항</title>
+</head>
+<div layout:fragment="content" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div class="cs-sidebar">
+                <div class="card">
+                    <h5 class="card-header ">고객센터</h5>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/notice/list}">공지사항</a>
+                                <ul class="submenu list-group list-group-flush">
+                                    <li class="list-group-item"><a th:href="@{/cs/notice/list}">전체 공지사항</a></li>
+                                </ul>
+                            </li>
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/faq/list}">자주묻는질문</a>
+                                <ul class="submenu list-group list-group-flush">
+                                    <li class="list-group-item"><a th:href="@{/cs/faq/list}" value="all">전체</a></li>
+                                    <th:block th:each="faqCat : ${faqCategories}">
+                                        <li class="list-group-item"><a th:href="@{/cs/faq/list(filt=${faqCat.id})}" th:text="${faqCat.name}">배송</a></li>
+                                    </th:block>
+                                </ul>
+                            </li>
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/qna/form}">문의사항</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-10">
+            <table class="table table-bordered mb-3">
+                <colgroup>
+                    <col style="width: 20%">
+                    <col style="width: 30%">
+                    <col style="width: 20%">
+                    <col style="width: 30%">
+                </colgroup>
+                <tbody>
+                <tr>
+                    <th>공지사항 제목</th>
+                    <td th:colspan="3" th:text="${notice.title}"></td>
+                </tr>
+                <tr>
+                    <th>최종수정일</th>
+                    <td th:text="${#dates.format(notice.updateDate, 'yyyy-MM-dd')}"></td>
+                    <th>작성자</th>
+                    <td th:text="${notice.updateByUser.nickname}"></td>
+                </tr>
+                <tr>
+                    <td class="p-3" th:colspan="4" th:utext="${notice.htmlContent}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</html>

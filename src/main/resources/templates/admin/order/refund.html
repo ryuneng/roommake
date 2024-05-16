@@ -1,0 +1,36 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='order'">
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h1>상품환불리스트</h1>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>순번</th>
+                    <th>환불번호</th>
+                    <th>환불접수일자</th>
+                    <th>환불금액</th>
+                    <th>환불처리상태</th>
+                    <th>환불수단</th>
+                    <th>주문자</th>
+                </tr>
+                </thead>
+                <tbody id="itemRefundBody">
+                <tr th:each="refund : ${refunds}">
+                    <th th:text="${refundStat.count}">1</th>
+                    <th th:text="${refund.id}">500000</th>
+                    <td th:text="${#dates.format(refund.createDate,'yyyy-MM-dd')}">2024-04-16</td>
+                    <td th:text="${refund.amount}">50,000</td>
+                    <td th:text="${refund.status}">환불신청</td>
+                    <td th:text="${refund.paymentMethod}"></td>
+                    <td th:text="${refund.userNickname}">주문자</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</html>

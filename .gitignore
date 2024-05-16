@@ -31,8 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
-/gitmessage.txt
-/src/main/resources/application.properties
 mvnw
 mvnw.cmd
 .mvn\
+.gitmessage.txt

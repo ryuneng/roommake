@@ -1,0 +1,488 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 주문하기</title>
+    <style layout:fragment="style">
+        .btn.btn-xs {
+            --bs-btn-padding-y: .25rem;
+            --bs-btn-padding-x: .35rem;
+            --bs-btn-font-size: .75rem;
+        }
+
+        .sticky {
+            position: sticky;
+            top: 100px;
+        }
+    </style>
+</head>
+<div layout:fragment="content" class="container my-3 mt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <h4 class="fw-bold text-center mb-4">주문/결제</h4>
+            </div>
+            <form method="get" id="form"> <!-- Ajax로 요청하기 때문에 action 속성은 불필요 -->
+                <div id="div-order-info" class="row mb-3">
+                    <!-- 1. 좌측 주문정보 영역 시작 -->
+                    <div class="col-9 mb-5">
+                        <!-- 1-1. 배송지 영역 시작 -->
+                        <div class="row">
+                            <div class="col-12 mb-5">
+                                <h5 class="fw-bold">배송지</h5>
+                                <hr>
+                                <div id="div-delivery-null" th:if="${delivery == null}" class="d-flex justify-content-start align-items-center mb-1">
+                                    <span class="me-2 small">배송지를 추가해주세요.</span>
+                                    <button type="button" class="btn btn-xs" style="border-color: gray" onclick="showDeliveryList()">배송지 추가</button>
+                                </div>
+                                <div id="div-delivery-not-null" th:if="${delivery != null}">
+                                    <div class="d-flex justify-content-start align-items-center mb-1">
+                                        <div id="div-delivery-id" th:attr="data-delivery-id=${delivery.id}" class="me-3 fw-bold">
+                                            배송지명 | <span id="span-delivery-name" th:text="${delivery.name}"></span>
+                                        </div>
+                                        <button type="button" class="btn btn-xs" style="border-color: gray" onclick="showDeliveryList()">변경</button>
+                                    </div>
+                                    <div class="mb-1 small">
+                                        (<span id="span-delivery-zipcode" th:text="${delivery.zipcode}">(03134)</span>)
+                                        <span id="span-delivery-address" th:text="${delivery.address1} + ' ' + ${delivery.address2}">서울특별시 종로구 율곡로10길 105 디아망 4F</span>
+                                    </div>
+                                    <div class="mb-2 small">
+                                        <span id="span-delivery-recipient" th:text="${delivery.recipient}">수령인</span> |
+                                        <span id="span-delivery-phone" th:text="${delivery.phone}">010-1234-5678</span>
+                                    </div>
+                                    <div class="form-group mb-1">
+                                        <select name="deliveryMemo" class="form-select text-secondary" style="width: 500px">
+                                            <option value="0">배송메모를 선택해주세요</option>
+                                            <option value="1">문 앞에 놓아주세요</option>
+                                            <option value="2">배송 전에 미리 연락주세요</option>
+                                            <option value="3">부재 시 경비실에 맡겨주세요</option>
+                                            <option value="4">부재 시 전화 주시거나 문자 남겨주세요</option>
+                                            <option value="5">직접 입력</option>
+                                        </select>
+                                    </div>
+                                    <div hidden="hidden" id="div-delivery-memo" style="width: 500px">
+                                        <textarea name="memo" type="text" class="form-control" placeholder="배송 요청사항을 입력해주세요" style="width: 500px"></textarea>
+                                        <p class="text-end text-secondary" style="font-size: small">
+                                            <span id="span-text-count">0</span>/50
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 배송지 영역 끝 -->
+                        <!-- 1-2. 주문상품 영역 시작 -->
+                        <div class="row mb-3">
+                            <div class="col-12 mb-5" style="font-size: small">
+                                <h5 class="fw-bold">주문상품</h5>
+                                <hr class="mb-1">
+                                <table class="table text-center">
+                                    <thead>
+                                    <tr>
+                                        <th>상품정보</th>
+                                        <th>수량</th>
+                                        <th>가격</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="align-middle" id="tbody-item" th:attr="data-item-quantity=${dto.items.size()}">
+                                    <tr th:each="item : ${dto.items}">
+                                        <!-- 상품정보 영역 시작 -->
+                                        <td th:id="td-product- + ${item.productId}" th:attr="data-product-id=${item.productId}">
+                                            <div class="d-flex w-100 justify-content-start">
+                                                <a th:href="@{/store/detail/{id}(id=${item.productId})}" class="link-underline link-underline-opacity-0 text-dark" target="_blank">
+                                                    <div th:id="div-cart-id- + ${item.cartId == 0 ? 0 : item.cartId}"
+                                                         th:attr="data-cart-id=${item.cartId == 0 ? 0 : item.cartId}">
+                                                        <img th:src="@{${item.imageName}}" style="width: 80px; height: 80px">
+                                                    </div>
+                                                </a>
+                                                <div class="ms-3 text-start">
+                                                    <div>
+                                                        <div id="div-item-name"
+                                                             th:attr="data-item-name=${item.name}"
+                                                             th:text="${item.name}"
+                                                             style="display: -webkit-box;
+                                                              overflow: hidden;
+                                                              text-overflow: ellipsis;
+                                                              -webkit-box-orient: vertical;
+                                                              -webkit-line-clamp: 1;">
+                                                            LED조명 통서랍 수납침대 SSQ(매트리스 선택)
+                                                        </div>
+                                                        <div>
+                                                            <span th:attr="data-pay-item-price=${item.price != item.discountedPrice ? item.discountedPrice : item.price}"
+                                                                  th:class="${item.price != item.discountedPrice ? 'text-secondary text-decoration-line-through' : ''}"
+                                                                  th:text="${#numbers.formatInteger(item.price, 1, 'COMMA')}">
+                                                                189,000
+                                                            </span>원
+                                                            <span th:if="${item.price != item.discountedPrice}">
+                                                                <span th:text="${#numbers.formatInteger(item.discountedPrice, 1, 'COMMA')}"
+                                                                      class="text-danger">
+                                                                    170,000
+                                                                </span>원
+                                                            </span>
+                                                        </div>
+                                                        <div th:id="div-product-detail- + ${item.productDetailId}"
+                                                             th:attr="data-product-detail-id=${item.productDetailId}"
+                                                             class="text-secondary mt-2" style="font-size: 12px">
+                                                            사이즈 선택: <span th:text="${item.size}">슈퍼싱글SS 프레임만</span>
+                                                            / 색상 선택: <span th:text="${item.color}">화이트</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <!-- 상품정보 영역 끝 -->
+                                        <td>
+                                            <span th:id="span-item-amount"
+                                                  th:attr="data-item-amount=${item.amount}"
+                                                  th:text="${item.amount}">1
+                                            </span>개
+                                        </td>
+                                        <td class="fw-bold">
+                                            <span id="span-amount-to-price"
+                                                  th:attr="data-amount-to-price=${item.discountedPrice * item.amount}"
+                                                  th:text="${#numbers.formatInteger(item.discountedPrice * item.amount, 1, 'COMMA')}">
+                                                340,000
+                                            </span>원
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- 주문상품 영역 끝 -->
+                        <!-- 1-3. 포인트 영역 시작 -->
+                        <div class="row mb-3">
+                            <div class="col-12 mb-5">
+                                <h5 class="fw-bold">포인트</h5>
+                                <hr>
+                                <div class="form-group d-flex justify-content-start mb-1">
+                                    <input id="input-point" type="text" value="0" class="form-control me-3" style="width: 500px">
+                                </div>
+                                <div class="small" style="font-size: small">
+                                    보유 포인트
+                                    <span id="span-user-point"
+                                          th:attr="data-user-point=${user.getPoint()}"
+                                          th:text="${#numbers.formatInteger(user.getPoint(), 1, 'COMMA')}">
+                                        3000
+                                    </span>P
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 포인트 영역 끝 -->
+                        <!-- 1-4. 결제수단 영역 시작 -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="fw-bold">결제수단</h5>
+                                <hr>
+                                <div class="d-flex align-items-center ms-3 pb-4">
+                                    <input type="radio" value="카카오페이" checked>
+                                    <img th:src="@{/images/order/kakaopay-logo.png}" class="ms-2" style="width:5%">
+                                    <label class="ms-2 small fw-bold">카카오페이</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 결제수단 영역 끝 -->
+                    </div>
+                    <!-- 주문정보 영역 끝 -->
+
+                    <!-- 2. 우측 결제금액 정보 영역 시작 -->
+                    <div class="col-3">
+                        <div class="card sticky">
+                            <div class="card-body">
+                                <table class="table table-borderless" style="font-size: 14px">
+                                    <tr>
+                                        <td>총 상품금액</td>
+                                        <td class="text-end">
+                                            <strong>
+                                                <span id="span-total-item-price"
+                                                      th:attr="data-total-item-price=${dto.totalItemPrice}"
+                                                      th:text="${#numbers.formatInteger(dto.totalItemPrice, 1, 'COMMA')}">
+                                                    334,800
+                                                </span>원
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>총 할인금액</td>
+                                        <td class="text-end">
+                                            <strong>
+                                                <span id="span-total-discounted-price"
+                                                      th:attr="data-total-discounted-price=${dto.totalDiscountedPrice}"
+                                                      th:text="${#numbers.formatInteger(dto.totalDiscountedPrice, 1, 'COMMA')}">
+                                                    - 50,000
+                                                </span>원
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>포인트 사용</td>
+                                        <td class="text-end">
+                                            <strong>
+                                                <span id="span-use-point" data-use-point="0">0</span> P
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <hr>
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="fw-bold">총 결제금액</div>
+                                        <div class="text-end text-danger" style="font-size: 19px">
+                                            <span id="span-total-price"
+                                                  th:attr="data-total-price=${dto.totalPayPrice}, data-final-total-price=${dto.totalPayPrice}"
+                                                  th:text="${#numbers.formatInteger(dto.totalPayPrice, 1, 'COMMA')}"
+                                                  class="fw-bold">
+                                                283,800
+                                            </span>원
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="text-secondary text-center mb-2" style="font-size: 10px">
+                                    주문 내용을 확인하였으며, 정보 제공 등에 동의합니다.
+                                </div>
+                                <div class="text-center bg-white mb-3">
+                                    <button type="button" class="btn btn-dark w-100" id="btn-pay-ready">결제하기</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 결제금액 정보 영역 끝 -->
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" layout:fragment="script">
+    let $userPoint = $("#span-user-point");   // 유저 보유 포인트
+    let $inputPoint = $("#input-point");      // 입력한 사용 포인트
+    let $usedPoint = $("#span-use-point");    // 적용된 사용 포인트
+    let $totalPrice = $("#span-total-price"); // 총 결제금액
+
+    // 포인트 입력 시 엔터 방지
+    $(document).on('keydown', function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+        }
+    });
+
+    $inputPoint.keyup(function() {
+        // 포인트 사용 시 정수 외 입력 제한
+        let sanitizedValue = $(this).val().replace(/[^0-9]/g, '');
+
+        // input 박스 천단위 구분자 표시
+        let formattedValue = sanitizedValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        $(this).val(formattedValue);
+    });
+
+    $inputPoint.blur(function() {
+        // 빈 문자열 입력 시 0으로 초기화
+        if ($(this).val() === "" || $usedPoint.text() === "NaN") {
+            $(this).val(0);
+            $usedPoint.attr("data-use-point", 0);
+            $usedPoint.text(0);
+        }
+
+        // 사용한 포인트 총 결제금액에 반영
+        if (parseInt($(this).val()) > parseInt($userPoint.attr("data-user-point"))) {
+            alert("사용포인트는 보유포인트보다 클 수 없습니다.");
+            $(this).val(0);
+            return false;
+        } else if (parseInt($(this).val()) > parseInt($("#span-total-price").attr("data-total-price"))) {
+            alert("사용포인트는 구매금액보다 클 수 없습니다.");
+            $(this).val(0);
+            return false;
+        } else {
+            // input 박스 천단위 구분자 제거
+            let $inputValue = $inputPoint.val().replace(/,/g, '');
+
+            // 입력이 완료된 값을 포인트사용 칸에 천단위 구분자 표시하여 반영
+            $usedPoint.text(parseInt($inputValue).toLocaleString());
+            $usedPoint.attr("data-use-point", $inputValue);
+
+            let beforeTotalPrice = parseInt($totalPrice.attr("data-total-price"));                // 포인트 사용 전 총 결제금액
+            let afterTotalPrice = beforeTotalPrice - parseInt($usedPoint.attr("data-use-point")); // 포인트 사용 후 총 결제금액
+            $totalPrice.attr("data-final-total-price", afterTotalPrice);
+            $totalPrice.text(afterTotalPrice.toLocaleString());
+        }
+    });
+
+    // 카카오페이 결제 팝업창 연결
+    $(function() {
+        $("#btn-pay-ready").click(function(e) {
+            // 배송지 없는 상태로 결제하기 클릭 시 기본동작 막기
+            if ($("#div-delivery-id").attr("data-delivery-id") == null) {
+                alert("배송지를 추가해주세요.");
+                return false;
+            }
+
+            // 카카오페이에 보낼 대표 상품명
+            let name;
+            if (parseInt($("#tbody-item").attr("data-item-quantity")) == 1) {
+                name = "룸메이크 - " + $("#div-item-name").attr("data-item-name");
+            } else {
+                name = "룸메이크 - " + $("#div-item-name").attr("data-item-name") + " 외 " + (parseInt($("#tbody-item").attr("data-item-quantity")) - 1) + "개";
+            }
+
+            // 배송메모 직접입력 시 textarea 내용으로 저장
+            let deliveryMemo;
+            if ($("select[name=deliveryMemo] :selected").val() == 5) {
+                if ($("textarea[name=memo]").val() == '') {
+                    alert("배송 요청사항을 입력해주세요.")
+                    return false;
+                }
+                deliveryMemo = $("textarea[name=memo]").val();
+            } else if ($("select[name=deliveryMemo] :selected").val() == 0) {
+                deliveryMemo = null;
+            } else {
+                deliveryMemo = $("select[name=deliveryMemo] :selected").text();
+            }
+
+            // OrderCreateForm의 List<CartCreateForm>에 담을 배열
+            let items = [];
+
+            // 상품 번호
+            $("td[id^=td-product]").each(function() {
+                let item = {productId: $(this).attr("data-product-id")};
+                items.push(item);
+            });
+
+            // 상품상세 번호
+            $("div[id^=div-product-detail]").each(function(index, div) {
+                let item = items[index];
+                item["productDetailId"] = $(div).attr("data-product-detail-id");
+            })
+
+            // 장바구니 번호
+            $("div[id^=div-cart-id]").each(function(index, div) {
+                let item = items[index];
+                item["cartId"] = $(div).attr("data-cart-id");
+            });
+
+            // 상품 수량
+            $("span[data-item-amount]").each(function(index, span) {
+                let item = items[index];
+                item["amount"] = $(span).attr("data-item-amount");
+            })
+
+            // 주문일 기준 상품금액
+            $("span[data-pay-item-price]").each(function(index, span) {
+                let item = items[index];
+                item["itemPrice"] = $(span).attr("data-pay-item-price");
+            });
+
+            // 상품*수량 합계금액 (할인가격 포함)
+            $("span[data-amount-to-price]").each(function(index, span) {
+                let item = items[index];
+                item["amountToItemPrice"] = $(span).attr("data-amount-to-price");
+            });
+
+            let data = {
+                name: name,                                                        // 카카오페이에 보낼 대표 상품명
+                totalPrice: $("#span-total-price").attr("data-final-total-price"), // 총 결제금액
+                usePoint: $("#span-use-point").attr("data-use-point"),             // 사용 포인트
+                deliveryId: $("#div-delivery-id").attr("data-delivery-id"),        // 배송지 번호
+                deliveryMemo: deliveryMemo,                                        // 배송메모
+                items: items
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/order/pay/ready',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function(response) {
+                    location.href = response.next_redirect_pc_url;
+                }
+            });
+        });
+    });
+
+    // 배송지 리스트 팝업 표시
+    function showDeliveryList() {
+        let type = "base";
+        window.open("/order/delivery/list/" + type, "_blank", "width=600,height=700,top=70,left=100")
+    }
+
+    function showDeliveryText() {
+        // 배송메모 직접입력 란 표시
+        $("select[name=deliveryMemo]").change(function() {
+            if ($(this).val() == 5) {
+                $("#div-delivery-memo").removeAttr("hidden");
+            } else {
+                $("#div-delivery-memo").attr("hidden", "hidden");
+            }
+        });
+
+        // 배송메모 글자수 카운트
+        $("textarea[name=memo]").keyup(function() {
+            let text = $(this).val();
+            let len = text.length;
+            if (len >= 50) {
+                $(this).val(text.substring(0, 50));
+            }
+
+            $("#span-text-count").text(len);
+        });
+    }
+
+    showDeliveryText();
+
+    // 배송지 변경 업데이트 함수
+    function updateDelivery(deliveryId) {
+        $.ajax({
+            type: 'POST',
+            url: '/order/updateDelivery',
+            data: {deliveryId: deliveryId},
+            success: function(response) {
+                // 기본배송지가 있는 상태에서 변경하는 경우
+                if ($("#div-delivery-not-null").length > 0) {
+                    $("#div-delivery-id").attr("data-delivery-id", response.id);
+                    $("#span-delivery-name").text(response.name);
+                    $("#span-delivery-zipcode").text(response.zipcode);
+                    $("#span-delivery-address").text(response.address1 + " " + response.address2);
+                    $("#span-delivery-phone").text(response.phone);
+                    $("#span-delivery-recipient").text(response.recipient);
+                }
+                // 기본배송지가 없는 상태에서 변경하는 경우
+                else if ($("#div-delivery-null").length > 0) {
+                    let $div = $("#div-delivery-null").empty();
+                    let responseDiv = `
+                            <div>
+                                <div class="d-flex justify-content-start align-items-center mb-1">
+                                    <div id="div-delivery-id" data-delivery-id="${response.id}" class="me-3 fw-bold">
+                                        배송지명 | <span id="span-delivery-name">${response.name}</span>
+                                    </div>
+                                    <button type="button" class="btn btn-xs" style="border-color: gray" onclick="showDeliveryList()">변경</button>
+                                </div>
+                                <div class="mb-1 small">
+                                    <span id="span-delivery-zipcode">(${response.zipcode})</span>
+                                    <span id="span-delivery-address">${response.address1} ${response.address2}</span>
+                                </div>
+                                <div class="mb-2 small">
+                                    <span id="span-delivery-recipient">${response.recipient}</span> |
+                                    <span id="span-delivery-phone">${response.phone}</span>
+                                </div>
+                                <div class="form-group mb-1">
+                                    <select name="deliveryMemo" class="form-select text-secondary" style="width: 500px">
+                                        <option value="0">배송메모를 선택해주세요</option>
+                                        <option value="1">문 앞에 놓아주세요</option>
+                                        <option value="2">배송 전에 미리 연락주세요</option>
+                                        <option value="3">부재 시 경비실에 맡겨주세요</option>
+                                        <option value="4">부재 시 전화 주시거나 문자 남겨주세요</option>
+                                        <option value="5">직접 입력</option>
+                                    </select>
+                                </div>
+                                <div hidden="hidden" id="div-delivery-memo" style="width: 500px">
+                                    <textarea name="memo" type="text" class="form-control" placeholder="배송 요청사항을 입력해주세요" style="width: 500px"></textarea>
+                                    <p class="text-end text-secondary" style="font-size: small">
+                                        <span id="span-text-count">0</span>/50
+                                    </p>
+                                </div>
+                            </div>
+                    `
+                    $div.append(responseDiv);
+                    showDeliveryText();
+                }
+            }
+        });
+    }
+</script>
+</html>

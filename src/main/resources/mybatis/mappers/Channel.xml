@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.channel.mapper.ChannelMapper">
+
+    <sql id="userAndPostCount">
+        (select count(distinct user_id)
+         from channel_participant
+         where channel_id = c.channel_id)   as channelParticipantCount,
+        (select count(distinct post_id)
+         from channel_post
+         where channel_id = c.channel_id
+         and post_status = 'active')   as channelPostCount
+    </sql>
+
+    <insert id="createChannel" parameterType="com.roommake.channel.vo.Channel">
+        insert into channel
+            (user_id, channel_title, channel_description, channel_image_name)
+        values
+            (#{user.id}, #{title}, #{description}, #{imageName})
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+    </insert>
+
+    <select id="getTotalRows" parameterType="com.roommake.dto.Criteria" resultType="int">
+        select
+            count(*)
+        from
+            channel
+        <where>
+            <if test="'all' == opt">
+                channel_title like CONCAT('%', #{keyword}, '%')
+                or channel_description like CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="'title' == opt">
+                and channel_title like CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="'description' == opt">
+                and channel_description like CONCAT('%', #{keyword}, '%')
+            </if>
+            and channel_delete_yn = 'N'
+        </where>
+    </select>
+
+    <select id="getAllChannels" parameterType="com.roommake.dto.Criteria" resultType="com.roommake.channel.dto.ChannelInfoDto">
+        select
+            channel_id              as id,
+            user_id                 as "user.id",
+            channel_title           as title,
+            channel_description     as description,
+            channel_create_date     as createDate,
+            channel_update_date     as updateDate,
+            channel_delete_date     as deleteDate,
+            channel_delete_yn       as deleteYn,
+            channel_image_name      as imageName,
+            channelParticipantCount as channelParticipantCount,
+            channelPostCount        as channelPostCount
+        from
+            (
+                select
+                    @rownum := @rownum + 1     as row_num,
+                    c.channel_id,
+                    c.user_id,
+                    c.channel_title,
+                    c.channel_description,
+                    c.channel_create_date,
+                    c.channel_update_date,
+                    c.channel_delete_date,
+                    c.channel_delete_yn,
+                    c.channel_image_name,
+                    <include refid="userAndPostCount" />
+                from
+                    (select @rownum := 0) r,
+                    channel c
+                <where>
+                    <if test="'all' == opt">
+                        c.channel_title like CONCAT('%', #{keyword}, '%')
+                        or c.channel_description like CONCAT('%', #{keyword}, '%')
+                    </if>
+                    <if test="'title' == opt">
+                        and c.channel_title like CONCAT('%', #{keyword}, '%')
+                    </if>
+                    <if test="'description' == opt">
+                        and c.channel_description like CONCAT('%', #{keyword}, '%')
+                    </if>
+                        and c.channel_delete_yn = 'N'
+                </where>
+                order by
+                    <choose>
+                        <when test="'all' == sort">
+                            c.channel_id asc
+                        </when>
+                        <when test="'date' == sort">
+                            c.channel_create_date desc
+                        </when>
+                        <when test="'part' == sort">
+                            channelParticipantCount desc
+                        </when>
+                    </choose>
+            ) as channel
+        where
+            row_num between #{begin} and #{end}
+    </select>
+
+    <select id="getChannelsByUserId" parameterType="int" resultType="com.roommake.channel.vo.Channel">
+        select
+            cp.user_id               as "user.id",
+            cp.channel_id            as id,
+            c.channel_title          as title,
+            c.channel_description    as description,
+            c.channel_create_date    as createDate,
+            c.channel_update_date    as updateDate,
+            c.channel_delete_date    as deleteDate,
+            c.channel_delete_yn      as deleteYn,
+            c.channel_image_name     as imageName
+        from
+            channel_participant cp
+            left join channel c on c.channel_id = cp.channel_id
+        where
+            cp.user_id = #{userId}
+            and c.channel_delete_yn = 'N'
+    </select>
+
+    <select id="getChannelByChannelId" parameterType="int" resultType="com.roommake.channel.vo.Channel">
+        select
+            channel_id          as id,
+            user_id             as "user.id",
+            channel_title       as title,
+            channel_description as description,
+            channel_create_date as createDate,
+            channel_update_date as updateDate,
+            channel_delete_date as deleteDate,
+            channel_delete_yn   as deleteYn,
+            channel_image_name  as imageName
+        from
+            channel c
+        where
+            channel_id = #{channelId}
+    </select>
+
+    <select id="getUserAndPostCountChannelId" parameterType="int" resultType="com.roommake.channel.dto.ChannelInfoDto">
+        select
+            c.channel_id  as id,
+            <include refid="userAndPostCount" />
+        from
+            channel c
+        where
+            c.channel_id = #{channelId};
+    </select>
+
+    <update id="modifyChannel" parameterType="com.roommake.channel.vo.Channel">
+        update
+            channel
+        <set>
+            channel_title = #{title},
+            channel_description = #{description},
+            channel_create_date = #{createDate},
+            channel_update_date = #{updateDate},
+            channel_delete_yn = #{deleteYn},
+            channel_image_name = #{imageName},
+            <if test=' "Y" == deleteYn '>
+                channel_delete_date = #{deleteDate}
+            </if>
+        </set>
+        where
+            channel_id = #{id}
+    </update>
+
+    <insert id="createChannelParticipant" parameterType="com.roommake.channel.vo.ChannelParticipant">
+        insert into channel_participant
+            (channel_id, user_id)
+        values
+            (#{channel.id}, #{user.id})
+    </insert>
+
+    <select id="getChannelParticipant" parameterType="com.roommake.channel.vo.ChannelParticipant" resultType="com.roommake.channel.vo.ChannelParticipant">
+        select
+            channel_id as "channel.id",
+            user_id    as "user.id"
+        from
+            channel_participant
+        where
+            channel_id = #{channel.id}
+            and user_id = #{user.id}
+    </select>
+
+    <delete id="deleteChannelParticipant" parameterType="com.roommake.channel.vo.ChannelParticipant">
+        delete from
+            channel_participant
+        where
+            channel_id = #{channel.id}
+            and user_id = #{user.id}
+    </delete>
+
+    <select id="getAllChannelPosts" parameterType="int" resultType="com.roommake.channel.vo.ChannelPost">
+        select
+            post_id              as id,
+            channel_id           as "chnnel.id",
+            user_id              as "user.id",
+            post_title           as title,
+            post_content         as content,
+            post_view_count      as viewCount,
+            post_create_date     as createDate,
+            post_update_date     as updateDate,
+            post_delete_date     as deleteDate,
+            post_status          as status,
+            post_delete_yn       as deleteYn,
+            post_like_count      as likeCount,
+            post_complaint_count as complaintCount,
+            post_image_name      as imageName
+        from
+            channel_post
+        where
+            channel_id = #{value}
+            and post_status = 'active'
+            and post_delete_yn = 'N'
+    </select>
+
+
+</mapper>

@@ -1,0 +1,78 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='product'">
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h1>상품리스트</h1>
+            <form action="/admin/product/excel" method="POST" enctype="multipart/form-data" class="row g-3 align-items-center" style="max-width: 300px; margin-right: auto;">
+                <div class="col-auto">
+                    <label for="excel" class="visually-hidden">엑셀 파일 선택</label>
+                    <input type="file" accept=".xlsx" class="form-control form-control-sm" id="excel" name="excel">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary btn-sm">저장</button>
+                </div>
+            </form>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <form type="search" action="/admin/product/list" method="GET">
+                    <select name="type" style="height: 28px">
+                        <option value="name" th:selected="${type == 'name'}">상품명</option>
+                        <option value="number" th:selected="${type == 'number'}">상품번호</option>
+                        <option value="nameNumber" th:selected="${type == 'nameNumber'}">상품명+상품번호</option>
+                    </select>
+                    <input type="text" name="keyword" th:value="${keyword}"/>
+                    <button type="search">검색</button>
+                </form>
+            </div>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">상품번호</th>
+                    <th scope="col">상품사진</th>
+                    <th scope="col">상품이름</th>
+                    <th scope="col">상품등록일</th>
+                    <th scope="col">상품수정일</th>
+                    <th scope="col">상품설명</th>
+                    <th scope="col">관리</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products}">
+                    <td>
+                        <a th:href="@{/admin/product/detail(id=${product.id})}" th:text="${product.id}">11515151</a>
+                    </td>
+                    <td>
+                        <img th:src="@{|${product.imageName}|}" width="80" height="80">
+                    </td>
+                    <td th:text="${product.name}">침대</td>
+                    <td th:text="${#dates.format(product.createDate, 'yyyy-MM-dd')}">2024-04-19</td>
+                    <td th:text="${#dates.format(product.updateDate, 'yyyy-MM-dd')}">2024-04-19</td>
+                    <td th:text="${product.content}">참좋은 침대</td>
+                    <td>
+                        <a class="btn btn-primary" th:href="@{'/admin/product/modify?id=' + ${product.id}}" role="button">수정</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a class="btn btn-primary" th:href="@{/admin/product/create}" role="button">상품등록</a>
+            </div>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center" th:if="${totalPages > 0}">
+                    <li class="page-item" th:class="${page == 1} ? 'page-item disabled' : 'page-item'">
+                        <a class="page-link" th:href="@{'/admin/product/list?page=' + ${prevPage} + '&type=' + ${type} + '&keyword=' + ${keyword}}">이전</a>
+                    </li>
+                    <li class="page-item" th:each="pageNumber : ${#numbers.sequence(page - 2 > 0 ? page - 2 : 1, page + 2 < totalPages ? page + 2 : totalPages)}">
+                        <a class="page-link" th:href="@{'/admin/product/list?page=' + ${pageNumber} + '&type=' + ${type} + '&keyword=' + ${keyword} }" th:text="${pageNumber}" th:class="${page == pageNumber} ? 'page-link active' : 'page-link'"></a>
+                    </li>
+                    <li class="page-item" th:class="${page == totalPages} ? 'page-item disabled' : 'page-item'">
+                        <a class="page-link" th:href="@{'/admin/product/list?page=' + ${nextPage} + '&type=' + ${type} + '&keyword=' + ${keyword} }">다음</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+</html>

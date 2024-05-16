@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.admin.management.mapper.NoticeMapper">
+
+    <insert id="createNotice" parameterType="com.roommake.admin.management.vo.Notice">
+        insert into notice
+            (notice_title, notice_content, notice_create_by, notice_update_by, notice_priority)
+        values
+            (#{title}, #{content}, #{createByUser.id}, #{updateByUser.id}, #{priority})
+    </insert>
+
+    <update id="modifyNotice" parameterType="com.roommake.admin.management.vo.Notice">
+        update
+            notice
+        <set>
+            notice_title            = #{title},
+            notice_content          = #{content},
+            notice_priority         = #{priority},
+            notice_update_by        = #{updateByUser.id},
+            notice_update_date      = #{updateDate},
+            notice_delete_yn        = #{deleteYn},
+            <if test='"Y" == deleteYn '>
+                notice_delete_date  = #{deleteDate}
+            </if>
+        </set>
+        where
+            notice_id = #{id}
+    </update>
+
+    <select id="getAllNotices" resultType="com.roommake.admin.management.vo.Notice">
+        select
+            notice_id           as id,
+            notice_title        as title,
+            notice_create_date  as createDate,
+            notice_update_date  as updateDate,
+            notice_priority     as priority,
+            notice_create_by    as "createByUser.id",
+            notice_update_by    as "updateByUser.id"
+        from
+            notice
+        where
+            notice_delete_yn = 'N'
+        order by
+            notice_id desc
+    </select>
+
+    <select id="getNoticeById" parameterType="int" resultType="com.roommake.admin.management.vo.Notice">
+        select
+            n.notice_id           as id,
+            n.notice_title        as title,
+            n.notice_content      as content,
+            n.notice_create_date  as createDate,
+            n.notice_update_date  as updateDate,
+            n.notice_delete_date  as deleteDate,
+            n.notice_delete_yn    as deleteYn,
+            n.notice_priority     as priority,
+            n.notice_create_by    as "createByUser.id",
+            u.user_nickname       as "createByUser.nickname",
+            n.notice_update_by    as "updateByUser.id",
+            u.user_nickname       as "updateByUser.nickname"
+        from
+            notice n left join user u on n.notice_create_by = u.user_id
+        where
+            notice_delete_yn = 'N'
+        and notice_id = #{id}
+        order by
+            notice_id desc
+    </select>
+
+    <select id="getNotices" parameterType="com.roommake.dto.Criteria" resultType="com.roommake.admin.management.vo.Notice">
+        select
+            notice_id           as id,
+            notice_title        as title,
+            notice_content      as content,
+            notice_create_date  as createDate,
+            notice_update_date  as updateDate,
+            notice_priority     as priority,
+            notice_create_by    as "createByUser.id",
+            user_nickname       as "createByUser.nickname",
+            notice_update_by    as "updateByUser.id",
+            user_nickname       as "updateByUser.nickname"
+        from
+            (select
+                n.notice_id,
+                n.notice_title,
+                n.notice_content,
+                n.notice_create_date,
+                n.notice_update_date,
+                n.notice_priority,
+                n.notice_create_by,
+                u.user_nickname,
+                n.notice_update_by,
+                @rownum := @rownum +1 as row_num
+            from
+                (select @rownum := 0) r,
+                notice n left join user u on n.notice_create_by = u.user_id
+            <where>
+                <if test="'title' == opt">
+                    notice_title like CONCAT('%', #{keyword}, '%')
+                </if>
+                <if test="'content' == opt">
+                    notice_content like CONCAT('%', #{keyword}, '%')
+                </if>
+                and n.notice_delete_yn = 'N'
+            </where>
+            order by
+                <choose>
+                    <when test="'title' == sort">
+                        notice_title asc
+                    </when>
+                    <when test="'priority' == sort">
+                        notice_priority asc
+                    </when>
+                    <otherwise>
+                        notice_id desc
+                    </otherwise>
+                </choose>
+            ) as notice
+        where
+            row_num between #{begin} and #{end}
+    </select>
+
+    <select id="getTotalRows" parameterType="com.roommake.dto.Criteria" resultType="int">
+        select
+            count(*)
+        from
+            notice
+        <where>
+            <if test="'title' == opt">
+                notice_title like CONCAT('%', #{keyword}, '%')
+            </if>
+            <if test="'content' == opt">
+                notice_content like CONCAT('%', #{keyword}, '%')
+            </if>
+            and notice_delete_yn = 'N'
+        </where>
+    </select>
+</mapper>

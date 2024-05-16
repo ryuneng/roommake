@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.admin.management.mapper.BannerMapper">
+    <insert id="createBanner" parameterType="com.roommake.admin.management.vo.Banner" >
+        insert into banner
+            (user_id, banner_start_date, banner_end_date, banner_status, banner_image_origin_name, banner_image_upload_name, banner_description, banner_url)
+        values
+            (#{user.id}, #{startDate}, #{endDate}, #{status}, #{imageOriginName}, #{imageUploadName}, #{description}, #{url})
+    </insert>
+
+    <update id="modifyBanner" parameterType="com.roommake.admin.management.vo.Banner">
+        update
+            banner
+        <set>
+            banner_start_date           = #{startDate},
+            banner_end_date             = #{endDate},
+            banner_status               = #{status},
+            banner_image_origin_name    = #{imageOriginName},
+            banner_image_upload_name    = #{imageUploadName},
+            banner_description          = #{description},
+            banner_url                  = #{url},
+            banner_delete_yn            = #{deleteYn},
+            <if test=' "Y" == deleteYn '>
+                banner_delete_date      = #{deleteDate}
+            </if>
+        </set>
+        where
+            banner_id = #{id}
+    </update>
+
+    <select id="getBannerById" parameterType="int" resultType="com.roommake.admin.management.vo.Banner">
+        select
+            banner_id                   as id,
+            user_id                     as "user.id",
+            banner_create_date          as createDate,
+            banner_delete_date          as deleteDate,
+            banner_start_date           as startDate,
+            banner_end_date             as endDate,
+            banner_status               as status,
+            banner_image_origin_name    as imageOriginName,
+            banner_image_upload_name    as imageUploadName,
+            banner_delete_yn            as deleteYn,
+            banner_description          as description,
+            banner_url                  as url
+        from
+            banner
+        where
+            banner_id = #{id}
+        and banner_delete_yn = 'N'
+        order by
+            banner_id desc
+    </select>
+
+
+    <select id="getBanners" parameterType="com.roommake.dto.Criteria" resultType="com.roommake.admin.management.vo.Banner">
+        select
+            banner_id                   as id,
+            user_id                     as "user.id",
+            user_nickname               as "user.nickname",
+            banner_create_date          as createDate,
+            banner_delete_date          as deleteDate,
+            banner_start_date           as startDate,
+            banner_end_date             as endDate,
+            banner_status               as status,
+            banner_image_origin_name    as imageOriginName,
+            banner_image_upload_name    as imageUploadName,
+            banner_delete_yn            as deleteYn,
+            banner_description          as description,
+            banner_url                  as url
+        from
+            (select
+                banner_id,
+                b.user_id,
+                u.user_nickname,
+                banner_create_date,
+                banner_delete_date,
+                banner_start_date,
+                banner_end_date,
+                banner_status,
+                banner_image_origin_name,
+                banner_image_upload_name,
+                banner_delete_yn,
+                banner_description,
+                banner_url,
+                @rownum := @rownum + 1 as row_num
+            from
+                (select @rownum := 0) r,
+                banner b
+                left join user u on b.user_id = u.user_id
+            <where>
+                <choose>
+                    <when test='filt == "expect"'>
+                    and banner_status = 'expect'
+                    </when>
+                    <when test='filt == "active"'>
+                    and banner_status = 'active'
+                    </when>
+                    <when test='filt == "end"'>
+                    and banner_status = 'end'
+                    </when>
+                    <otherwise>
+                    and (banner_status in('expect', 'active', 'end'))
+                    </otherwise>
+                </choose>
+                and banner_delete_yn = 'N'
+            </where>
+            order by
+                <choose>
+                    <when test='sort == "new"'>
+                        banner_create_date desc
+                    </when>
+                    <when test='sort == "old"'>
+                        banner_create_date asc
+                    </when>
+                    <otherwise>
+                        banner_id desc
+                    </otherwise>
+                </choose>
+        ) as banner
+        where
+            row_num between #{begin} and #{end}
+    </select>
+    <select id="getTotalRows" parameterType="com.roommake.dto.Criteria" resultType="int">
+        select
+            count(*)
+        from
+            banner
+        <where>
+            <if test="'expect' == filt">
+                banner_status = 'expect'
+            </if>
+            <if test="'active' == filt">
+                banner_status = 'active'
+            </if>
+            <if test="'end' == filt">
+                banner_status = 'end'
+            </if>
+            and banner_delete_yn = 'N'
+        </where>
+    </select>
+
+    <select id="getAllBanners" resultType="com.roommake.admin.management.vo.Banner">
+        select
+            banner_id                       as id,
+            user_id                         as "user.id",
+            banner_create_date              as createDate,
+            banner_start_date               as startDate,
+            banner_end_date                 as endDate,
+            banner_status                   as status,
+            banner_image_origin_name        as imageOriginName,
+            banner_image_upload_name        as imageUploadName,
+            banner_description              as description,
+            banner_url                      as url
+        from
+            banner
+        where
+            banner_delete_yn = 'N'
+        order by
+            banner_id desc
+    </select>
+
+    <update id="modifyBannerStatus">
+        update
+            banner
+        set
+            banner_status =
+            case
+                when banner_start_date &gt; now() then 'expect'
+                when banner_end_date &lt; now() then'end'
+                else 'active'
+            end
+        where
+            banner_status != 'end'
+        and banner_delete_yn = 'N'
+    </update>
+</mapper>

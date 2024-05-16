@@ -1,0 +1,1099 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}" xmlns="http://www.w3.org/1999/html">
+<head>
+    <style>
+        .buy-btn {
+            width: 363px;
+            height: 50px;
+        }
+
+        .buy-btn-under {
+            width: 255px;
+            height: 50px;
+        }
+
+        .detail-index {
+            text-align: center;
+            /*border-width: 5px;
+            border-color: lightblue;
+            border-style: double; */
+        }
+
+        .product-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+
+        }
+
+
+        .product-buy-navbar {
+            position: sticky;
+            top: 100px;
+        }
+
+        /* 상품설명사진크기조정 */
+        .product-description {
+            width: 100%;
+        }
+
+        .rating_number {
+            top: 100%;
+        }
+
+
+        #scrollTopPc {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            cursor: pointer;
+            z-index: 99;
+            font-size: 50px;
+        }
+
+        /* 맨 아래 이동버튼css입니다
+        #scrollDownPc {
+            position: fixed;
+            bottom: 60px;
+            right: 15px;
+            cursor: pointer;
+            z-index: 99;
+            font-size: 50px;
+        }
+        */
+
+        #myform fieldset {
+            display: inline-block;
+            direction: rtl;
+            border: 0;
+        }
+
+        #myform fieldset legend {
+            text-align: right;
+        }
+
+        #myform input[type=radio] {
+            display: none;
+        }
+
+        #myform label {
+            font-size: 3em;
+            color: transparent;
+            text-shadow: 0 0 0 #f0f0f0;
+        }
+
+        #myform label:hover {
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+
+        #myform label:hover ~ label {
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+
+        #myform input[type=radio]:checked ~ label {
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+
+        #reviewContents {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: solid 1.5px #D3D3D3;
+            border-radius: 5px;
+            font-size: 16px;
+            resize: none;
+        }
+
+        /* 상뷰리뷰 별점을 나타내는 css */
+        .star_rating {
+            width: 100%;
+            box-sizing: border-box;
+            display: inline-flex;
+            float: left;
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .star_rating .star {
+            width: 25px;
+            height: 25px;
+            margin-right: 10px;
+            display: inline-block;
+            background: url('https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FE2bww%2FbtsviSSBz4Q%2F5UYnwSWgTlFt6CEFZ1L3Q0%2Fimg.png') no-repeat;
+            background-size: 100%;
+            box-sizing: border-box;
+        }
+
+        .star_rating .star.on {
+            width: 25px;
+            height: 25px;
+            margin-right: 10px;
+            display: inline-block;
+            background: url('https://blog.kakaocdn.net/dn/b2d6gV/btsvbDoal87/XH5b17uLeEJcBP3RV3FyDk/img.png') no-repeat;
+            background-size: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+    <link href="/assets/css/star.css" rel="stylesheet"/>
+
+</head>
+<div layout:fragment="content" class="container my-3 mt-4">
+    <div class="container">
+        <div class="row">
+            <!-- 상품 이미지 -->
+            <div class="col-md-5" style="height: 400px;">
+                <img th:src="@{${product.imageName}}" width="525" height="400">
+            </div>
+            <div class="col-md-7 ps-6">
+                <span class="fs-1" id="product-span" th:attr="data-this-productId=${id}" th:text="${product.name}">정말정말좋은 침대</span>
+                <!-- 스크랩등록 popup으로 이동하는버튼 -->
+                <a sec:authorize="!isAuthenticated()" class="btn p-0" th:href="@{/user/login}" style="border: none; background-color: transparent; padding: 0; height: 30px; width: 30px;">
+                    <div style="font-size: 20px"><i class="bi bi-bookmark"></i></div>
+                </a>
+<!--                <div sec:authorize="isAuthenticated()">-->
+<!--                    <button style="font-size: 40px; float: right" id="btn-product-scrap" th:if="${!commScrap}" th:attr="data-community-id=${product.id}">-->
+<!--                        <div class="scrap-icon nav-item" style="font-size: 20px"><i class="bi bi-bookmark-plus"></i></div>-->
+<!--                    </button>-->
+<!--                    <button style="font-size: 40px; float: right" id="btn-product-ubScrap" th:if="${commScrap}" th:attr="data-community-id=${product.id}">-->
+<!--                        <div class="scrap-icon nav-item" style="font-size: 20px"><i class="bi bi-bookmark-plus"></i></div>-->
+<!--                    </button>-->
+<!--                </div>-->
+                <div>
+                    <i class="bi bi-star-fill" style="height: 35px; color: gold;"></i>
+                    <span th:text="${#numbers.formatDecimal((productRatingTotal/productReviewAmount), 1, 1)}" th:if="${productRatingTotal} > 0 ">4.3</span>
+                    <span th:text="${productRatingTotal}" th:if="${productRatingTotal} == 0">4.3</span>
+                    <span><strong th:text="${productReviewAmount}">상품의 리뷰갯수</strong>개 리뷰</span>
+                </div>
+                <div>
+                    <span class="fs-2 text-danger" id="product-discount" th:attr="data-discount=${product.discount}" th:text="${#numbers.formatDecimal(product.discount,1,0)}">50</span><span class="fs-2 text-danger">%</span>
+                    <span th:if="${product.discount > 0}" class="fs-2 text-black-50 text-decoration-line-through"><strong  data-th-text="${#numbers.formatInteger(product.price, 3, 'COMMA')}">100,000</strong>원</span>
+                </div>
+                <div>
+                    <span th:if="${product.discount > 0}" class="fs-2"><strong id="product-price" th:attr="data-price=${product.price}" data-th-text="${#numbers.formatInteger((product.price - (product.price * (product.discount/100))), 3, 'COMMA')}">100,000</strong>원</span>
+                    <span th:unless="${product.discount > 0}" class="fs-2"><strong id="product-price" th:attr="data-price=${product.price}" data-th-text="${#numbers.formatInteger(product.price, 3, 'COMMA')}">100,000</strong>원</span>
+                </div>
+                <hr>
+                <!-- 상단 상품선택 select바 -->
+                <select class="form-select" id="product-option">
+                    <option hidden>상품을 선택하세요</option>
+                    <option id="product-name" name="option"
+                            th:value="${productDetail.id}"
+                            th:each="productDetail, loop : ${productDetail}"
+                            th:text="${product.name} + '/' + ${productDetail.size} + '/' + ${productDetail.color}"
+                            th:attr="data-name=${product.name},
+                            data-size=${productDetail.size},
+                            data-color=${productDetail.color},
+                            data-product-detail-id=${productDetail.id},
+                            data-product-id=${product.id}">갈색침대
+                    </option>
+                </select>
+                <!-- 옵션이 있는 경우에 나오도록 만들예정
+                <select class="form-select d-none" id="product-options">
+                    <option hidden>옵션을 선택하세요</option>
+                    <option th:each="productDetail, loop : ${productDetail}" th:text="${productDetail.color}">매트리스</option>
+                </select>
+                -->
+            </div>
+        </div>
+        <!--
+        <div class="row mb-3">
+            <div class="col-md-7 ps-6 offset-5">
+                <form id="order-form" method="post" th:action="@{/store/addCart}">
+
+                    <div class="bg-body-tertiary mb-3" id="order-box">
+
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="fs-3">총 주문금액</span>
+                        <span class="fs-3" id="product-price" th:attr="data-price=${product.price}">
+                        <strong id="totalPrice">0</strong>원
+
+                        </span>
+                    </div>
+                    <button type="button" id="buy-btn-cart" class="btn btn-outline-primary buy-btn">장바구니</button>
+                    <button type="button" id="buy-btn-order" class="btn btn-primary buy-btn">바로구매</button>
+                </form>
+            </div>
+        </div>
+        -->
+        <div class="product-navbar">
+            <!-- 상품디테일페이지 네비바 -->
+            <nav class="navbar navbar-expand-lg bg-body-tertiary">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th class="detail-index" id="product-content">상품정보</th>
+                        <th class="detail-index" id="product-review">상품리뷰</th>
+                        <th class="detail-index" id="product-qna">상품문의</th>
+                        <th class="detail-index" id="order-product">다른상품</th>
+                    </tr>
+                    </thead>
+                </table>
+            </nav>
+        </div>
+        <!-- 상품메인설명부분 -->
+        <div class="row">
+            <div class="col-md-7">
+                <div id="product-content-main">
+                    <img class="product-description" th:src="@{/images/store/productdetail/b0fa5096cc009.jpg}">
+                </div>
+                <br/>
+                <span class="fs-4" id="product-review-main">리뷰</span>
+                <!-- 신규댓글등록버튼 -->
+                <button type="button" class="btn btn-primary d-none" id="product-review-btn" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                        style="float: right;">
+                    리뷰쓰기
+                </button>
+                <!-- 신규댓글등록 모달창 -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">상품리뷰</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <select class="form-select reply-select" id="review-select-model">
+                                    <option id="product-name-review-modal" name="option"
+                                            th:value="${productDetail.id}"
+                                            th:each="productDetail, loop : ${productDetail}"
+                                            th:text="${product.name} + '/' + ${productDetail.size} + '/' + ${productDetail.color}"
+                                            th:attr="data-name=${product.name},
+                                        data-size=${productDetail.size},
+                                        data-color=${productDetail.color},
+                                        data-product-detail-id=${productDetail.id},
+                                        data-product-id=${product.id}">갈색침대
+                                    </option>
+                                </select>
+                                <form class="mb-3 visually" name="myform" id="myform" method="post" th:action=@{|/store/replyCreate/${product.id}|}>
+                                    <fieldset>
+                                        <span class="text-bold">별점을 선택해주세요</span>
+                                        <input type="radio" name="reviewStar" value="5" id="rate1"><label
+                                            for="rate1">★</label>
+                                        <input type="radio" name="reviewStar" value="4" id="rate2"><label
+                                            for="rate2">★</label>
+                                        <input type="radio" name="reviewStar" value="3" id="rate3"><label
+                                            for="rate3">★</label>
+                                        <input type="radio" name="reviewStar" value="2" id="rate4"><label
+                                            for="rate4">★</label>
+                                        <input type="radio" name="reviewStar" value="1" id="rate5"><label
+                                            for="rate5">★</label>
+                                    </fieldset>
+                                    <div>
+                                        <textarea class="col-auto form-control" type="text" id="reviewContents" name="content"
+                                                  placeholder="리뷰를 적어주세용"></textarea>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">리뷰등록</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 리뷰를 적을 상품을 선택하는 select바 -->
+<!--                <select class="form-select reply-select" id="review-select">-->
+<!--                    <option hidden>상품을 선택하세요</option>-->
+<!--                    <option id="product-name-review" name="option"-->
+<!--                            th:value="${productDetail.id}"-->
+<!--                            th:each="productDetail, loop : ${productDetail}"-->
+<!--                            th:text="${product.name} + '/' + ${productDetail.size} + '/' + ${productDetail.color}"-->
+<!--                            th:attr="data-name=${product.name},-->
+<!--                            data-size=${productDetail.size},-->
+<!--                            data-color=${productDetail.color},-->
+<!--                            data-product-detail-id=${productDetail.id},-->
+<!--                            data-product-id=${product.id}">갈색침대-->
+<!--                    </option>-->
+<!--                </select>-->
+                <div class="bg-body-tertiary product-rating">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-center align-middle rating_number">
+                                <i class="bi bi-star-fill" style="height: 100px; font-size: 40px;  color: gold;"></i>
+                                <span class="fs-1" th:text="${#numbers.formatDecimal((productRatingTotal/productReviewAmount), 1, 1)}" th:if="${productRatingTotal} > 0 ">4.3</span>
+                                <span class="fs-1" th:text="${productRatingTotal}" th:if="${productRatingTotal} == 0">4.3</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="content">
+                                <canvas id="myChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="bg-body-tertiary product-rating">
+                    <button id="review-vote-btn" class="btn btn-outline-dark">추천순</button>
+                    <button id="review-latest-btn" class="btn btn-outline-dark">최신순</button>
+<!--                    <select id="review-rating-select" class="btn btn-outline-dark" style="float: right">-->
+<!--                        <option hidden>별점순</option>-->
+<!--                        <option value="5">5개</option>-->
+<!--                        <option value="4">4개</option>-->
+<!--                        <option value="3">3개</option>-->
+<!--                        <option value="2">2개</option>-->
+<!--                        <option value="1">1개</option>-->
+<!--                    </select>-->
+                    <!-- 유저가 작성한 리뷰글이 위치 -->
+                    <div class="card my-3" id="reviewCard">
+                        <div class="card-body py-1 px-2" th:each="productReview, loop:${reviews}">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <span class="badge bg-light text-dark" th:text="${productReview.nickname}">리뷰작성자의 이름</span>
+                                    <span class="badge bg-light text-dark" th:text="${#dates.format(productReview.createDate, 'yyyy년 M월 d일')}">리뷰작성일자</span>
+                                </div>
+                                <div>
+                                    <a th:href="@{/store/replyVote/{id}(id=${productReview.id})}" class="btn btn-sm btn-outline-primary">
+                                        도움이 돼요
+                                        <span class="badge rounded-fill bg-primary" th:text="${productReview.voteCount}">상품추천수</span>
+                                    </a>
+<!--                                    <a th:href="@{|/store/replyModify/${productReview.id}?productId=${product.id}|}"-->
+<!--                                       sec:authorize="isAuthenticated()"-->
+<!--                                       th:if="${#authentication.principal.username == productReview.email}"-->
+<!--                                       class="btn btn-sm btn-warning">수정</a>-->
+
+                                    <a th:href="@{|/store/replyDelete/${productReview.id}/${product.id}|}"
+                                       sec:authorize="isAuthenticated()"
+                                       th:if="${#authentication.principal.username == productReview.email}"
+                                       class="btn btn-sm btn-danger">삭제</a>
+                                </div>
+                            </div>
+                            <!-- 상품별점이 출력되는 곳 -->
+                            <div>
+                                <th:block th:if="${productReview.rating == 1}">
+                                    <div class="star_rating">
+                                        <span class="star on"></span>
+                                        <span class="star"></span>
+                                        <span class="star"></span>
+                                        <span class="star"></span>
+                                        <span class="star"></span>
+                                    </div>
+                                </th:block>
+                                <th:block th:if="${productReview.rating == 2}">
+                                    <div class="star_rating">
+                                        <span class="star on"></span>
+                                        <span class="star on"></span>
+                                        <span class="star"></span>
+                                        <span class="star"></span>
+                                        <span class="star"></span>
+                                    </div>
+                                </th:block>
+                                <th:block th:if="${productReview.rating == 3}">
+                                    <div class="star_rating">
+                                        <span class="star on"></span>
+                                        <span class="star on"></span>
+                                        <span class="star on"></span>
+                                        <span class="star"></span>
+                                        <span class="star"></span>
+                                    </div>
+                                </th:block>
+                                <th:block th:if="${productReview.rating == 4}">
+                                    <div class="star_rating">
+                                        <span class="star on"></span>
+                                        <span class="star on"></span>
+                                        <span class="star on"></span>
+                                        <span class="star on"></span>
+                                        <span class="star"></span>
+                                    </div>
+                                </th:block>
+                                <th:block th:if="${productReview.rating == 5}">
+                                    <div class="star_rating">
+                                        <span class="star on"></span>
+                                        <span class="star on"></span>
+                                        <span class="star on"></span>
+                                        <span class="star on"></span>
+                                        <span class="star on"></span>
+                                    </div>
+                                </th:block>
+                            </div>
+                            <div>
+                                <img th:src="@{${productReview.imageName}}" width="200" height="120">
+                                <p class="card-text ps-2" style="white-space: pre-line;" th:text="${productReview.content}">댓글내용</p>
+                            </div>
+                        </div>
+                        <nav aria-label="Page navigation example" class="d-flex justify-content-center">
+                            <ul class="pagination" id="reviewpaging" th:attr="data-review-currentPage=${reviewspaging.currentPage}">
+                                <li class="page-item">
+                                    <button class="page-link"
+                                            aria-label="Previous" th:classappend="${reviewspaging.first ? 'disabled' : ''}"
+                                            th:id="'qnalist-btn-' + ${reviewspaging.currentPage - 1}"
+                                            th:attr="data-review-page=${reviewspaging.currentPage - 1}">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </button>
+                                </li>
+                                <th:block th:each="num : ${#numbers.sequence(reviewspaging.beginPage, reviewspaging.totalPages)}">
+                                    <li class="page-item">
+                                        <button class="btn page-link" th:id="'reviewlist-btn-' + ${num}" th:classappend="${qnaspaging.currentPage == num ? 'active' : ''}"
+                                                th:attr="data-review-page=${num}" th:text="${num}">1</button>
+                                    </li>
+                                </th:block>
+                                <li class="page-item">
+                                    <button class="page-link"
+                                            aria-label="Previous" th:classappend="${reviewspaging.last ? 'disabled' : ''}"
+                                            th:id="'qnalist-btn-' + ${reviewspaging.currentPage + 1}"
+                                            th:attr="data-review-page=${reviewspaging.currentPage + 1}">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <!-- 상품문의가 위치하는 부분 -->
+                <div id="product-qna-main">
+                    <span class="fs-3">상품문의</span>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal1"
+                            style="float: right;">
+                        문의등록
+                    </button>
+                    <div class="card my-3" id="qnaCard">
+                        <div class="card-body py-1 px-2" th:each="qna, loop:${qnas}">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <span class="badge bg-light text-dark" th:text="${qna.userNickname}">문의작성자의 이름</span>
+                                    <span class="badge bg-light text-dark" th:text="${#dates.format(qna.createDate, 'yyyy년 M월 d일')}">문의작성일자</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div sec:authorize="isAnonymous()">
+                                    <div th:if="${qna.privateYn == 'Y'}">비밀글입니다.</div>
+                                    <div th:unless="${qna.privateYn == 'Y'}">
+                                        <span th:text="${qna.content}"></span><br>
+                                        <i class="bi bi-lightbulb" th:if="${qna.answerYn == 'Y'}"></i><span th:if="${qna.answerYn == 'Y'}" th:text="${qna.answer}"></span>
+                                    </div>
+                                </div>
+                                <div sec:authorize="isAuthenticated()">
+                                    <div th:if="${qna.privateYn == 'Y' && #authentication.principal.username == qna.userEmail}" th:text="${qna.content}"> </div>
+                                    <div th:if="${qna.privateYn == 'Y' && #authentication.principal.username != qna.userEmail}">비밀글입니다.</div>
+                                    <div th:if="${qna.privateYn == 'N'}" th:text="${qna.content}"></div>
+                                </div>
+                            </div>
+                            <hr>
+                        </div>
+                        <!-- 상품문의 페이징처리 -->
+                        <div>
+                            <nav aria-label="Page navigation example" class="d-flex justify-content-center" id="nav-qna">
+                                <ul class="pagination" id="qna-pagination">
+                                    <li class="page-item">
+                                        <button class="page-link"
+                                           aria-label="Previous" th:classappend="${qnaspaging.first ? 'disabled' : ''}"
+                                           th:id="'qnalist-btn-' + ${qnaspaging.currentPage - 1}"
+                                           th:attr="data-qna-page=${qnaspaging.currentPage - 1}">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </button>
+                                    </li>
+                                    <th:block th:each="num : ${#numbers.sequence(qnaspaging.beginPage, qnaspaging.endPage)}">
+                                        <button class="page-link" th:id="'qnalist-btn-' + ${num}" th:attr="data-qna-page=${num}" th:classappend="${qnaspaging.currentPage == num ? 'active' : ''}"
+                                            th:text="${num}">1</button>
+                                    </th:block>
+                                    <li class="page-item">
+                                        <button class="page-link"
+                                           aria-label="Next" th:classappend="${qnaspaging.last ? 'disabled' : ''}"
+                                           th:id="'qnalist-btn-' + ${qnaspaging.currentPage + 1}"
+                                           th:attr="data-qna-page=${qnaspaging.currentPage + 1}">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <!-- 상품문의등록 모달창 -->
+                <div class="modal fade" id="exampleModal1" tabindex="-1" aria-labelledby="exampleModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel1">문의등록</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <form class="mb-3 visually" method="post" th:action="@{|/store/qna/${product.id}|}">
+                                <div class="modal-body">
+                                    <select class="form-select reply-select" name="categoryId">
+                                        <option type="hidden">문의종류을 선택하세요</option>
+                                        <option th:each="qnacategory, loop : ${qnaCategories}" th:text="${qnacategory.name}" th:value="${qnacategory.id}"></option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <textarea class="col-auto form-control" name="title" placeholder="제목을 입력해주세요"></textarea>
+                                    <textarea class="col-auto form-control" type="text" name="content" id="reviewContents"
+                                              placeholder="문의사항을 작성해주세요" rows="10" cols="50"></textarea>
+                                </div>
+                                <div>
+                                    <div class="modal-footer">
+                                        <input type="checkbox" name="secret" value="Y">
+                                        비밀글
+                                        </input>
+                                        <button type="submit" class="btn btn-primary">문의등록</button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 상품상세부분 우측 결제 내비바 -->
+            <div class="col-md-5">
+                <div class="product-buy-navbar">
+
+                    <!-- 상품옵션이 있을 경우에 추가할 예정
+                    <select class="form-select d-none" id="product-options-under">
+                        <option hidden>옵션을 선택하세요</option>
+                        <option th:each="productDetail, loop : ${productDetail}" th:text="${productDetail.}">매트리스</option>
+                    </select>
+                    -->
+                    <div>
+                        <form id="order-form" method="post" th:action="@{/store/addCart}">
+                            <!-- 상품선택시 상품이 선택한 상품이 추가되는 영역 -->
+                            <div class="bg-body-tertiary mb-3" id="order-box-under">
+
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="fs-3">주문금액</span>
+                                <span class="fs-3"><strong id="total-price">0</strong>원</span>
+                            </div>
+                            <button type="button" id="buy-btn-cart" class="btn btn-outline-primary buy-btn-under">장바구니</button>
+                            <button type="button" id="buy-btn-order" class="btn btn-primary buy-btn-under">바로구매</button>
+                        </form>
+                    </div>
+                    <!-- 최상단 이동버튼입니다 -->
+                    <div onclick="topFunction()" id="scrollTopPc" class="hidden-md hidden-sm hidden-xs">
+                        <i class="bi bi-arrow-up-circle"></i>
+                    </div>
+                    <!-- 맨아래 이동버튼입니다
+                    <div onclick="downFunction()" id="scrollDownPc" class="hidden-md hidden-sm hidden-xs">
+                        <i class="bi bi-arrow-down-circle"></i>
+                    </div>
+                    -->
+                </div>
+            </div>
+            <!-- 다른상품 추천하는 부분 -->
+            <h3 class="fw-bolder">비슷한 상품들</h3>
+            <div id="order-product-main">
+                <div class="row">
+                    <div class="col-3" th:each="productDifferentList, loop : ${productDifferentList}">
+                        <div>
+                            <div class="card-line-null" style="width: 15rem; height: 20rem">
+                                <a class="link-dark link-underline link-underline-opacity-0" th:href="@{/store/detail/{id}(id=${productDifferentList.id})}">
+                                    <div style="height: 50%">
+                                        <img th:if="${productDifferentList.imageName == 'default.jpg'}" th:src="@{|/images/product/default.jpg|}" width="200" height="120">
+                                        <img th:if="${productDifferentList.imageName != 'default.jpg'}" th:src="@{${productDifferentList.imageName}}" width="200" height="120">
+                                    </div>
+                                    <div class="card-body">
+                                        <span class="fw-bolder" th:text="${productDifferentList.name}">누워서 코딩하고싶은 의자</span>
+                                        <div class="card-text">
+                                            <div>
+                                                <div>
+                                                    <span class="fs-4 text-danger" th:text="${#numbers.formatDecimal(productDifferentList.discount,1,0)}">50</span><span style="padding-right: 2%" class="fs-4 text-danger">%</span>
+                                                    <span class="fs-5" data-th-text="${#numbers.formatInteger(productDifferentList      .price, 3, 'COMMA')}"></span><span class="fs-5">원</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <img style="height: 35px;" th:src="@{/images/store/ratingimage.jpg}">
+                                                <span th:text="${#numbers.formatDecimal((productDifferentList.productRating), 1, 1)}">4.3</span>
+                                            </div>
+                                            <th:block th:each="tag : ${productDifferentList.tags}">
+                                                <span th:if="${tag.name == '할인'}" class="badge bg-primary me-0"  th:text="${tag.name}">할인</span>
+                                                <span th:if="${tag.name == '내일도착'}" class="badge bg-success me-0"  th:text="${tag.name}">내일도착</span>
+                                                <span th:if="${tag.name == '배송비무료'}" class="badge bg-warning me-0"  th:text="${tag.name}">배송비무료</span>
+                                            </th:block>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</html>
+
+<script type="text/javascript" layout:fragment="script">
+    const ctx = document.getElementById('myChart');
+
+    //상품 디테일 페이지 상단에 위치한 select박스 선택시 상단,하단에 있는 추가상품 select바 생성 및
+    //오더 폼에 선택한 상품정보 출력
+    $("select[id=product-option]").change(function() {
+        $("#product-options").removeClass("d-none");
+        $("#product-options-under").removeClass("d-none");
+        $("#product-option-under").val($(this).prop("value"));
+
+        let $option = $(this).find("option:selected");
+        let price = parseFloat($("strong[id=product-price]").attr("data-price"))
+        let discount = parseFloat($("span[id=product-discount]").attr("data-discount"))
+
+        var totalprice = 0;
+        if(discount > 0) {
+            totalprice += parseInt(price - (price * (discount/100)));
+        } else {
+            totalprice += price
+        }
+
+        let name = $option.attr("data-name");
+        let size = $option.attr("data-size");
+        let color = $option.attr("data-color");
+        let productDetailId = $option.attr("data-product-detail-id");
+        let productid = $option.attr("data-product-id");
+
+        let exist = false;
+        $("input[name=productDetailId]").each(function() {
+            if ($(this).val() === productDetailId) {
+                exist = true;
+            }
+        })
+
+        if (exist) {
+            alert("이미 선택한 옵셥입니다.");
+            return;
+        }
+
+        let div = `
+                <div id="order-detail-box-${productDetailId}" class="mb-3 border-bottom pb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>${name}/${size}/${color}</span>
+                        <button type="button" class="btn btn-xs" id='btn-del-${productDetailId}' data-delete-button="${productDetailId}"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                    <input type="hidden" name="id" value="${productid}"></input>
+                    <input type="hidden" name="productDetailId" value="${productDetailId}"></input>
+                    <input type="hidden" name="cartId" value="0"></input>
+                    <div class="d-flex justify-content-between" >
+                        <div>
+                            <input style="width: 50%" type="number" id='result-${productDetailId}' data-product-productDetailId="${productDetailId}" name="amount" value="1" style="display:inline-block"></input>
+                        </div>
+                        <span class="fs-5"><strong id="product-price-${productDetailId}" data-this-price="${totalprice}">${(totalprice).toLocaleString()}</strong>원</span>
+                    </div>
+                </div>
+            `
+        $("div[id=order-box-under]").append(div)
+        refreshTotalPrice();
+
+
+    })
+
+    // 하단 상품개수 변경시 상품가격도 같이 변경되는 함수
+    $("div[id=order-box-under]").on('change', 'input', function() {
+        let price = parseFloat($("strong[id=product-price]").attr("data-price"))
+        let discount = parseFloat($("span[id=product-discount]").attr("data-discount"))
+        var totalprice = 0;
+        if(discount > 0) {
+            totalprice += parseInt(price - (price * (discount/100)));
+        } else {
+            totalprice += price
+        }
+        let val = $(this).val();    // 해당상품갯수
+        let producttotal = parseInt(totalprice * val);   // 갯수 * 가격
+        let productDetailId = $(this).attr("data-product-productDetailId")
+        $(`[id="product-price-${productDetailId}"]`).attr("data-this-price", producttotal)
+        $(`[id="product-price-${productDetailId}"]`).text(producttotal.toLocaleString());
+
+
+        refreshTotalPrice();
+
+    })
+
+    // 상품 총 주문금액을 재정의 해주는 함수
+    function refreshTotalPrice() {
+        let totalPrice = 0
+        $("#order-box-under strong").each(function() {
+            totalPrice += parseInt($(this).attr("data-this-price"));
+        });
+
+        $("#total-price").text(totalPrice.toLocaleString());
+
+    }
+
+
+    // 하단에 위치한 상품박스에 x버튼 클릭시 해당하는 상품박스가 사라지는 함수
+    $("div[id=order-box-under]").on('click','button',function() {
+        let boxId = $(this).attr("data-delete-button")
+
+        $(`[id="order-detail-box-${boxId}"]`).remove();
+        refreshTotalPrice();
+    })
+
+    // 상품리뷰에서 상품선택 시 리뷰작성폼에서의 select바에서도 상품이 같은 값으로 변경
+    $("#review-select").change(function() {
+        $("#review-select-model").val($(this).prop("value"));
+    })
+
+    // 장바구니 버튼 클릭시 구매form 링크가 /store/addCart로 변경 되며 submit이 실행되는 함수
+    $("button[id=buy-btn-cart]").click(function() {
+        let form = $("form[id=order-form]");
+        form.attr("action", "/store/addCart")
+        form.trigger("submit")
+        //$("div[id=modal-form-cart]").show()
+
+
+    })
+
+    // 바로구매 버튼 클릭시 구매form 링크가 /order/form로 변경 되며 submit이 실행되는 함수
+    $("button[id=buy-btn-order]").click(function() {
+        let form = $("form[id=order-form]");
+        form.attr("action", "/order/form")
+        form.trigger("submit")
+    })
+
+
+    // 상품상세 네비바에 상품정보 클릭시 상품정보 시작위치로 이동하는 함수
+    $("th[id=product-content]").click(function() {
+        let movePoint = $("div[id=product-content-main]").offset();
+        $("html, body").animate({scrollTop: movePoint.top}, 0);
+    })
+
+    // 상품상세 네비바에 상품리뷰 클릭시 상품리뷰 시작위치로 이동하는 함수
+    $("th[id=product-review]").click(function() {
+        let movePoint = $("span[id=product-review-main]").offset();
+        $("html, body").animate({scrollTop: movePoint.top - 95}, 0);
+    })
+
+    // 상품상세 네비바에 상품문의 클릭시 상문문의 시작위치로 이동하는 함수
+    $("th[id=product-qna]").click(function() {
+        let movePoint = $("div[id=product-qna-main]").offset();
+        $("html, body").animate({scrollTop: movePoint.top}, 0);
+    })
+
+    // 상품상세 네비바에 다른상품 클릭시 다른상품 시작위치로 이동하는 함수
+    $("th[id=order-product]").click(function() {
+        let movePoint = $("div[id=order-product-main]").offset();
+        $("html, body").animate({scrollTop: movePoint.top}, 0);
+    })
+
+    // 상품리뷰애서 상품을 선택시 리뷰쓰기버튼이 생기는 함수
+    $("select[id=review-select]").change(function() {
+        $("button[id=product-review-btn]").removeClass("d-none");
+    })
+
+    // 스크랩등록 popup을 띄우는 jquery
+    $("button[id=product-scrap]").click(function() {
+        window.open("/store/popup", "팝업테스트", "width=500, height=400, top=150, left=700");
+    })
+
+    $("button[id=product-qna-btn]").click(function() {
+        $("div[id=modal-form-qna]").show()
+    })
+
+    // 상품문의의 페이징처리를 담당하는 함수
+    $('div[id=qnaCard]').on('click', '[id^="qnalist-btn-"]', function() {
+        const page = $(this).attr("data-qna-page");
+        const id = $("span[id=product-span]").attr("data-this-productId");
+        const data = {id, page}
+        $.getJSON("/store/qnalist", data, function(response) {
+            let items = response.items;
+            let paging = response.paging;
+            $("div[id=qnaCard]").empty();
+            $.each(items, function(index, item) {
+
+                let span = '';
+                if (item.privateYn === 'N' && item.answerYn === 'Y') {
+                    span= `
+                        <i class="bi bi-lightbulb"></i>
+                        <span>${item.answer}</span>
+                    `;
+                }
+
+                if (item.privateYn === 'Y' && item.answerYn === 'Y' && item.userEmail === item.loginEmail) {
+                    span= `
+                        <i class="bi bi-lightbulb"></i>
+                        <span>${item.answer}</span>
+                    `;
+                }
+
+                let div = `
+                    <div class="card-body py-1 px-2" >
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <span class="badge bg-light text-dark">${item.userNickname}</span>
+                                <span class="badge bg-light text-dark">${item.createDate}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div>${item.secretContent}</div>
+                            ${span}
+                        </div>
+                        <hr>
+                    </div>
+                `
+
+                $("div[id=qnaCard]").append(div)
+            })
+
+            let lists = "";
+            for (let num = paging.beginPage; num <= paging.endPage; num++) {
+                lists +=`
+                    <li class="page-item">
+                        <button class="page-link ${paging.currentPage === num ? 'active' : ''}" id="qnalist-btn-${num}" data-qna-page="${num}">
+                            ${num}
+                        </button>
+                    </li>
+                `
+            }
+
+
+            let qnapaging =`
+                <div>
+                    <nav aria-label="Page navigation example" class="d-flex justify-content-center" id="nav-qna">
+                        <ul class="pagination">
+                            <li class="page-item ${paging.first ? 'disabled' : ''}">
+                                <button class="page-link"
+                                   aria-label="Previous"
+                                   id="qnalist-btn-${paging.currentPage - 1}"
+                                   data-qna-page="${paging.currentPage - 1}"
+                                   >
+                                    <span aria-hidden="true">&laquo;</span>
+                                </button>
+                            </li>
+                                ${lists}
+                            <li class="page-item">
+                                <button class="page-link ${paging.last ? 'disabled' : ''}"
+                                   aria-label="Next"
+                                   id="qnalist-btn-${paging.currentPage + 1}"
+                                   data-qna-page="${paging.currentPage + 1}"
+                                   >
+                                    <span aria-hidden="true">&raquo;</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            `
+            $("div[id=qnaCard]").append(qnapaging)
+        })
+    })
+
+    // 상품리뷰 페이징처리하는 함수
+    $('div[id=reviewCard]').on('click', '[id^="reviewlist-btn-"]', function() {
+        const page = $(this).attr("data-review-page");
+        const id = $("span[id=product-span]").attr("data-this-productId");
+        const data = {id, page}
+        getproductreview(data);
+
+    })
+
+    $('select[id=review-rating-select]').change(function() {
+        const id = $("span[id=product-span]").attr("data-this-productId");
+        const page = $("ul[id=reviewpaging]").attr("data-review-currentPage")
+        const rating = $(this).val();
+        const data = {id, page, rating}
+        getproductreview(data)
+    })
+
+    $('button[id=review-vote-btn]').click(function() {
+        const id = $("span[id=product-span]").attr("data-this-productId");
+        const page = $("ul[id=reviewpaging]").attr("data-review-currentPage")
+        const sort = "vote"
+        const data = {id, page, sort}
+        getproductreview(data)
+    })
+
+    $('button[id=review-latest-btn]').click(function() {
+        const id = $("span[id=product-span]").attr("data-this-productId");
+        const page = $("ul[id=reviewpaging]").attr("data-review-currentPage")
+        const sort = "latest"
+        const data = {id, page, sort}
+        getproductreview(data)
+    })
+
+    function getproductreview(data) {
+        $.getJSON("/store/reviewlist", data, function(response) {
+            let items = response.items;
+            let paging = response.paging;
+            $("div[id=reviewCard]").empty();
+            $.each(items, function(index, item) {
+
+                let rating = '';
+                if(item.rating === 1) {
+                    rating = `
+                            <div class="star_rating">
+                                <span class="star on"></span>
+                                <span class="star"></span>
+                                <span class="star"></span>
+                                <span class="star"></span>
+                                <span class="star"></span>
+                            </div>
+                            `;
+                }
+                if(item.rating === 2) {
+                    rating = `
+                            <div class="star_rating">
+                                <span class="star on"></span>
+                                <span class="star on"></span>
+                                <span class="star"></span>
+                                <span class="star"></span>
+                                <span class="star"></span>
+                            </div>
+                            `;
+                }
+                if(item.rating === 3) {
+                    rating = `
+                            <div class="star_rating">
+                                <span class="star on"></span>
+                                <span class="star on"></span>
+                                <span class="star on"></span>
+                                <span class="star"></span>
+                                <span class="star"></span>
+                            </div>
+                            `;
+                }
+                if(item.rating === 4) {
+                    rating = `
+                            <div class="star_rating">
+                                <span class="star on"></span>
+                                <span class="star on"></span>
+                                <span class="star on"></span>
+                                <span class="star on"></span>
+                                <span class="star"></span>
+                            </div>
+                            `;
+                }
+                if(item.rating === 5) {
+                    rating = `
+                            <div class="star_rating">
+                                <span class="star on"></span>
+                                <span class="star on"></span>
+                                <span class="star on"></span>
+                                <span class="star on"></span>
+                                <span class="star on"></span>
+                            </div>
+                            `;
+                }
+
+                let Delete = '';
+                if (item.email === item.loginEmail) {
+                    Delete = `
+                    <a href="@{/post/replyDelete/${item.id}"
+                                       class="btn btn-sm btn-danger">삭제</a>
+                    `;
+                }
+
+                let div = `
+                    <div class="card-body py-1 px-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <span class="badge bg-light text-dark">${item.nickname}</span>
+                                    <span class="badge bg-light text-dark">${item.createDate}</span>
+                                </div>
+                                <div>
+                                    <a href="@{/store/replyVote/${item.id}" class="btn btn-sm btn-outline-primary">
+                                        도움이 돼요
+                                        <span class="badge rounded-fill bg-primary">${item.voteCount}</span>
+                                    </a>
+                                    ${Delete}
+                                </div>
+                            </div>
+                            <!-- 상품별점이 출력되는 곳 -->
+                            <div>
+                                ${rating}
+                            </div>
+                            <div>
+                                <img src="${item.imageName}" width="200" height="120">
+                                <p class="card-text ps-2" style="white-space: pre-line;">${item.content}</p>
+                            </div>
+                        </div>
+                `
+
+                $("div[id=reviewCard]").append(div)
+            })
+
+            let lists = "";
+            for (let num = paging.beginPage; num <= paging.endPage; num++) {
+                lists +=`
+                    <li class="page-item">
+                        <a class="page-link ${paging.currentPage === num ? 'active' : ''}" id="reviewlist-btn-${num}" data-review-page="${num}">
+                            ${num}
+                        </a>
+                    </li>
+                `
+            }
+
+
+            let reviewpaging =`
+                <div>
+                    <nav aria-label="Page navigation example" class="d-flex justify-content-center" id="nav-qna">
+                        <ul class="pagination" id="reviewpaging" data-review-currentPage="${paging.currentPage}">
+                            <li class="page-item ${paging.first ? 'disabled' : ''}">
+                                <a class="page-link"
+                                   aria-label="Previous"
+                                   id="reviewlist-btn-${paging.currentPage - 1}"
+                                   data-review-page="${paging.currentPage - 1}"
+                                   >
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                                ${lists}
+                            <li class="page-item">
+                                <a class="page-link ${paging.last ? 'disabled' : ''}"
+                                   aria-label="Next"
+                                   id="reviewlist-btn-${paging.currentPage + 1}"
+                                   data-review-page="${paging.currentPage + 1}"
+                                   >
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            `
+            $("div[id=reviewCard]").append(reviewpaging)
+        })
+    }
+
+
+
+
+
+
+
+    // 우측하단 상하단 이동 툴바 함수
+    function scrollFunction() {
+        if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+            document.getElementById("scrollTopPc").style.display = "block";
+            document.getElementById("scrollTopMob").style.display = "block";
+            document.getElementById("scrollDownPc").style.display = "block";
+            document.getElementById("scrollDownMob").style.display = "block";
+        } else {
+            document.getElementById("scrollTopPc").style.display = "none";
+            document.getElementById("scrollTopMob").style.display = "none";
+            document.getElementById("scrollDownPc").style.display = "none";
+            document.getElementById("scrollDownMob").style.display = "none";
+        }
+    }
+
+    // 우측하단 클릭시 최상단으로 스크롤이 이동하는 함수
+    function topFunction() {
+        $('html,body').animate({scrollTop: 0}, 400);
+    }
+
+    // 맨 아래 이동버튼 함수입니다.
+    // function downFunction() {
+    //     $('html, body').animate({scrollTop: $('#doz_footer').offset().top}, 500);
+    // }
+
+    // 차트를 출력하는 함수
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['5점', '4점', '3점', '2점', '1점', '0점'],
+            datasets: [{
+                label: '별점',
+                data: [12, 19, 3, 5, 2, 3],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>

@@ -1,0 +1,42 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='product'">
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h1>상품수정</h1>
+            <form class="border bg-light p-3" action="modify" method="post">
+                <input type="hidden" class="form-control" name="id" th:value="${product.id}">
+                <div class="form-group mb-3">
+                    <label>상품명</label>
+                    <input type="text" class="form-control" name="name" th:value="${product.name}">
+                </div>
+                <div class="form-group mb-3">
+                    <label>상품가격</label>
+                    <input type="text" class="form-control" name="price" th:value="${product.price}">
+                </div>
+                <div class="form-group mb-3">
+                    <label>상품설명</label>
+                    <input type="text" class="form-control" name="content" th:value="${product.content}">
+                </div>
+                <div>
+                    <label>판매상태</label>
+                    <input type="text" class="form-control" name="statusYn" th:value="${product.statusYn}">
+                </div>
+                <div>
+                    <label>할인률</label>
+                    <input type="text" class="form-control" name="discount" th:value="${product.discount}">
+                </div>
+                <div>
+                    <label for="currentDate">상품수정일</label>
+                    <input type="text" id="currentDate" class="form-control" name="updateDate" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" readonly>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button class="btn btn-primary me-md-2" type="submit">수정완료</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</html>

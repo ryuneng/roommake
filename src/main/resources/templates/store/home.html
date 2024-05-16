@@ -1,0 +1,246 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <style>
+        /* 캐러셀 스타일 */
+        .carousel-inner > .carousel-item > img {
+            top: 0;
+            left: 0;
+            min-width: 250%;
+            min-height: 100%;
+        }
+
+
+        /* 카테고리 스타일 */
+        .category-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* 서브카테고리 스타일 */
+        .sub-category-item {
+            padding-left: 20px;
+        }
+
+
+        /* 카테고리 목록 스타일 */
+        .category-item ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .category-item ul li {
+            margin-bottom: 10px;
+            font-size: 14px; /* 텍스트 크기를 작게 조정합니다 */
+        }
+
+        .category-item ul li a {
+            display: block;
+            padding: 10px 15px;
+            background-color: #e9ecef; /* 배경색 */
+            color: #212529; /* 텍스트 색상 */
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .category-item ul li a:hover {
+            background-color: #ced4da; /* 마우스 오버 시 배경색 */
+            color: #212529; /* 마우스 오버 시 텍스트 색상 */
+            text-decoration: none;
+        }
+
+        /* 하위 카테고리 목록 스타일 */
+        .sub-category-item {
+            margin-left: 15px;
+        }
+
+    </style>
+</head>
+<div layout:fragment="content" class="container my-3 mt-4">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 쇼핑페이지 사이드바 -->
+            <div class="col-md-3">
+                <!-- 좌측 카테고리 -->
+                <div class="category">
+                    <h3>카테고리</h3>
+                    <ul class="list-unstyled">
+                        <li class="category-item" th:each="category, loop : ${categories}">
+                            <a class="nav-link text-dark" th:id="'category-id' + ${category.id}" th:href="@{|/store/category/${category.id}/top|}"
+                               th:text="${category.name}"
+                               th:attr="date-categoryid=${category.id}" style="display: inline">가구</a>
+                            <button type="button" class="btn border-0" th:id="'button-' + ${category.id}" style="float: right"
+                                    th:attr="data-category-id=${category.id}"><i class="bi bi-caret-down-fill"></i></button>
+                            <!-- 서브카테고리가 들어갈 위치 -->
+                            <ul class="list-unstyled d-none sub-category-item" th:id="'subcategory-' + ${category.id}">
+
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- 쇼핑페이지 메인 -->
+            <div class="col-md-9">
+                <!-- 진행중인 이벤트를 나열 -->
+                <span class="fs-3 fw-bolder">놓치면 안되는 룸메이크만의 이벤트</span>
+                <div class="mx-auto">
+                    <a th:href="@{/event/dailycheck}" style="text-decoration: none; color: black;">
+                        <div class="card w-60 h-40">
+                            <img th:src="@{/images/event/dailycheck-event.jpg}" class="card-img-top"
+                                 style="height: 170px;" alt="...">
+                            <div class="card-body" style="display: flex; justify-content: space-between;">
+                                <span class="badge text-bg-primary align-content-center">진행중</span>
+                                <span><small>2024-01-01~2024-01-30</small></span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <!-- 카테고리별 상품리스트 나열 -->
+                <div>
+                    <!-- 할인상품 리스트 -->
+                    <span class="fs-3 fw-bolder">#지금 할인하는 가구는?</span>
+                    <div>
+                        <div class="row">
+                            <div class="col-3">
+                                <div>
+                                    <div class="card-line-null" style="width: 15rem; height: 20rem">
+                                        <div style="height: 50%">
+                                            <img th:src="@{/images/store/storebanner2.jpg}" class="card-img-top rounded"
+                                                 alt="..." height="100%">
+                                        </div>
+                                        <div class="card-body">
+                                            <span class="fw-bolder">누워서 코딩하고싶은 의자</span>
+                                            <div class="card-text">
+                                                <div>
+                                                    <div>
+                                                        <span class="fs-4 text-danger">50%</span>
+                                                        <span class="fs-5">50000원</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <i class="bi bi-star-fill" style="height: 35px; color: gold;"></i>
+                                                    <span>4.3</span>
+                                                </div>
+                                                <div>
+                                                    <span class="badge bg-primary">할인</span>
+                                                    <span class="badge bg-warning text-dark">내일도착</span>
+                                                    <span class="badge bg-success">배송비무료</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div>
+                                    <div class="card-line-null" style="width: 15rem; height: 20rem">
+                                        <div style="height: 50%">
+                                            <img th:src="@{/images/store/storebanner3.jpg}" class="card-img-top rounded"
+                                                 alt="..." height="100%">
+                                        </div>
+                                        <div class="card-body">
+                                            <span class="fw-bolder">가구 이쁘당</span>
+                                            <div class="card-text">
+                                                <div>
+                                                    <div>
+                                                        <span class="fs-4 text-danger">50%</span>
+                                                        <span class="fs-5">50000원</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <i class="bi bi-star-fill" style="height: 35px; color: gold;"></i>
+                                                    <span>4.3</span>
+                                                </div>
+                                                <div>
+                                                    <span class="badge bg-success">배송비무료</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div>
+                                    <div class="card-line-null" style="width: 15rem; height: 20rem">
+                                        <div style="height: 50%">
+                                            <img th:src="@{/images/store/sampleproduct1.jpg}"
+                                                 class="card-img-top rounded" alt="..." height="100%">
+                                        </div>
+                                        <div>
+                                            <span class="fw-bolder">누워서 자고 싶은 침대</span>
+                                            <div class="card-text">
+                                                <div>
+                                                    <div>
+                                                        <span class="fs-4 text-danger">50%</span>
+                                                        <span class="fs-5">50000원</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <i class="bi bi-star-fill" style="height: 35px; color: gold;"></i>
+                                                    <span>4.3</span>
+                                                </div>
+                                                <div>
+                                                    <span class="badge bg-primary">할인</span>
+                                                    <span class="badge bg-success">배송비무료</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div>
+                                    <div class="card-line-null" style="width: 15rem; height: 20rem">
+                                        <div style="height: 50%">
+                                            <img th:src="@{/images/store/sampleproduct2.jpg}"
+                                                 class="card-img-top rounded" alt="..." height="100%">
+                                        </div>
+                                        <div>
+                                            <span class="fw-bolder">2층 침대입니당</span>
+                                            <div class="card-text">
+                                                <div>
+                                                    <div>
+                                                        <span class="fs-4 text-danger">50%</span>
+                                                        <span class="fs-5" style="text-align: right">50000원</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <i class="bi bi-star-fill" style="height: 35px; color: gold;"></i>
+                                                    <span>4.3</span>
+                                                </div>
+                                                <div>
+                                                    <span class="badge bg-primary">할인</span>
+                                                    <span class="badge bg-warning text-dark">내일도착</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jquery부분 시작 -->
+<script type="text/javascript" layout:fragment="script">
+    // 좌측 카테고리 토글관련된 함수
+    $(".category-item button").click(function() {
+        const subcategoryid = $(this).attr("data-category-id");
+        $(`[id=subcategory-${subcategoryid}]`).empty()
+        $.getJSON("/store/category", {id: subcategoryid}, function(data) {
+            $.each(data, function(index, item) {
+                let li = `
+                    <li><a href="/store/category/${item.id}/sub" class="nav-link text-dark" value="${item.id}">${item.name}</a><li>
+                `
+
+                $(`[id=subcategory-${subcategoryid}]`).append(li);
+            })
+
+        })
+        $(this).next().toggleClass("d-none");
+    });
+</script>
+</html>

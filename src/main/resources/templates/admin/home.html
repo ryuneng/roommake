@@ -1,0 +1,263 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}">
+<head>
+    <style>
+        #table-cs, #table-complaint {
+            max-height: 200px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row">
+        <div class="col-12">
+            <div class="justify-content-between d-flex pt-3">
+                <h3 style="text-align: center">RoomMake Dashboard</h3>
+                <div>
+                    <p style="text-align: end;">
+                        <span th:text="${today}"></span><br>
+                        <small style="color: #555555;">10분 간격으로 업데이트 됩니다.</small>
+                    </p>
+                </div>
+            </div>
+            <hr>
+            <!-- 주문배송 클레임 영역 -->
+            <div class="row mb-3">
+                <div class="col-3">
+                    <h6><i class="bi bi-truck"></i> 주문/배송</h6>
+                    <table class="table border table-bordered">
+                        <tbody>
+                        <!-- 주문/배송(상품준비중, 배송중, 배송완료, 구매확정) -->
+                        <tr th:each="orderStatus, stat : ${orderStatusDataList}" th:if="${stat.index < 4}">
+                            <th th:text="${orderStatus.statusName}"></th>
+                            <td><span th:text="${orderStatus.statusCnt}"></span>건</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-3">
+                    <h6><i class="bi bi-clipboard2-check"></i> 주문 변동사항</h6>
+                    <table class="table border table-bordered">
+                        <tbody>
+                        <!-- 주문 변동사항(취소, 반품신청, 교환신청 -->
+                        <tr th:each="orderStatus, stat : ${orderStatusDataList}" th:if="${stat.index == 4 || stat.index == 5 || stat.index == 7}">
+                            <th th:text="${orderStatus.statusName}"></th>
+                            <td><span th:text="${orderStatus.statusCnt}"></span>건</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-6">
+                    <div id="donutchart" style="width: 100%"></div>
+                </div>
+            </div>
+            <hr>
+            <!-- 매출 역역 -->
+            <div class="row mb-3">
+                <div class="col-4">
+                    <h6><i class="bi bi-graph-up-arrow"></i> 매출</h6>
+                    <table class="table table-bordered">
+                        <colgroup>
+                            <col style="width: 40%">
+                            <col style="width: 20%">
+                            <col style="width: 40%">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th>매출일자</th>
+                            <th>매출건수</th>
+                            <th>매출액(원)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="salesData : ${salesDataList}">
+                            <th th:text="${#dates.format(salesData.date, 'yyyy-MM-dd')}">4월 1일</th>
+                            <td th:text="${salesData.salesCnt}">10 건</td>
+                            <th th:text="${#numbers.formatInteger(salesData.salesAmount, 1, 'COMMA')}"> 3,000,000</th>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-8">
+                    <div id="mixed_div" style="width: 100%; height: 100%"></div>
+                </div>
+                <p>* 매출건수는 상품준비중과 배송중 상태, 매출금액은 실 결제금액 기준입니다. 지난 7일간 발생한 매출에 대해 출력합니다.</p>
+            </div>
+            <hr>
+            <!-- CS 관련 영역 -->
+            <div class="row mb-3">
+                <div class="col-6">
+                    <h6><i class="fa-solid fa-land-mine-on"></i> 미처리 신고 내역</h6>
+                    <div id="table-complaint" class="border">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr class="border" style="position: sticky; top: 0; z-index: 1; border-top: 1px">
+                                <th>신고번호</th>
+                                <th>신고내용</th>
+                                <th>콘텐츠 유형</th>
+                                <th>신고일자</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${noConfirmComplaints.isEmpty()}">
+                                <td class="text-center" style="font-weight: bold" colspan="4">신고내역이 없습니다.</td>
+                            </tr>
+                            <tr th:each="complaint : ${noConfirmComplaints}">
+                                <th th:text="${complaint.id}">44362</th>
+                                <td th:text="${complaint.categoryContent}">도배</td>
+                                <td th:text="${complaint.type}"></td>
+                                <td th:text="${#dates.format(complaint.createDate, 'yyyy-MM-dd')}">2024년 4월 10일</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end">
+                        <a class="btn btn-secondary btn-sm" th:href="@{/admin/management/complaint}">신고 내역</a>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <h6><i class="fa-solid fa-triangle-exclamation"></i> 미응답 CS 문의 </h6>
+                    <div id="table-cs" class="border">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr class="border" style="position: sticky; top: 0; z-index: 1; border-top: 1px">
+                                <th>카테고리</th>
+                                <th>제목</th>
+                                <th>작성자</th>
+                                <th>작성일자</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:if="${noAnswerQnas.isEmpty()}">
+                                <td class="text-center" style="font-weight: bold" colspan="4">문의사항이 없습니다.</td>
+                            </tr>
+                            <tr th:each="qna : ${noAnswerQnas}">
+                                <th th:text="${qna.category.name}">배송</th>
+                                <td th:text="${qna.title}">배송 언제 됨</td>
+                                <td th:text="${qna.user.nickname}">강감찬</td>
+                                <td th:text="${#dates.format(qna.createDate,'yyyy-MM-dd')}">2024년 4월 5일</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end">
+                        <a class="btn btn-secondary btn-sm" th:href="@{/admin/management/qna}">문의 내역</a>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <!-- 방문자 및 신규가입 영역 -->
+            <div class="row mb-3">
+                <div class="col-6">
+                    <h6><i class="bi bi-people"></i> 고객현황</h6>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>구분</th>
+                            <th>신규가입</th>
+                            <th>방문자</th>
+                        </tr>
+                        <tr>
+                            <th>신규</th>
+                            <td><span th:text="${newUserCnt}"></span>명</td>
+                            <td><span th:text="${newVisitorCnt}"></span>명</td>
+                        </tr>
+                        <tr>
+                            <th>누적</th>
+                            <td><span th:text="${totalUserCnt}"></span>명</td>
+                            <td><span th:text="${totalVisitorCnt}"></span>명</td>
+                        </tr>
+                        </thead>
+                    </table>
+                    <p>신규 가입자와 순방문자(ip기준)는 전날 기준입니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" layout:fragment="script">
+    google.charts.load('current', {packages: ['corechart', 'bar'], language: 'ko'});
+
+    // 주문 상태별 파이 차트
+    $.ajax({
+        type: 'GET',
+        url: `/admin/orderStatusData`,
+        success(orderStatusDataList) {
+            // 모든 주문/배송 내역의 statusCnt가 0인지 확인
+            let allZero = orderStatusDataList.every(function(item) {
+                return item.statusCnt == 0;
+            });
+
+            if (allZero) {
+                $("#donutchart").html('<div class="text-center" style="font-weight: bold;"><p>업데이트된 주문/배송 내역이 없습니다.</p></div>');
+            } else {
+                google.charts.setOnLoadCallback(drawChart);
+
+                function drawChart() {
+                    let statusArray = [
+                        ['Order Status', 'Status count']
+                    ];
+
+                    orderStatusDataList.forEach(function(orderStatusData, index) {
+                        statusArray.push([orderStatusData.statusName, orderStatusData.statusCnt]);
+                    })
+
+                    var data = google.visualization.arrayToDataTable(statusArray);
+
+                    var options = {
+                        title: '주문/배송',
+                        pieHole: 0.4,
+                        colors: ['#5BBCFF', '#FFEC9E', '#FFD1E3', '#A5DD9B', '#FA7070', '#0D9276', '#7EA1FF']
+                    };
+
+                    var chart = new google.visualization.PieChart(document.getElementById('donutchart'));
+                    chart.draw(data, options);
+                }
+            }
+        }
+    })
+
+    // 매출 콤보 차트
+    $.ajax({
+        type: 'GET',
+        url: `/admin/salesData`,
+        success(salesDataList) {
+            google.charts.setOnLoadCallback(drawVisualization);
+
+            function drawVisualization() {
+                let array = [
+                    ['일자', '매출금액', '매출건수']
+                ];
+                salesDataList.forEach(function(data, index) {
+                    array.push([data.date, data.salesAmount, data.salesCnt]);
+                })
+                var data = google.visualization.arrayToDataTable(array);
+                var options = {
+                    title: '주간 매출',
+                    vAxes: {
+                        0: { // 왼쪽 y축
+                            titleTextStyle: {
+                                italic: false
+                            }
+                        },
+                        1: { // 오른쪽 y축
+                            minValue: 0,
+                            titleTextStyle: {
+                                italic: false
+                            }
+                        }
+                    },
+                    seriesType: 'bars',
+                    series: {
+                        0: {targetAxisIndex: 0}, // 첫 번째 시리즈는 왼쪽 Y축에 표시
+                        1: {targetAxisIndex: 1, type: 'line'} // 두 번째 시리즈는 오른쪽 Y축에 표시
+                    },
+                    colors: ['#7EA1FF', '#FFD1E3']
+                };
+
+                var chart = new google.visualization.ComboChart(document.getElementById('mixed_div'));
+                chart.draw(data, options);
+            }
+        }
+    })
+</script>
+</html>

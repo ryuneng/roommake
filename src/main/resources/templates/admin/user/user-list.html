@@ -1,0 +1,149 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='user'">
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h4>회원 목록</h4>
+            <hr>
+            <form id="form-users" method="get" action="/admin/user/userList">
+                <input type="hidden" name="page">
+                <!-- rows, 정렬, 필터링 영역 -->
+                <div class="my-3 d-flex justify-content-between">
+                    <select class="form-control w-25" name="rows" onchange="changeRows()">
+                        <option value="5" th:selected="${criteria.rows eq 5}">5개씩보기</option>
+                        <option value="10" th:selected="${criteria.rows eq 10 or criteria.rows == null}" }>10개씩보기</option>
+                        <option value="20" th:selected="${criteria.rows eq 20}" }>20개씩보기</option>
+                        <option value="50" th:selected="${criteria.rows eq 50}" }>50개씩보기</option>
+                    </select>
+                    <select class="form-control w-25" name="filt" onchange="changeFilt()">
+                        <option value="all" th:selected="${criteria.filt eq 'all' or criteria.filt == null}" }>전체</option>
+                        <option value="active" th:selected="${criteria.filt eq 'active'}">활동중</option>
+                        <option value="block" th:selected="${criteria.filt eq 'block'}" }>차단</option>
+                        <option value="delete" th:selected="${criteria.filt eq 'delete'}" }>탈퇴</option>
+                    </select>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sort" value="date" th:checked="${criteria.sort eq 'date' or criteria.sort == null}" th:onchange="changeSort()"/>
+                            <label class="form-check-label">신규가입순</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sort" value="nickname" th:checked="${criteria.sort eq 'nickname'}" th:onchange="changeSort()"/>
+                            <label class="form-check-label">닉네임순</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sort" value="grade" th:checked="${criteria.sort eq 'grade'}" th:onchange="changeSort()"/>
+                            <label class="form-check-label">등급순</label>
+                        </div>
+                    </div>
+                </div>
+                <!-- 유저 리스트 -->
+                <table class="table table-bordered" id="table-users">
+                    <colgroup>
+                        <col style="width: 5%;">
+                        <col style="width: 5%;">
+                        <col style="width: 20%;">
+                        <col style="width: 10%;">
+                        <col style="width: 10%;">
+                        <col style="width: 10%;">
+                        <col style="width: 10%;">
+                        <col style="width: 15%;">
+                        <col style="width: 15%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" id="checkbox-all"></th>
+                        <th>번호</th>
+                        <th>이메일</th>
+                        <th>닉네임</th>
+                        <th>등급</th>
+                        <th>상태</th>
+                        <th>보유포인트</th>
+                        <th>가입일자</th>
+                        <th>수정일자</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${users.isEmpty()}">
+                        <td class="text-center" style="font-weight: bold" colspan="9">회원이 없습니다.</td>
+                    </tr>
+                    <tr th:each="user : ${users}" th:attr="id=|user-${user.id}|">
+                        <td><input type="checkbox" name="no" th:attr="data-user-id=${user.id}"></td>
+                        <td th:text="${user.id}">1111</td>
+                        <td><a th:text="${user.email}">hong@gmail.com</a></td>
+                        <td th:text="${user.nickname}">길동이</td>
+                        <td th:text="${user.userGrade.name}">GOLD</td>
+                        <td th:text="${user.status}">active</td>
+                        <td th:text="${user.point}">1,000</td>
+                        <td th:text="${#dates.format(user.createDate, 'yyyy-MM-dd')}">2024년 4월 10일</td>
+                        <td th:text="${#dates.format(user.updateDate, 'yyyy-MM-dd')}">2024년 4월 11일</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <!-- 검색, 페이징 영역 -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="row row-cols-lg-auto g-3 mb-3">
+                            <div class="col-4">
+                                <select class="form-select" name="opt">
+                                    <option value="email" th:selected="${criteria.opt eq 'email'}">이메일</option>
+                                    <option value="nickname" th:selected="${criteria.opt eq 'nickname'}">닉네임</option>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <input type="text" class="form-control" name="keyword" th:value="${criteria.keyword}"/>
+                            </div>
+                            <div class="col-4">
+                                <button type="submit" class="btn btn-outline-primary">검색</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div th:if="${paging.totalRows ne 0 }">
+                            <nav>
+                                <ul class="pagination d-flex justify-content-center">
+                                    <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                        <a th:href="@{|/admin/user/userList?page=${paging.currentPage - 1}|}" class="page-link"
+                                           th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                                    </li>
+                                    <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                        <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                            <a th:href="@{|/admin/user/userList?page=${num}|}" class="page-link"
+                                               th:onclick="|changePage(${num}, event)|" th:text="${num}"></a>
+                                        </li>
+                                    </th:block>
+                                    <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                        <a th:href="@{|/admin/user/userList?page=${paging.currentPage + 1}|}" class="page-link"
+                                           th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="text-end">
+                <button type="button" class="btn btn-danger" id="btn-del-user">삭제</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script">
+    $("#btn-del-user").click(function() {
+        let checkedUserIds = [];
+        $(":checkbox[name=no]:checked").each(function() {
+            checkedUserIds.push($(this).attr("data-user-id"));
+        });
+        $.ajax({
+            type: 'POST',
+            url: '/admin/user/delete',
+            data: JSON.stringify(checkedUserIds),
+            contentType: 'application/json',
+            success: function() {
+                location.reload();
+            }
+        })
+    })
+</script>
+</html>

@@ -1,0 +1,159 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <style>
+        a {
+            text-decoration: none;
+            color: black;
+        }
+
+        .list-group-item {
+            border-bottom: none;
+        }
+    </style>
+    <title>룸메이크 | 공지사항</title>
+</head>
+<div layout:fragment="content" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div class="cs-sidebar">
+                <div class="card">
+                    <h5 class="card-header ">고객센터</h5>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/notice/list}">공지사항</a>
+                                <ul class="submenu list-group list-group-flush">
+                                    <li class="list-group-item"><a th:href="@{/cs/notice/list}">전체 공지사항</a></li>
+                                </ul>
+                            </li>
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/faq/list}">자주묻는질문</a>
+                                <ul class="submenu list-group list-group-flush">
+                                    <li class="list-group-item"><a th:href="@{/cs/faq/list}" value="all">전체</a></li>
+                                    <th:block th:each="faqCat : ${faqCategories}">
+                                        <li class="list-group-item"><a th:href="@{/cs/faq/list(filt=${faqCat.id})}" th:text="${faqCat.name}">배송</a></li>
+                                    </th:block>
+                                </ul>
+                            </li>
+                            <li class="list-group-item">
+                                <a style="font-weight: bold;" th:href="@{/cs/qna/form}">문의사항</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-10">
+            <h3 class="mb-3">공지사항</h3>
+
+            <form id="form-notice-list" method="get" action="/cs/notice/list">
+                <input type="hidden" name="page">
+                <div class="my-3 d-flex justify-content-between">
+                    <select class="form-control w-25" name="rows" onchange="changeRows()">
+                        <option value="5" th:selected="${criteria.rows eq 5}">5개씩보기</option>
+                        <option value="10" th:selected="${criteria.rows eq 10 or criteria.rows == null}" }>10개씩보기</option>
+                        <option value="20" th:selected="${criteria.rows eq 20}" }>20개씩보기</option>
+                        <option value="50" th:selected="${criteria.rows eq 50}" }>50개씩보기</option>
+                    </select>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sort" value="date" th:checked="${criteria.sort eq 'date' or criteria.sort == null}" th:onchange="changeSort()"/>
+                            <label class="form-check-label">최신순</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sort" value="title" th:checked="${criteria.sort eq 'title'}" th:onchange="changeSort()"/>
+                            <label class="form-check-label">이름순</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sort" value="priority" th:checked="${criteria.sort eq 'priority'}" th:onchange="changeSort()"/>
+                            <label class="form-check-label">우선순위</label>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-bordered  mb-3" id="table-notices">
+                    <colgroup>
+                        <col style="width: 10%;">
+                        <col style="width: 55%;">
+                        <col style="width: 15%;">
+                        <col style="width: 10%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>제목</th>
+                        <th>수정일자</th>
+                        <th>작성자</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="notice : ${noticeList}" th:attr="id=|notice-${notice.id}|">
+                        <td th:text="${notice.id}">11</td>
+                        <td><a th:href="@{/cs/notice/detail/{id}(id = ${notice.id})}" th:text="${notice.title}" th:attr="data-notice-id=${notice.id}" style="color:black; text-decoration: none;">필독 공지사항</a>
+                            <span class="badge rounded-pill bg-danger ms-3" th:if="${notice.priority == 1}">필독</span>
+                        </td>
+                        <td th:text="${#dates.format(notice.createDate, 'yyyy-MM-dd')}">2024년 4월 11일</td>
+                        <td th:text="${notice.updateByUser.nickname}">김유신</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="row row-cols-lg-auto g-3 mb-3">
+                            <div class="col-4">
+                                <select class="form-select" name="opt">
+                                    <option value="title" th:selected="${criteria.opt eq 'title'}">제목</option>
+                                    <option value="content" th:selected="${criteria.opt eq 'content'}">내용</option>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <input type="text" class="form-control" name="keyword" th:value="${criteria.keyword}"/>
+                            </div>
+                            <div class="col-4">
+                                <button type="submit" class="btn btn-outline-primary">검색</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div th:if="${paging.totalRows ne 0 }">
+                            <nav>
+                                <ul class="pagination d-flex justify-content-center">
+                                    <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                        <a th:href="@{|/admin/management/notice?page=${paging.currentPage - 1}|}" class="page-link"
+                                           th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                                    </li>
+                                    <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                        <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                            <a th:href="@{|/admin/management/notice?page=${num}|}" class="page-link"
+                                               th:onclick="|changePage(${num}, event)|" th:text="${num}"></a>
+                                        </li>
+                                    </th:block>
+
+                                    <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                        <a th:href="@{|/admin/management/notice?page=${paging.currentPage + 1}|}" class="page-link"
+                                           th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script">
+    function changeRows() {
+        $('[id^="form-"]').submit();
+    }
+
+    function changeSort() {
+        $('[id^="form-"]').submit();
+    }
+
+    function changePage(page, event) {
+        event.preventDefault();
+        $("input[name=page]").val(page);
+        $('[id^="form-"]').submit();
+    }
+</script>
+</html>

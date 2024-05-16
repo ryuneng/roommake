@@ -1,0 +1,215 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='management'">
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h4>자주묻는질문</h4>
+            <hr>
+            <form id="form-faq" method="get" action="/admin/management/faq">
+                <input type="hidden" name="page">
+                <!-- rows, 카테고리 필터링 선택 영역 -->
+                <div class="my-3 d-flex justify-content-between">
+                    <select class="form-control w-25" name="rows" onchange="changeRows()">
+                        <option value="5" th:selected="${criteria.rows eq 5}">5개씩보기</option>
+                        <option value="10" th:selected="${criteria.rows eq 10 or criteria.rows == null}" }>10개씩보기</option>
+                        <option value="20" th:selected="${criteria.rows eq 20}" }>20개씩보기</option>
+                        <option value="50" th:selected="${criteria.rows eq 50}" }>50개씩보기</option>
+                    </select>
+                    <select class="form-select w-25" name="filt" onchange="changeFilt()">
+                        <option name="filt-category" value="all" th:selected="${criteria.filt == null or criteria.filt == 'all'}">전체</option>
+                        <th:block th:each="faqCat : ${faqCategories}">
+                            <option name="filt-category" th:value="${faqCat.id}" th:selected="${#strings.equals(criteria.filt, faqCat.id)}" th:text="${faqCat.name}">배송</option>
+                        </th:block>
+                    </select>
+                </div>
+                <!-- 자주묻는질문 리스트 -->
+                <table class="table table-bordered" id="table-faqs" style="width: 100%">
+                    <colgroup>
+                        <col style="width: 5%;">
+                        <col style="width: 5%;">
+                        <col style="width: 10%;">
+                        <col style="width: 30%;">
+                        <col style="width: 15%;">
+                        <col style="width: 10%;">
+                        <col style="width: 15%;">
+                        <col style="width: 10%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" id="checkbox-all"></th>
+                        <th>번호</th>
+                        <th>카테고리</th>
+                        <th>제목</th>
+                        <th>작성일자</th>
+                        <th>작성일</th>
+                        <th>수정일자</th>
+                        <th>수정자</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${faqs.isEmpty()}">
+                        <td class="text-center" style="font-weight: bold" colspan="8">자주묻는질문이 없습니다.</td>
+                    </tr>
+                    <tr th:each="faq : ${faqs}" th:attr="id=|faq-${faq.id}|">
+                        <td><input type="checkbox" name="no" th:attr="data-faq-id=${faq.id}"></td>
+                        <td th:text="${faq.id}">11</td>
+                        <td th:text="${faq.category.name}">배송</td>
+                        <td><a th:href="@{|/faq/detail/${faq.id}|}" th:text="${faq.title}" th:attr="data-faq-id=${faq.id}">배송 안내입니다.</a></td>
+                        <td th:text="${#dates.format(faq.createDate, 'yyyy-MM-dd')}">2024년 4월 10일</td>
+                        <td th:text="${faq.createByUser.nickname}">홍길동</td>
+                        <td th:text="${#dates.format(faq.updateDate, 'yyyy-MM-dd')}">2024년 4월 11일</td>
+                        <td th:text="${faq.updateByUser.nickname}">김유신</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <!-- 자주묻는질문 페이징처리 영역 -->
+                <div class="col-12">
+                    <div th:if="${paging.totalRows ne 0 }">
+                        <nav>
+                            <ul class="pagination d-flex justify-content-center">
+                                <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                    <a th:href="@{|/admin/management/faq?page=${paging.currentPage - 1}|}" class="page-link"
+                                       th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                                </li>
+                                <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                    <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                        <a th:href="@{|/admin/management/faq?page=${num}|}" class="page-link"
+                                           th:onclick="|changePage(${num}, event)|" th:text="${num}"></a>
+                                    </li>
+                                </th:block>
+
+                                <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                    <a th:href="@{|/admin/management/faq?page=${paging.currentPage + 1}|}" class="page-link"
+                                       th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </form>
+            <div class="text-end">
+                <button type="button" class="btn btn-danger mb-3" id="btn-del-faq">삭제</button>
+            </div>
+            <hr>
+            <form class="border bg-light p-3" method="post">
+                <input type="hidden" id="faq-id" name="id">
+                <div class="list-group mb-3">
+                    <div class="form-group mb-3">
+                        <label class="form-label">자주묻는질문 카테고리</label>
+                        <select class="form-select" name="category" id="select-faq-category">
+                            <th:block th:each="faqCat : ${faqCategories}">
+                                <option id="option-faq-category" th:text="${faqCat.name}" th:value="${faqCat.id}" name="category">배송</option>
+                            </th:block>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">제목</label>
+                    <input type="text" class="form-control" name="title" id="faq-title"/>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">내용</label>
+                    <textarea rows="5" class="form-control" name="content" id="faq-content"></textarea>
+                </div>
+                <div class="text-end">
+                    <button type="button" class="btn btn-primary" id="btn-save-faq">등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script">
+    $(function() {
+        // form에 detail 출력
+        $('#table-faqs tbody a').click(function(event) {
+            event.preventDefault();
+
+            let faqId = $(this).attr("data-faq-id");
+
+            $.getJSON(`/admin/management/faq/detail/${faqId}`, function(faq) {
+                $('#faq-id').val(faq.id);
+                $('#faq-title').val(faq.title);
+                $('#faq-content').val(faq.content);
+                // 카테고리를 설정할 때 선택된 옵션을 변경
+                $('#select-faq-category option').each(function() {
+                    if ($(this).val() == faq.category.id) { // faq에서 받은 카테고리 ID와 비교
+                        $(this).prop('selected', true); // 일치하면 해당 옵션 선택
+                    } else {
+                        $(this).prop('selected', false); // 일치하지 않으면 선택 취소
+                    }
+                });
+            })
+        })
+
+        // 등록, 수정
+        $('#btn-save-faq').click(function(event) {
+            event.preventDefault();
+
+            let formData = {
+                id: $('#faq-id').val(),
+                title: $('#faq-title').val(),
+                content: $('#faq-content').val(),
+                category: $('option[name=category]:selected').val()
+            }
+            let url;
+            if (formData.id) {
+                url = `/admin/management/faq/modify/${formData.id}`
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: formData,
+                    success: function(faq) {
+                        let $tr = $(`#faq-${faq.id}`);
+                        $tr.find("td:eq(2)").text(faq.category.name);
+                        $tr.find("td:eq(3) a").text(faq.title);
+                        $tr.find("td:eq(4)").text(faq.createDate);
+                        $tr.find("td:eq(5)").text(faq.createByUser.nickname);
+                        $tr.find("td:eq(6)").text(faq.updateDate);
+                        $tr.find("td:eq(7)").text(faq.updateByUser.nickname);
+                        alert("자주묻는질문이 수정 되었습니다.");
+                    },
+                    error: function() {
+                        alert("자주묻는질문 수정 실패했습니다. 확인 후 다시 시도해주십시오.");
+                    }
+                })
+            } else {
+                url = '/admin/management/faq/create';
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: formData,
+                    success: function() {
+                        location.reload();
+                        alert("자주묻는질문이 등록 되었습니다.");
+                    },
+                    error: function() {
+                        alert("자주묻는질문 등록 실패했습니다. 확인 후 다시 시도해주십시오.");
+                    }
+                });
+            }
+        })
+
+        $('button[id=btn-del-faq]').click(function() {
+            let checkedFaqIds = [];
+            $(":checkbox[name=no]:checked").each(function() {
+                checkedFaqIds.push($(this).attr("data-faq-id"));
+            });
+            $.ajax({
+                type: 'POST',
+                url: `/admin/management/faq/delete`,
+                data: JSON.stringify(checkedFaqIds),
+                contentType: 'application/json',
+                success: function() {
+                    location.reload();
+                    alert("자주묻는질문이 삭제 되었습니다.");
+                },
+                error: function() {
+                    alert("자주묻는질문 삭제 실패했습니다. 확인 후 다시 시도해주십시오.");
+                }
+            })
+        })
+    })
+</script>
+</html>

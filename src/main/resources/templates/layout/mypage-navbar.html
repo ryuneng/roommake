@@ -1,0 +1,107 @@
+<div class="container-fluid small" th:fragment="mypage-navbar">
+    <style>
+        .nav-link {
+            color: black;
+
+        }
+
+        .active-link {
+            color: dodgerblue;
+        }
+    </style>
+
+    <ul class="nav justify-content-center" id="nav-category" style="border-bottom: 1px solid lightgray;">
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${category} == '프로필' ? 'active-link'" aria-current="page" href="/user/mypage"><span style="font-weight: bold; font-size: larger;">프로필</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${category} == '나의쇼핑' ? 'active-link'" href="/user/myorder"><span style="font-weight: bold; font-size: larger;">나의쇼핑</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${category} == '나의리뷰' ? 'active-link'" href="/user/myReview/best"><span style="font-weight: bold; font-size: larger;">나의리뷰</span></a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${category} == '설정' ? 'active-link'" href="/user/setting"><span style="font-weight: bold; font-size: larger;">설정</span></a>
+        </li>
+    </ul>
+
+    <div id="nav-sub-category"></div>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            let category = $("html").attr("data-category");
+            let subcategory = $("html").attr("data-sub-category");
+            // 초기 설정: '프로필' 카테고리와 '모두 보기' 하위 카테고리 로드
+            loadCategory(category, subcategory);
+
+            // 네비게이션 링크 클릭 이벤트 핸들러
+            $('#nav-category .nav-link').click(function() {
+                // 이전에 활성화된 링크의 클래스를 제거
+                $('#nav-category .nav-link').removeClass('active-link');
+                // 클릭된 링크에 'active-link' 클래스 추가
+                $(this).addClass('active-link');
+
+                // 각 카테고리에 대응하는 기본 하위 카테고리 설정
+                var category = $(this).text().trim();
+                var defaultSubcategories = {
+                    '프로필': '모두 보기',
+                    '나의쇼핑': '주문 목록',
+                    '나의리뷰': '리뷰쓰기',
+                    '설정': '회원정보수정'
+                };
+                // 선택된 카테고리에 해당하는 하위 카테고리로 카테고리 로드
+                loadCategory(category, defaultSubcategories[category]);
+            });
+
+            // 카테고리 로드 함수
+            function loadCategory(category, subcategory) {
+                var categoryClass = category.replace(/\s+/g, ''); // 공백 제거
+
+                // 현재 카테고리가 아닌 다른 카테고리의 네비바 숨김
+                $('#nav-sub-category .nav').not('.' + categoryClass).hide();
+
+                // 새로운 네비게이션 바 생성
+                var newNav = $('<ul></ul>')
+                    .addClass('nav justify-content-center ' + categoryClass)
+                    .css('border-bottom', '1px solid lightgray');
+
+                // 하위 카테고리 목록 생성
+                var items;
+                switch (category) {
+                    case '프로필':
+                        items = [{label: '모두 보기', link: '/user/mypage'}, {label: '커뮤니티', link: '/user/mycomm'}, {label: '스크랩', link: '/user/scrapbook'}, {label: '좋아요', link: '/user/heart'}];
+                        break;
+                    case '나의쇼핑':
+                        items = [{label: '주문 목록', link: '/user/myorder'}, {label: '나의 문의내역', link: '/user/myqna/noAnswer'}, {label: '포인트', link: '/user/point'}];
+                        break;
+                    case '나의리뷰':
+                        items = [{label: '리뷰쓰기', link: ''}, {label: '내가 작성한 리뷰', link: '/user/myReview/best'}];
+                        break;
+                    case '설정':
+                        items = [{label: '회원정보수정', link: '/user/setting'}, {label: '사용자 숨기기 설정', link: ''}, {label: '비밀번호 변경', link: '/user/changePwd'}];
+                        break;
+                }
+
+                // 상위 카테고리 선택 시 하위 목록을 동적으로 생성
+                items.forEach(function(item) {
+                    var li = $('<li></li>').addClass('nav-item');
+                    var a = $('<a></a>').attr("href", item.link).addClass('nav-link').text(item.label).click(function() {
+                        // 클릭 시 다른 모든 링크의 'active-link' 클래스 제거 후 현재 클릭한 링크에 추가
+                        $('#nav-sub-category .nav-link').removeClass('active-link');
+                        $(this).addClass('active-link');
+                    }).css('font-weight', 'bold')
+                        .css('font-size', '14px');
+                    // 선택된 하위 카테고리에 'active-link' 클래스 추가
+                    if (item.label === subcategory) {
+                        a.addClass('active-link');
+                    }
+
+                    li.append(a);
+                    newNav.append(li);
+                });
+
+                // 기존 하위 목록을 제거하고 새로운 하위 목록을 추가
+                $('#nav-sub-category').empty().append(newNav);
+            }
+        });
+    </script>
+</div>

@@ -1,0 +1,69 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 반품신청완료</title>
+</head>
+<div layout:fragment="content" class="container my-3 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-3">
+            </div>
+            <div class="col-6 text-center mb-4">
+                <h4 class="fw-bold mb-5">반품신청이 완료되었습니다</h4>
+                <!-- 상품 영역 시작 -->
+                <div class="mb-5">
+                    <div class="text-start fw-bold" style="font-size: 17px">반품 상품</div>
+                    <hr>
+                    <table class="table text-center">
+                        <tbody class="align-middle">
+                        <tr>
+                            <td>
+                                <div class="d-flex w-100 justify-content-start">
+                                    <a th:href="@{/store/detail/{id}(id=${dto.item.productId})}" class="link-underline link-underline-opacity-0 text-dark">
+                                        <div>
+                                            <img th:src="@{${dto.item.imageName}}" style="width: 80px; height: 80px">
+                                        </div>
+                                    </a>
+                                    <div class="ms-3 text-start">
+                                        <div>
+                                            <div th:text="${dto.item.name}" style="display: -webkit-box;
+                                                                  overflow: hidden;
+                                                                  text-overflow: ellipsis;
+                                                                  -webkit-box-orient: vertical;
+                                                                  -webkit-line-clamp: 1;">
+                                                LED조명 통서랍 수납침대 SSQ(매트리스 선택)
+                                            </div>
+                                            <div class="text-secondary mt-2" style="font-size: 12px">
+                                                사이즈: <span th:text="${dto.item.size}">슈퍼싱글SS 프레임만</span>
+                                                / 색상: <span th:text="${dto.item.color}">화이트</span>
+                                            </div>
+                                            <div style="font-size: small"><span th:text="${dto.item.amount}">2</span>개</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 상품 영역 끝 -->
+                <div class="d-flex justify-content-start mb-5 text-start align-items-center">
+                    <div class="fw-bold me-3">
+                        <div class="mb-3">회수 요청사항</div>
+                    </div>
+                    <div>
+                        <div th:if="${dto.collectionMemo != null}" th:text="${dto.collectionMemo}" class="mb-3">문 앞</div>
+                        <div th:if="${dto.collectionMemo == null}" class="mb-3">없음</div>
+                    </div>
+                </div>
+                <div class="mb-3 pb-3 small">환불은 상품을 회수한 이후에 진행됩니다.</div>
+                <div class="d-flex justify-content-between mb-5">
+                    <a th:href="@{|/order/claim/return-detail/${dto.item.orderItemId}|}" type="button" class="btn btn-outline-dark w-50 me-3">신청내역 확인</a>
+                    <a th:href="@{/store/home}" class="btn btn-primary w-50 ms-3">쇼핑하기</a>
+                </div>
+            </div>
+            <div class="col-3">
+            </div>
+        </div>
+    </div>
+</div>
+</html>

@@ -1,0 +1,61 @@
+<html lang="ko" layout:decorate="~{layout/mypage-base}" th:with="category='프로필'" th:attr="data-category='프로필',data-sub-category='좋아요'">
+
+<div class="container my-5" layout:fragment="content">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- 유저 프로필 -->
+            <div class="card text-center p-4 position-relative" style="width: 300px;">
+                <div style="position: absolute; top: 5px; right: 5px; padding: 5px; background-color: white; border-radius: 50%;">
+                    <i class="bi bi-share fs-4"></i>
+                </div>
+                <div style="width: 80px; height: 80px; margin: 0 auto; overflow: hidden; border-radius: 50%;">
+                    <img style="width: 100%; height: 100%; object-fit: cover;" th:src="${user.profilePhoto == 'default.jpg' ? '/images/mypage/default.jpg' : user.profilePhoto}">
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title" style="font-weight: bold" th:text="${user.nickname}">그릭요거트</h5>
+                    <p class="card-text">팔로잉 15 | 팔로워 3</p>
+                    <a class="btn btn-primary btn-sm" href="#">설정</a>
+                    <hr>
+                    <!-- 하위 아이콘 (북마크, 하트) -->
+                    <div class="d-flex align-items-center justify-content-center">
+                        <div class="d-flex flex-column align-items-center mx-3">
+                            <a href="http://localhost/scrapbook" class="text-decoration-none text-dark">
+                                <i class="bi bi-bookmark fs-3"></i>
+                            </a>
+                            <p class="card-text m-0"><small class="text-muted">스크랩북 <span th:text="${totalScrapCount}"></span></small></p>
+                        </div>
+                        <div class="d-flex flex-column align-items-center mx-3">
+                            <i class="bi bi-heart fs-3"></i>
+                            <small class="text-muted">좋아요 <span th:text="${totalLikes}"></span></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="content-section container">
+                <!-- 갤러리 -->
+                <div class="row mb-3">
+                    <!-- 좋아요 정보 반복 -->
+                    <div th:each="like : ${userLikes}" class="col-md-3 mb-3">
+                        <!-- 이미지와 제목 -->
+
+                        <!-- 커뮤니티 이미지 -->
+                        <img th:if="${like.imageName == 'default.jpg'}"
+                             th:src="@{|/images/${like.type}/${like.imageName}|}"
+                             alt="커뮤니티 이미지"
+                             style="width: 140px; height: 140px; object-fit: cover; border: 1px solid #ccc;">
+
+                        <img th:if="${like.imageName != 'default.jpg'}"
+                             th:src="@{${like.imageName}}"
+                             alt="커뮤니티 이미지"
+                             style="width: 140px; height: 140px; object-fit: cover; border: 1px solid #ccc;">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

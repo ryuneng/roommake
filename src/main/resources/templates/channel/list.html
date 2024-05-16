@@ -1,0 +1,149 @@
+<html layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 채널</title>
+</head>
+<div layout:fragment="content" class="container my-3">
+
+    <!-- 활동중인 채널 목록 -->
+    <div class="row mb-3" th:if="${participationChannelList}">
+        <div class="my-3 mt-4" th:if="${!participationChannelList.isEmpty()}">
+            <div class="col-12">
+                <h4><strong th:text="${#authentication.principal.nickname}"></strong>님이 활동중인 채널</h4>
+            </div>
+        </div>
+        <div class="col-12 d-flex justify-content-start">
+            <div th:each="participationChannel : ${participationChannelList}">
+                <div class="card border-0 me-3" style="width: 110px;">
+                    <a th:href="|/channel/post/list/${participationChannel.id}|">
+                        <img th:src="@{${participationChannel.imageName}}" class="card-img-top img-fluid" alt="..." style="height: 100px;">
+                    </a>
+                    <div class="card-body p-0" style="overflow-y: auto;">
+                       <span class="card-text" style="font-size: 16px;
+                            display: inline-block; width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${participationChannel.title}">
+                           내반려동물소개
+                       </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 채널 제목 -->
+    <div class="row mt-3 mb-1">
+        <div class="col-12">
+            <h4>마음에 드는 채널을 골라보세요</h4>
+        </div>
+    </div>
+
+    <form id="form-channel" method="get" th:action="@{/channel/list}">
+        <input type="hidden" name="page"/>
+        <!-- 채널 정렬 옵션 -->
+        <div class="row mb-3">
+            <!-- 정렬 영역 -->
+            <div class="d-flex justify-content-end" onchange="changeSort()">
+                <select class="form-select" style="width:150px;" name="sort">
+                    <option value="all" th:selected="${#strings.equals(param.sort, 'all')}">전체</option>
+                    <option value="date" th:selected="${#strings.equals(param.sort, 'date')}">최신순</option>
+                    <option value="part" th:selected="${#strings.equals(param.sort, 'part')}">참여자수</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 채널 목록 -->
+        <div class="row" th:if="${channelList.isEmpty()}">
+            <div class="col-12 my-5 text-center">
+                <h4>채널이 존재하지 않습니다.</h4>
+            </div>
+        </div>
+        <div th:if="${!channelList.isEmpty()}">
+            <div class="row">
+                <!-- 채널 카드 -->
+                <div class="col-6 mb-3" th:each="channel : ${channelList}">
+                    <a th:href="|/channel/post/list/${channel.id}|" style="text-decoration: none; color: black;">
+                        <div class="card w-60 h-35">
+                            <div class="card-body">
+                                <!-- 채널 제목 -->
+                                <h5 class="card-title" style="overflow: hidden; text-overflow: ellipsis; font-weight: bold;" th:text="${channel.title}">
+                                    반려동물 자랑하기
+                                </h5>
+                                <!-- 채널 이미지 -->
+                                <img th:src="@{${channel.imageName}}" class="card-img-top" style="height: 250px;" alt="...">
+                                <!-- 참여자, 게시물, 좋아요 영역 -->
+                                <div class="card-text mt-1">
+                                    <!-- 참여자, 게시물 수 -->
+                                    <div class="d-flex justify-content-start">
+                                        <span class="nav-item" style="font-size: 15px; color: gray;">
+                                            <strong th:text="${channel.channelParticipantCount}">77</strong>명 활동 중 ・ <strong th:text="${channel.channelPostCount}">77</strong>개의 콘텐츠
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 검색, 채널 개설 영역 -->
+        <div class="d-flex justify-content-between mb-5">
+            <!-- 검색 영역 -->
+            <div class="row row-cols-sm-auto justify-content-start align-items-center">
+                <div class="col-12">
+                    <select class="form-select" name="opt">
+                        <option value="all" th:selected="${#strings.equals(param.opt, 'all')}">전체</option>
+                        <option value="title" th:selected="${#strings.equals(param.opt, 'title')}">채널제목</option>
+                        <option value="description" th:selected="${#strings.equals(param.opt, 'description')}">채널설명</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <input type="text" class="form-control" name="keyword" th:value="${param.keyword}"/>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-outline-primary">검색</button>
+                </div>
+            </div>
+            <!-- 채널개설 영역 -->
+            <a class="btn btn-outline-primary" th:href="@{/channel/create}">채널 생성</a>
+        </div>
+
+        <!-- 페이지 네비게이션바 -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div th:if="${paging.totalRows ne 0}">
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                <a th:href="@{|/channel/list?page=${paging.currentPage - 1}|}"
+                                   class="page-link" th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                            </li>
+                            <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                    <a th:href="@{|/channel/list?page=${num}|}"
+                                       class="page-link" th:classappend="${paging.currentPage == num ? 'active' : ''}"
+                                       th:text="${num}" th:onclick="|changePage(${num}, event)|"></a>
+                                </li>
+                            </th:block>
+                            <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                <a th:href="@{|/channel/list?page=${paging.currentPage + 1}|}"
+                                   class="page-link" th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script layout:fragment="script">
+    function changeSort() {
+        let form = document.getElementById("form-channel");
+        form.submit();
+    }
+
+    function changePage(page, event) {
+        event.preventDefault();
+        document.querySelector("input[name=page]").value = page;
+        document.getElementById("form-channel").submit();
+    }
+</script>
+</html>

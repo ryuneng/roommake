@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.admin.management.mapper.FaqMapper">
+
+    <cache eviction="LRU" flushInterval="600000" size="512" readOnly="true" />
+
+    <insert id="createFaq" parameterType="com.roommake.admin.management.vo.Faq" >
+        insert into faq
+            (faq_title, faq_content, faq_category_id, faq_create_by, faq_update_by)
+        values
+            (#{title}, #{content}, #{category.id}, #{createByUser.id}, #{updateByUser.id})
+    </insert>
+
+    <update id="modifyFaq" parameterType="com.roommake.admin.management.vo.Faq">
+        update
+            faq
+        <set>
+            faq_title           = #{title},
+            faq_content         = #{content},
+            faq_update_date     = #{updateDate},
+            faq_delete_yn       = #{deleteYn},
+            faq_category_id     = #{category.id},
+            faq_update_by       = #{updateByUser.id},
+            <if test='"Y" == deleteYn '>
+                faq_delete_date = #{deleteDate}
+            </if>
+        </set>
+        where
+            faq_id = #{id}
+    </update>
+
+    <select id="getFaqById" parameterType="int" resultType="com.roommake.admin.management.vo.Faq">
+        select
+            f.faq_id              as id,
+            f.faq_title           as title,
+            f.faq_content         as content,
+            f.faq_create_date     as createDate,
+            f.faq_update_date     as updateDate,
+            f.faq_delete_date     as deleteDate,
+            f.faq_delete_yn       as deleteYn,
+            f.faq_category_id     as "category.id",
+            c.faq_category_name   as "category.name",
+            f.faq_create_by       as "createByUser.id",
+            f.faq_update_by       as "updateByUser.id"
+        from
+            faq f
+            left join faq_category c ON f.faq_category_id = c.faq_category_id
+        where faq_id = #{id}
+          and faq_delete_yn = 'N'
+        order by
+            faq_id desc
+    </select>
+
+
+    <select id="getFaqs" parameterType="com.roommake.dto.Criteria" resultType="com.roommake.admin.management.vo.Faq">
+        select
+            faq_id              as id,
+            faq_title           as title,
+            faq_content         as content,
+            faq_create_date     as createDate,
+            faq_update_date     as updateDate,
+            faq_delete_date     as deleteDate,
+            faq_delete_yn       as deleteYn,
+            faq_category_id     as "category.id",
+            faq_category_name   as "category.name",
+            faq_create_by       as "createByUser.id",
+            create_user_nickname   as "createByUser.nickname",
+            faq_update_by           as "updateByUser.id",
+            update_user_nickname   as "updateByUser.nickname"
+        from
+            (select
+                f.faq_id,
+                f.faq_title,
+                f.faq_content,
+                f.faq_create_date,
+                f.faq_update_date,
+                f.faq_delete_date,
+                f.faq_delete_yn,
+                c.faq_category_name,
+                f.faq_category_id,
+                f.faq_create_by,
+                u1.user_nickname        as create_user_nickname,
+                f.faq_update_by,
+                u2.user_nickname        as update_user_nickname,
+                @rownum := @rownum + 1 as row_num
+            from
+            (select @rownum := 0) r,
+            faq f
+            left join faq_category c on f.faq_category_id = c.faq_category_id
+            left join user u1 on f.faq_create_by = u1.user_id
+            left join user u2 on f.faq_update_by = u2.user_id
+            <where>
+                <choose>
+                    <when test='filt != "all"'>
+                        and f.faq_category_id = #{filt}
+                    </when>
+                </choose>
+                and f.faq_delete_yn = 'N'
+            </where>
+            order by
+                faq_id desc
+        ) as banner
+        where
+            row_num between #{begin} and #{end}
+    </select>
+
+    <select id="getTotalRows" parameterType="com.roommake.dto.Criteria" resultType="int">
+        select
+            count(*)
+        from
+            faq
+        <where>
+            <if test="filt != 'all'">
+                faq_category_id = #{filt}
+            </if>
+            and faq_delete_yn = 'N'
+        </where>
+    </select>
+
+    <select id="getFaqCategories" resultType="com.roommake.admin.management.vo.FaqCategory">
+        select
+            faq_category_id     as id,
+            faq_category_name   as name
+        from
+            faq_category
+        order by
+            faq_category_id asc
+    </select>
+
+    <select id="getFaqCategory" parameterType="int" resultType="com.roommake.admin.management.vo.FaqCategory">
+        select
+            faq_category_id     as id,
+            faq_category_name   as name
+        from
+            faq_category
+        where
+            faq_category_id = #{id}
+    </select>
+</mapper>

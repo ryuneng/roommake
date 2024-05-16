@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <script type="text/javascript" th:src="@{/webjars/jquery/3.7.1/jquery.min.js}"></script>
+    <title>룸메이크 | 배송지 선택</title>
+    <style>
+        html, body {
+            overflow: hidden;
+        }
+
+        .container {
+            max-height: 650px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div id="div-type" th:attr="data-type=${type}" class="mb-3">
+                <h5 class="fw-bold text-center mb-3">배송지 선택</h5>
+                <div class="text-center">
+                    <a th:href="@{|/order/delivery/create/${type}|}" class="btn btn-sm btn-outline-dark w-75">+ 배송지 추가</a>
+                </div>
+            </div>
+            <div>
+                <table class="table">
+                    <tr th:each="delivery: ${deliveries}">
+                        <td>
+                            <div class="d-flex justify-content-start align-items-center mb-1">
+                                <div class="d-flex justify-content-start align-items-center">
+                                    <span class="me-2 fw-bold" th:text="${delivery.name}">우리집</span>
+                                    <span th:if="${delivery.defaultYn == 'Y'}" class="text-primary" style="font-size: small">기본배송지</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="mb-1 small">
+                                    (<span th:text="${delivery.zipcode}">(03134)</span>)
+                                    <span th:text="${delivery.address1}">서울특별시 종로구 율곡로10길 105</span>
+                                    <span th:text="${delivery.address2}">디아망 4F</span>
+                                </div>
+                                <div class="mb-2 small">
+                                    <span th:text="${delivery.recipient}">수령인</span> |
+                                    <span th:text="${delivery.phone}">| 010-1111-2222</span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between w-100">
+                                <div>
+                                    <button th:id="${'btn-del-delivery-' + delivery.id}"
+                                            th:attr="data-delivery-id=${delivery.id}, data-default-yn=${delivery.defaultYn}"
+                                            class="btn btn-sm btn-outline-dark">
+                                        삭제
+                                    </button>
+                                    <a th:href="@{|/order/delivery/modify/${type}/${delivery.id}|}" class="btn btn-sm btn-outline-dark">수정</a>
+                                </div>
+                                <div>
+                                    <button th:if="${type == 'base'}"
+                                            th:id="${'btn-choose-delivery-' + delivery.id}"
+                                            th:attr="data-delivery-id=${delivery.id}"
+                                            class="btn btn-sm btn-primary">
+                                        선택
+                                    </button>
+                                    <button th:if="${type == 'collection'}"
+                                            th:id="${'btn-choose-collection-' + delivery.id}"
+                                            th:attr="data-delivery-id=${delivery.id}"
+                                            class="btn btn-sm btn-primary">
+                                        선택
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function() {
+        // 배송지 삭제
+        $("button[id^=btn-del-delivery]").click(function() {
+            if ($(this).attr("data-default-yn") === 'Y') {
+                alert("기본배송지는 삭제할 수 없습니다.");
+                return false;
+            } else {
+                let type = $("#div-type").attr("data-type");
+                let result = confirm("삭제하시겠습니까?");
+                if (result) {
+                    let deliveryId = $(this).attr("data-delivery-id");
+                    location.href = `/order/delivery/delete/` + type + `/${deliveryId}`;
+                }
+            }
+        });
+
+        // 배송지 선택
+        $("button[id^=btn-choose-delivery]").click(function() {
+            let deliveryId = $(this).attr("data-delivery-id");
+
+            // 부모 창으로 데이터 전송
+            window.opener.updateDelivery(deliveryId);
+            window.close();
+        });
+
+        // 회수지 선택
+        $("button[id^=btn-choose-collection]").click(function() {
+            let deliveryId = $(this).attr("data-delivery-id");
+
+            // 부모 창으로 데이터 전송
+            window.opener.updateCollection(deliveryId);
+            window.close();
+        });
+    });
+
+</script>
+</body>

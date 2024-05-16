@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.cart.mapper.CartMapper">
+
+    <select id="getCartsByUserId" parameterType="int" resultType="com.roommake.cart.dto.CartItemDto">
+        select
+            c.cart_id               as cartId,
+            c.cart_item_amount      as amount,
+            p.product_id            as productId,
+            p.product_name          as name,
+            p.product_price         as price,
+            p.product_discount      as discount,
+            p.parents_product_id    as parentsProductId,
+            pd.product_detail_id    as productDetailId,
+            pd.product_detail_size  as size,
+            pd.product_detail_color as color,
+            pd.product_detail_stock as stock,
+            (select pi.product_image_name
+             from product_image pi
+             where pi.product_id = p.product_id
+             limit 1) as imageName
+        from
+            cart c join product p join product_detail pd
+        on
+            c.product_id = p.product_id
+        and c.product_detail_id = pd.product_detail_id
+        and c.user_id = #{userId}
+    </select>
+
+    <select id="getItemOptionsByProductId" parameterType="int" resultType="com.roommake.cart.dto.CartItemDto">
+        select
+            p.product_id            as productId,
+            p.product_name          as name,
+            p.product_price         as price,
+            p.product_discount      as discount,
+            p.parents_product_id    as parentsProductId,
+            pd.product_detail_id    as productDetailId,
+            pd.product_detail_size  as size,
+            pd.product_detail_color as color,
+            pd.product_detail_stock as stock
+        from
+            product p join product_detail pd
+        on
+            p.product_id = pd.product_id
+        and p.product_id = #{value}
+    </select>
+
+    <delete id="deleteCart">
+        delete from
+            cart
+        where
+            cart_id in
+            <foreach item="cartId" collection="cartIds" open="(" separator="," close=")">
+                #{cartId}
+            </foreach>
+    </delete>
+
+    <update id="updateCartAmount">
+        update
+            cart
+        set
+            cart_item_amount = #{amount}
+        where
+            cart_id = #{cartId}
+    </update>
+
+    <update id="updateCartOption">
+        update
+            cart
+        set
+            product_detail_id = ${productDetailId}
+        where
+            cart_id = #{cartId}
+    </update>
+
+    <delete id="deleteExpiredCartItems" parameterType="int">
+        delete from
+            cart
+        where
+            cart_create_date &lt; current_date - interval 30 day
+    </delete>
+</mapper>

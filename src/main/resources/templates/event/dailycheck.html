@@ -1,0 +1,61 @@
+<html layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 이벤트</title>
+</head>
+<div layout:fragment="content" class="container my-3">
+    <!-- 그림과 버튼을 가운데로 정렬하기 위해 justify-content-center 클래스를 추가 -->
+    <div class="row justify-content-center mt-5 mb-5">
+        <div class="col-12 mb-3">
+            <!-- 이미지를 중앙으로 정렬하기 위해 mx-auto와 d-block 클래스를 추가 -->
+            <div sec:authorize="!isAuthenticated()">
+                <img th:src="@{/images/event/dailycheck-event1.jpg}" class="card-img-top mx-auto d-block" style="width: 800px;" alt="...">
+                <!-- 출석체크 버튼 -->
+                <a th:href="@{/user/login}">
+                    <img th:src="@{/images/event/dailycheck-event2.jpg}" class="card-img-top mx-auto d-block" style="width: 800px;" alt="...">
+                </a>
+                <img th:src="@{/images/event/dailycheck-event3.jpg}" class="card-img-top mx-auto d-block" style="width: 800px;" alt="...">
+            </div>
+            <div sec:authorize="isAuthenticated()">
+                <img th:src="@{/images/event/dailycheck-event1.jpg}" class="card-img-top mx-auto d-block" style="width: 800px;" alt="...">
+                <!-- 출석체크 버튼 -->
+                <button id="btn-attend-dailyCheck" class="card-img-top mx-auto d-block border-0 bg-transparent p-0">
+                    <img th:src="@{/images/event/dailycheck-event2.jpg}" class="card-img-top mx-auto d-block" style="width: 800px;" alt="...">
+                </button>
+                <img th:src="@{/images/event/dailycheck-event3.jpg}" class="card-img-top mx-auto d-block" style="width: 800px;" alt="...">
+            </div>
+        </div>
+
+        <div class="col-12 d-flex justify-content-center">
+            <button id="copyLink" type="button" class="btn btn-outline-secondary mx-2" style="height: 50px; width: 50px;">
+                <i class="bi bi-paperclip" style="font-size: 24px;"></i>
+            </button>
+            <button id="kakaoShare" style="border: none; background-color: transparent;">
+                <img src="https://developers.kakao.com/assets/img/about/logos/kakaotalksharing/kakaotalk_sharing_btn_medium.png"
+                     alt="카카오톡 공유 보내기 버튼" height="50px" width="50px"/>
+            </button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" layout:fragment="script">
+    $(function() {
+
+        // 출석체크 버튼 이벤트
+        $("#btn-attend-dailyCheck").on("click", function() {
+            $.post(`/event/attendDailyCheck`, function(response) {
+                alert(response);
+            })
+        });
+
+        // 카카오 SDK 초기화
+        Kakao.init('9255796b13d48451ac7ccab3bb053c11');
+
+        // 카카오톡 공유 버튼 클릭 이벤트
+        $('#kakaoShare').click(function() {
+            Kakao.Share.sendCustom({
+                templateId: 107418
+            });
+        });
+
+    })
+</script>
+</html>

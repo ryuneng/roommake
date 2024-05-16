@@ -1,0 +1,53 @@
+<div th:fragment="navbar-admin-fragment">
+    <div class="navbar navbar-expand-lg navbar-light bg-light ">
+        <div class="container-fluid">
+            <div class="row">
+                <a class="navbar-brand" th:href="@{/admin/home}">관리자 홈</a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbar-support-content"
+                        aria-controls="navbar-support-content" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            <div class="collapse navbar-collapse row" id="navbar-support-content">
+                <div class="col-6 justify-content-start">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
+                        <li class="nav-item">
+                            <!-- -->
+                            <a th:href="@{/admin/management/notice}" class="nav-link" th:classappend="${menu eq 'management'} ? 'active'">관리</a>
+                        </li>
+                        <!--                        <li class="nav-item">-->
+                        <!--                            <a th:href="@{/admin/sales/sales}" class="nav-link" th:classappend="${menu eq 'sales'} ? 'active'">매출</a>-->
+                        <!--                        </li>-->
+                        <li class="nav-item">
+                            <a th:href="@{/admin/product/list}" class="nav-link" th:classappend="${menu eq 'product'} ? 'active'">상품</a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:href="@{/admin/order/item}" class="nav-link" th:classappend="${menu eq 'order'} ? 'active'">주문</a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:href="@{/admin/user/userList}" class="nav-link" th:classappend="${menu eq 'user'} ? 'active'">회원</a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:href="@{/admin/community/commList?commCatId=1}" class="nav-link" th:classappend="${menu eq 'community'} ? 'active'">게시글</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-6 order-lg-last">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3 justify-content-end">
+                        <li class="nav-item">
+                            <a th:href="@{/}" class="nav-link">RoomMake 이동</a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:href="@{/}" class="nav-link">로그아웃</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" layout:fragment="script">
+
+</script>

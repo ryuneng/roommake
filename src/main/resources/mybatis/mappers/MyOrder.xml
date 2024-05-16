@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.order.mapper.MyOrderMapper">
+
+    <select id="getTotalRows" resultType="int">
+        select
+            count(*)
+        from
+            `order`
+        <where>
+            user_id = #{userId}
+            <if test="criteria.beginDate != null and criteria.endDate != null">
+                and order_create_date >= date_format(#{criteria.beginDate}, '%Y-%m-%d')
+                and order_create_date &lt;= date_format(#{criteria.endDate} + interval 1 day, '%Y-%m-%d')
+            </if>
+            <if test="criteria.statusId != null">
+                and order_status_id = #{criteria.statusId}
+            </if>
+        </where>
+    </select>
+
+    <resultMap id="OrderResultMap" type="com.roommake.order.dto.OrderListDto">
+        <id column="order_id" property="id"/>
+        <id column="order_create_date" property="createDate"/>
+        <id column="order_update_date" property="updateDate"/>
+        <id column="order_total_price" property="totalPrice"/>
+        <id column="order_payment_price" property="paymentPrice"/>
+        <id column="invoice_number" property="invoiceNumber"/>
+        <association property="status" column="order_id" select="getOrderStatusByOrderId"/>
+        <association property="payment" column="order_id" select="getPaymentByOrderId"/>
+        <collection property="orderItems" column="order_id" select="getOrderItemsByOrderId"/>
+    </resultMap>
+
+    <select id="getAllOrdersByUserId" resultMap="OrderResultMap">
+        select
+            order_id,
+            user_id,
+            order_create_date,
+            order_update_date,
+            order_total_price,
+            order_payment_price,
+            invoice_number
+        from
+            (select
+                o.order_id,
+                o.user_id,
+                o.order_create_date,
+                o.order_update_date,
+                o.order_total_price,
+                o.order_payment_price,
+                o.invoice_number
+            from
+                `order` o join user u on o.user_id = u.user_id
+            <where>
+                o.user_id = #{userId}
+                <if test="criteria.beginDate != null and criteria.endDate != null">
+                    and o.order_create_date >= date_format(#{criteria.beginDate}, '%Y-%m-%d')
+                    and o.order_create_date &lt;= date_format(#{criteria.endDate} + interval 1 day, '%Y-%m-%d')
+                </if>
+                <if test="criteria.statusId != null">
+                    and o.order_status_id = #{criteria.statusId}
+                </if>
+            </where>
+            ) as `order`
+        order by order_id desc
+        limit 10 offset #{criteria.begin}
+    </select>
+
+    <select id="getOrderItemsByOrderId" parameterType="int" resultType="com.roommake.order.vo.OrderItem">
+        select
+            oi.order_item_id            as id,
+            oi.order_id                 as "order.id",
+            oi.product_id               as "product.id",
+            p.product_name              as "product.name",
+            oi.product_detail_id        as "productDetail.id",
+            pd.product_detail_size      as "productDetail.size",
+            pd.product_detail_unique_id as "productDetail.uniqueId",
+            pd.product_detail_color     as "productDetail.color",
+            oi.order_item_count         as amount,
+            oi.order_item_price         as price,
+            oi.order_status_id          as "orderStatus.id",
+            (select pi.product_image_name
+             from product_image pi
+             where pi.product_id = p.product_id
+                limit 1) as imageName
+        from
+            order_item oi
+        join
+            `order` o
+        on
+            oi.order_id = o.order_id
+        join
+            product p
+        on
+            oi.product_id = p.product_id
+        join
+            product_detail pd
+        on
+            oi.product_id = pd.product_id
+        and oi.product_detail_id = pd.product_detail_id
+        where
+            oi.order_id = #{value}
+    </select>
+
+    <select id="getPaymentByOrderId" parameterType="int" resultType="com.roommake.order.vo.Payment">
+        select
+            p.payment_id          as id,
+            p.order_id            as "order.id",
+            p.payment_price       as price,
+            p.payment_create_date as createDate,
+            p.payment_update_date as updateDate,
+            p.payment_method      as method,
+            p.payment_use_point   as usePoint,
+            p.payment_tid         as tid
+        from
+            payment p join `order` o
+        on
+            p.order_id = #{value}
+        and p.order_id = o.order_id
+    </select>
+
+    <select id="getOrderStatusByOrderId" parameterType="int" resultType="com.roommake.order.vo.OrderStatus">
+        select
+            os.order_status_id   as id,
+            os.order_status_name as name
+        from
+            order_status os join `order` o
+        on
+            o.order_id = #{value}
+        and os.order_status_id = o.order_status_id
+    </select>
+
+    <select id="getUserOrderInfoByUserId" parameterType="int" resultType="com.roommake.order.dto.UserOrderInfoDto">
+        select
+            u.user_id                    as userId,
+            u.user_unique_recommend_code as uniqueRecommendCode,
+            u.user_point                 as point,
+            u.user_grade_id              as userGradeId,
+            ug.user_grade_name           as userGradeName,
+            ug.user_point_rate           as userPointRate
+        from
+            user u join user_grade ug
+        on
+            user_id = #{id}
+        and u.user_grade_id  = ug.user_grade_id
+    </select>
+</mapper>

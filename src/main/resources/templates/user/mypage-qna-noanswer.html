@@ -1,0 +1,96 @@
+<html lang="ko" layout:decorate="~{layout/mypage-base}" th:with="category='나의쇼핑'" th:attr="data-category='나의쇼핑',data-sub-category='나의 문의내역'">
+<head>
+    <!-- 컨트롤러에서 전달한 메세지 띄우기 -->
+    <th:block th:if="${message != null}">
+        <th:block th:if="${message.message != null and message.message != ''}">
+            <script>
+                top.alert("[[${message.message}]]");
+            </script>
+        </th:block>
+    </th:block>
+</head>
+<div layout:fragment="content" class="container my-5">
+    <div class="container my-3">
+        <div class="row">
+            <div class="col">
+                <!-- 버튼 탭 -->
+                <div class="d-flex justify-content-center mb-2" role="group" aria-label="문의 탭">
+                    <div class="btn-group">
+                        <a th:href="@{/user/myqna/noAnswer}" class="btn btn-primary" style="padding-left: 2rem; padding-right: 2rem;">미답변 문의</a>
+                        <a th:href="@{/user/myqna/answer}" class="btn" style="background-color: #eee; padding-left: 2rem; padding-right: 2rem;">답변 완료</a>
+                    </div>
+                </div>
+                <div th:if="${noAnswerQnaList.isEmpty()}" class="p-3 bg-light text-center" style="font-weight: bold; font-size: large;">
+                    미응답 문의 내역이 없습니다.
+                </div>
+                <form id="form-qna-noanswer" action="/user/myqna/noAnswer" method="get">
+                    <input type="hidden" name="page">
+                    <!-- 미답변 문의 목록 -->
+                    <th:block th:each="qna : ${noAnswerQnaList}">
+                        <!-- 답변 완료 목록 -->
+                        <div class="border p-3 my-3 rounded mb-3" style="background-color: #fff;">
+                            <!-- 첫 번째 행 -->
+                            <div class="d-flex align-items-center" style="margin-bottom: 0.5rem;">
+                    <span style="background-color: #D3D3D3; color: #888888; padding: 1px 8px; border-radius: 4px; margin-right: 10px;">
+                        답변대기
+                    </span>
+                                <strong style="margin-left: 8px; margin-right: 8px;" th:text="${qna.category.name}"></strong>
+                                <i th:if='${qna.privateYn == "Y" }' class="bi bi-lock" style="margin-right: 8px;"></i>
+                                <span class="" th:text="${#dates.format(qna.createDate, 'yyyy-MM-dd')}"></span>
+                            </div>
+                            <!-- 두 번째 행 -->
+                            <div th:if="${qna.product != null}">
+                                <span style="color: #6c757d; margin-right: 4px;">상품</span>
+                                <span style="color: #007bff;" th:text="${qna.product.name}">논슬립 옷걸이</span>
+                            </div>
+                            <!-- 문의 내용 -->
+                            <div class="fw-bold mb-2">
+                                <i class="bi bi-question-circle" style="font-size: 1.2em; margin-right: 4px;"></i>
+                                <span th:text="${qna.title}"></span>
+                            </div>
+                            <div>
+                                <span th:text="${qna.content}"></span>
+                            </div>
+                            <!-- 삭제 버튼 -->
+                            <a th:href="@{|/user/myqna/delete/noAnswer/${qna.id}|}" class="btn btn-secondary btn-sm mt-2 text-end">삭제</a>
+                        </div>
+                    </th:block>
+                    <!-- 페이징 처리 -->
+                    <div class="row mt-3 mb-3">
+                        <div class="col-12">
+                            <div th:if="${paging.totalRows ne 0 }">
+                                <nav aria-label="Page navigation">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                            <a th:href="@{|/user/point?page=${paging.currentPage - 1}|}" class="page-link"
+                                               th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                                        </li>
+                                        <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                            <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                                <a th:href="@{|/user/point?page=${num}|}" class="page-link"
+                                                   th:onclick="|changePage(${num}, event)|" th:text="${num}"></a>
+                                            </li>
+                                        </th:block>
+
+                                        <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                            <a th:href="@{|/user/point?page=${paging.currentPage + 1}|}" class="page-link"
+                                               th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script">
+    function changePage(page, event) {
+        event.preventDefault();
+        $("input[name=page]").val(page);
+        $('[id^="form-"]').submit();
+    }
+</script>
+</html>

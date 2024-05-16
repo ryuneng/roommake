@@ -1,0 +1,24 @@
+<div th:fragment="sidebar-store-fragment">
+    <div class="category">
+        <h3>카테고리</h3>
+        <ul class="list-unstyled">
+            <li class="category-item" th:each="category, loop : ${categories}">
+                <a class="nav-link text-dark" id="category-id" th:href="@{/store/category/{id}(id=${category.id})}"
+                   th:text="${category.name}"
+                   th:attr="date-categoryid=${category.id}" style="display: inline">가구</a>
+                <button type="button" class="btn" style="float: right" id="category-btn"><i class="bi bi-caret-down-fill"></i></button>
+                <ul class="list-unstyled d-none" id="category-id2">
+                    <a class="nav-link text-dark" th:text>ㅎㅇㅎㅇ</a>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+</div>
+
+<script>
+    // 좌측 카테고리 토글관련된 함수
+    $("button[id=category-btn]").click(function() {
+        $("ul[id=category-id2]").removeClass("d-none");
+    });
+</script>

@@ -1,0 +1,186 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <style>
+
+        /* 카테고리 스타일 */
+        .category-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        /* 서브카테고리 스타일 */
+        .sub-category-item {
+            padding-left: 20px;
+        }
+
+
+        /* 카테고리 목록 스타일 */
+        .category-item ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .category-item ul li {
+            margin-bottom: 10px;
+            font-size: 14px; /* 텍스트 크기를 작게 조정합니다 */
+        }
+
+        .category-item ul li a {
+            display: block;
+            padding: 10px 15px;
+            background-color: #e9ecef; /* 배경색 */
+            color: #212529; /* 텍스트 색상 */
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .category-item ul li a:hover {
+            background-color: #ced4da; /* 마우스 오버 시 배경색 */
+            color: #212529; /* 마우스 오버 시 텍스트 색상 */
+            text-decoration: none;
+        }
+
+        /* 하위 카테고리 목록 스타일 */
+        .sub-category-item {
+            margin-left: 15px;
+        }
+
+
+    </style>
+</head>
+<div layout:fragment="content" class="container my-3 mt-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3">
+                <!-- 좌측 카테고리 -->
+                <div class="category">
+                    <h3>카테고리</h3>
+                    <ul class="list-unstyled">
+                        <li class="category-item" th:each="category, loop : ${categories}">
+                            <a class="nav-link text-dark" th:id="'category-id' + ${category.id}" th:href="@{|/store/category/${category.id}/top|}"
+                               th:text="${category.name}"
+                               th:attr="date-categoryid=${category.id}" style="display: inline">가구</a>
+                            <button type="button" class="btn border-0" th:id="'button-' + ${category.id}" style="float: right"
+                                    th:attr="data-category-id=${category.id}"><i class="bi bi-caret-down-fill"></i></button>
+                            <!-- 서브카테고리가 들어갈 위치 -->
+                            <ul class="list-unstyled d-none sub-category-item" th:id="'subcategory-' + ${category.id}">
+
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <!-- 원하는 카테고리별로 겸색기능이 있는 드롭다운 -->
+<!--                <div class="dropdown" style="display: inline;">-->
+<!--                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">-->
+<!--                        가격-->
+<!--                    </button>-->
+<!--                    <ul class="dropdown-menu">-->
+<!--                        <li>-->
+<!--                            <div>-->
+<!--                                <span>-->
+<!--                                    <input type="text"/>-->
+<!--                                </span>-->
+<!--                                <span>-->
+<!--                                    ~-->
+<!--                                </span>-->
+<!--                                <span>-->
+<!--                                    <input type="text"/>-->
+<!--                                </span>-->
+<!--                            </div>-->
+<!--                            <ul>-->
+<!--                                <label>가격</label></br>-->
+<!--                                <input type="radio">1000</input>-->
+<!--                                <input type="radio">2000</input></br>-->
+<!--                                <input type="radio">3000</input>-->
+<!--                                <input type="radio">4000</input></br>-->
+<!--                                <input type="radio">5000</input>-->
+<!--                                <input type="radio">6000</input>-->
+<!--                            </ul>-->
+<!--                        </li>-->
+
+<!--                    </ul>-->
+<!--                </div>-->
+                <!-- 카테고리별 상품리스트가 위치 -->
+                <div class="row">
+                    <!-- for문 시작지점 -->
+                    <div class="col-3" th:each="product : ${products}">
+                        <div class="card-line-null h-100 m-1">
+                            <a class="link-dark link-underline link-underline-opacity-0" th:href="@{/store/detail/{id}(id=${product.id})}">
+                                <div>
+                                    <img th:if="${product.imageName == 'default.jpg'}" th:src="@{|/images/product/default.jpg|}" width="200" height="120">
+                                    <img th:if="${product.imageName != 'default.jpg'}" th:src="@{${product.imageName}}" width="200" height="120">
+                                </div>
+                                <div class="card-body">
+                                    <p class="fs-6" th:text="${product.name}">상품이름</p>
+                                    <div class="card-text">
+                                        <span class="fs-4 text-danger" th:text="${#numbers.formatDecimal(product.discount,1,0)}">50</span><span style="padding-right: 2%" class="fs-4 text-danger">%</span>
+                                        <span class="fs-5" data-th-text="${#numbers.formatInteger(product.price, 3, 'COMMA')}"></span><span class="fs-5">원</span>
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-star-fill" style="height: 35px; color: gold;"></i>
+                                        <span th:text="${#numbers.formatDecimal((product.productRating), 1, 1)}">4.3</span>
+                                    </div>
+                                    <th:block th:each="tag : ${product.tags}">
+                                        <span th:if="${tag.name == '할인'}" class="badge bg-primary me-0"  th:text="${tag.name}">할인</span>
+                                        <span th:if="${tag.name == '내일도착'}" class="badge bg-success me-0"  th:text="${tag.name}">내일도착</span>
+                                        <span th:if="${tag.name == '배송비무료'}" class="badge bg-warning me-0"  th:text="${tag.name}">배송비무료</span>
+                                    </th:block>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <div>
+                        <nav aria-label="Page navigation example" class="d-flex justify-content-center">
+                            <ul class="pagination">
+                                <li class="page-item">
+                                    <a class="page-link" th:href="@{|/store/category/${id}/${type}?page=${paging.currentPage - 1}|}"
+                                       aria-label="Previous" th:classappend="${paging.first ? 'disabled' : ''}">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                    <li class="page-item">
+                                        <a class="page-link" id="list-btn" th:classappend="${paging.currentPage == num ? 'active' : ''}"
+                                           th:href="@{|/store/category/${id}/${type}?page=${num}|}" th:text="${num}">1</a>
+                                    </li>
+                                </th:block>
+                                <li class="page-item">
+                                    <a class="page-link" th:href="@{|/store/category/${id}/${type}?page=${paging.currentPage + 1}|}"
+                                       aria-label="Next" th:classappend="${paging.last ? 'disabled' : ''}">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" layout:fragment="script">
+
+    // 좌측 카테고리 토글관련된 함수
+    $(".category-item button").click(function() {
+        const subcategoryid = $(this).attr("data-category-id");
+        $(`[id=subcategory-${subcategoryid}]`).empty()
+        $.getJSON("/store/category", {id: subcategoryid}, function(data) {
+            $.each(data, function(index, item) {
+                let li = `
+                    <li><a href="/store/category/${item.id}/sub" class="nav-link text-dark" value="${item.id}">${item.name}</a><li>
+                `
+
+                $(`[id=subcategory-${subcategoryid}]`).append(li);
+            })
+
+        })
+        $(this).next().toggleClass("d-none");
+    });
+
+</script>

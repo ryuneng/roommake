@@ -1,0 +1,146 @@
+<html layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 :: 커뮤니티</title>
+</head>
+</head>
+<div layout:fragment="content" class="container my-3">
+
+    <!-- 게시글 리스트 시작 -->
+    <div class="list-group p-3 mb-3">
+        <form id="form-community" method="get" th:action="@{|/community/list/${commCatId}|}">
+            <input type="hidden" name="page"/>
+            <!-- 집들이 글 전체 개수, 정렬 옵션 -->
+            <div class="row mt-5 mb-3">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between">
+                        <div class="align-text-bottom">
+                            <h5>전체 <strong style="color: cornflowerblue" th:text="${paging.totalRows}">77</strong></h5>
+                        </div>
+                        <div>
+                            <select class="form-select" style="width:150px;" name="sort" onchange="changeSort()">
+                                <option value="all" th:selected="${#strings.equals(param.sort, 'all')}">전체</option>
+                                <option value="date" th:selected="${#strings.equals(param.sort, 'date')}">최신순</option>
+                                <option value="like" th:selected="${#strings.equals(param.sort, 'like')}">좋아요수</option>
+                                <option value="view" th:selected="${#strings.equals(param.sort, 'view')}">조회수</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" th:if="${communityList.isEmpty()}">
+                <div class="col-12 my-5 text-center">
+                    <h4>게시글이 존재하지 않습니다.</h4>
+                </div>
+            </div>
+            <div th:if="${!communityList.isEmpty()}">
+                <th:block th:each="community : ${communityList}">
+                    <a th:href="|/community/detail/${community.id}|" class="list-group-item list-group-item-action link-dark">
+                        <div class="d-flex w-100 justify-content-between mb-3 pt-2">
+                            <h6 class="mb-1 fw-bold" style="max-width: 936px;
+                                                            height: 19px;
+                                                            display: -webkit-box;
+                                                            overflow: hidden;
+                                                            text-overflow: ellipsis;
+                                                            -webkit-box-orient: vertical;
+                                                            -webkit-line-clamp: 1;" th:text="${community.title}">커뮤니티 제목</h6>
+                            <small th:text="${#dates.format(community.createDate, 'yyyy-MM-dd')}">2024-01-01</small>
+                        </div>
+                        <div class="d-flex w-100 justify-content-start mb-3">
+                            <img class="float-start img-thumbnail me-3" style="width: 130px; height: 130px; object-fit: cover;"
+                                 alt="..." th:src="@{${community.imageName}}">
+                            <p class="mb-1 text-secondary" style="height: 76px;
+                                                                  display: -webkit-box;
+                                                                  overflow: hidden;
+                                                                  text-overflow: ellipsis;
+                                                                  -webkit-box-orient: vertical;
+                                                                  -webkit-line-clamp: 3;" id="communityContent">
+                                <script th:inline="javascript">
+                                    /* Thymeleaf에서 content 변수를 가져와서 JavaScript 변수에 할당 */
+                                    var content = /*[[${community.content}]]*/'';
+                                    /* HTML 태그를 제거하는 정규식 */
+                                    var contentWithoutTags = content.replace(/<[^>]+>/g, '');
+                                    /* 태그가 제거된 내용을 출력 */
+                                    document.write(contentWithoutTags);
+                                </script>
+                            </p>
+                        </div>
+                        <div class="d-flex w-100 justify-content-between mb-2">
+                            <div>
+                                <small class="fw-bold" th:text="${community.user.nickname}">홍길동</small>
+                            </div>
+                            <div>
+                                <small>👀</small>
+                                <small th:text="${community.viewCount}">7</small>
+                                <small>|</small>
+                                <small>❤️</small>
+                                <small th:text="${community.likeCount}">7</small>
+                            </div>
+                        </div>
+                    </a>
+                </th:block>
+            </div>
+
+            <!-- 검색, 글쓰기 버튼 영역 -->
+            <div class="d-flex justify-content-between my-3">
+                <!-- 검색 영역 -->
+                <div class="row row-cols-sm-auto justify-content-start align-items-center">
+                    <div class="col-12">
+                        <select class="form-select" name="opt">
+                            <option value="all" th:selected="${#strings.equals(param.opt, 'all')}">전체</option>
+                            <option value="title" th:selected="${#strings.equals(param.opt, 'title')}">제목</option>
+                            <option value="content" th:selected="${#strings.equals(param.opt, 'content')}">내용</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <input type="text" class="form-control" name="keyword" th:value="${param.keyword}"/>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-outline-primary">검색</button>
+                    </div>
+                </div>
+                <!-- 글쓰기 버튼 -->
+                <a class="btn btn-outline-primary" th:href="@{/community/create}">글쓰기</a>
+            </div>
+
+            <!-- 페이지 네비게이션바 -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div th:if="${paging.totalRows ne 0}">
+                        <nav>
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                    <a th:href="@{|/community/houseList?page=${paging.currentPage - 1}|}"
+                                       class="page-link" th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                                </li>
+                                <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                    <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                        <a th:href="@{|/community/houseList?page=${num}|}"
+                                           class="page-link" th:classappend="${paging.currentPage == num ? 'active' : ''}"
+                                           th:text="${num}" th:onclick="|changePage(${num}, event)|"></a>
+                                    </li>
+                                </th:block>
+                                <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                    <a th:href="@{|/community/houseList?page=${paging.currentPage + 1}|}"
+                                       class="page-link" th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" layout:fragment="script">
+    function changeSort() {
+        let form = document.getElementById("form-community");
+        form.submit();
+    }
+
+    function changePage(page, event) {
+        event.preventDefault();
+        document.querySelector("input[name=page]").value = page;
+        document.getElementById("form-community").submit();
+    }
+</script>
+</html>

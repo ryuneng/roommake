@@ -1,0 +1,151 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='community'">
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h4 class="mb-3">커뮤니티 글 관리</h4>
+            <hr>
+            <form id="form-community" method="get" th:action="@{|/admin/community/commList?commCatId=${commCatId}|}">
+                <input type="hidden" name="page">
+                <!-- 정렬, 카테고리 선택 -->
+                <div class="mb-3 d-flex justify-content-between">
+                    <select class="form-select" style="width:150px;" name="sort" onchange="changeSort()">
+                        <option value="all" th:selected="${#strings.equals(param.sort, 'all')}">전체</option>
+                        <option value="date" th:selected="${#strings.equals(param.sort, 'date')}">최신순</option>
+                        <option value="like" th:selected="${#strings.equals(param.sort, 'like')}">좋아요수</option>
+                        <option value="view" th:selected="${#strings.equals(param.sort, 'view')}">조회수</option>
+                    </select>
+                    <div>
+                        <label class="form-label">카테고리</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="commCatId" value="1" th:checked="${commCatId eq 1 or criteria.sort == null}" th:onchange="changeCategory()"/>
+                            <label class="form-check-label">집들이</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="commCatId" value="2" th:checked="${commCatId eq 2}" th:onchange="changeCategory()"/>
+                            <label class="form-check-label">노하우</label>
+                        </div>
+                    </div>
+                </div>
+                <!-- 게시글 리스트 -->
+                <table class="table table-bordered">
+                    <colgroup>
+                        <col style="width: 5%;"/>
+                        <col style="width: 5%;"/>
+                        <col style="width: 10%;"/>
+                        <col style="width: 10%;"/>
+                        <col style="width: 25%;"/>
+                        <col style="width: 10%;"/>
+                        <col style="width: 10%;"/>
+                        <col style="width: 10%;"/>
+                        <col style="width: 10%;"/>
+                        <col style="width: 5%;"/>
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" id="checkbox-all"></th>
+                        <th>번호</th>
+                        <th>카테고리</th>
+                        <th>작성자</th>
+                        <th>제목</th>
+                        <th>등록일</th>
+                        <th>수정일</th>
+                        <th>조회수</th>
+                        <th>좋아요</th>
+                        <th>신고</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${communityList.isEmpty()}">
+                        <td class="text-center" style="font-weight: bold;" colspan="9">게시글이 없습니다.</td>
+                    </tr>
+                    <tr th:each="comm : ${communityList}">
+                        <td><input type="checkbox" name="no" th:attr="data-community-id=${comm.id}"></td>
+                        <td th:text="${comm.id}">25125</td>
+                        <th:block th:each="cat : ${commCategories}">
+                            <td th:if="${cat.id eq commCatId}" th:text="${cat.name}"></td>
+                        </th:block>
+                        <td th:text="${comm.user.nickname}"></td>
+                        <td><a th:href="|/community/detail/${comm.id}|" th:text="${comm.title}">원룸 구경오세요!(+수정)</a></td>
+                        <td th:text="${#dates.format(comm.createDate, 'yyyy-MM-dd')}">2024년 3월 28일</td>
+                        <td th:text="${#dates.format(comm.updateDate, 'yyyy-MM-dd')}">2024년 4월 1일</td>
+                        <td th:text="${comm.viewCount}">525</td>
+                        <td th:text="${comm.likeCount}">15</td>
+                        <td th:text="${comm.complaintCount}">1</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <!-- 검색영역 -->
+                <div class="row row-cols-sm-auto justify-content-start align-items-center">
+                    <div class="col-12">
+                        <select class="form-select" name="opt">
+                            <option value="all" th:selected="${#strings.equals(param.opt, 'all')}">전체</option>
+                            <option value="title" th:selected="${#strings.equals(param.opt, 'title')}">제목</option>
+                            <option value="content" th:selected="${#strings.equals(param.opt, 'content')}">내용</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <input type="text" class="form-control" name="keyword" th:value="${param.keyword}"/>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-outline-primary">검색</button>
+                    </div>
+                </div>
+                <!-- 페이징 영역 -->
+                <div th:if="${paging.totalRows ne 0}">
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                <a th:href="@{|/community/houseList?page=${paging.currentPage - 1}|}"
+                                   class="page-link" th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                            </li>
+                            <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                    <a th:href="@{|/community/houseList?page=${num}|}"
+                                       class="page-link" th:classappend="${paging.currentPage == num ? 'active' : ''}"
+                                       th:text="${num}" th:onclick="|changePage(${num}, event)|"></a>
+                                </li>
+                            </th:block>
+                            <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                <a th:href="@{|/community/houseList?page=${paging.currentPage + 1}|}"
+                                   class="page-link" th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </form>
+            <div class="text-end">
+                <button type="button" class="btn btn-danger" id="btn-del-comm">삭제</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script">
+    // 커뮤니티 카테고리 change 이벤트
+    function changeCategory() {
+        $('[id^="form-"]').submit();
+    }
+
+    $("#btn-del-comm").click(function(event) {
+        let checkedCommIds = [];
+        $(":checkbox[name=no]:checked").each(function() {
+            checkedCommIds.push($(this).attr("data-community-id"));
+        });
+        $.ajax({
+            type: "POST",
+            url: "/admin/community/",
+            data: JSON.stringify(checkedCommIds),
+            cotentType: 'application/json',
+            success() {
+                location.reload();
+                alert("커뮤니티 글이 삭제되었습니다.");
+            },
+            error: function() {
+                alert("삭제 처리에 실패했습니다. 확인 후 다시 시도해주십시오.");
+            }
+        })
+    })
+</script>
+</html>

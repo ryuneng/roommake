@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <!-- 부트스트랩 스타일시트 추가 -->
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- 차트 추가 -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!-- 폰트어썸 추가 -->
+    <script src="https://kit.fontawesome.com/bd748221d1.js" crossorigin="anonymous"></script>
+    <!-- jQuery 추가 -->
+    <script type="text/javascript" th:src="@{/webjars/jquery/3.7.1/jquery.min.js}"></script>
+    <!-- 부트스트랩 자바스크립트 파일을 포함시키기 -->
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.min.js}"></script>
+    <title>룸메이크 | 관리자 페이지</title>
+    <style>
+        /* a태그 주소에 밑줄 지우고 폰트 색상 black으로 바꾸고 bold 처리 */
+        td > a {
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        /* th, td 폭 좁아졌을 때 말줄임표 출력 */
+        th, td {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        table {
+            table-layout: fixed;
+        }
+    </style>
+</head>
+<body>
+<!-- 내비게이션 바 -->
+<div th:replace="~{layout/navbar-admin :: navbar-admin-fragment}"></div>
+
+<!-- 이 레이아웃 파일을 상속받은 개별 웹 페이지에서 정의한 context fragment가 포함될 곳을 지정한다. -->
+<th:block layout:fragment="content-admin"></th:block>
+
+<!-- 푸터 -->
+<footer th:replace="~{layout/footer :: footer-fragment}"></footer>
+
+<!-- 이 레이아웃 파일을 상속받은 개별 웹 페이지에서 정의한 사용자정의 스크립트 코드가 포함될 곳을 지정한다. -->
+<th:block layout:fragment="script"></th:block>
+
+<script type="text/javascript">
+    // 체크박스 이벤트
+    $("#checkbox-all").change(function() {
+        let currentCheckedStatus = $(this).prop('checked');
+
+        $(":checkbox[name=no]:enabled").prop("checked", currentCheckedStatus);
+    });
+
+    // 상품 체크박스를 체크/해제할 때 실행될 이벤트 핸들러 등록하기
+    $(":checkbox[name=no]").change(function() {
+        let len = $(":checkbox[name=no]:enabled").length;
+        let checkedLen = $(":checkbox[name=no]:checked").length;
+
+        if (len == checkedLen) {
+            $("#checkbox-all").prop('checked', true);
+        } else {
+            $("#checkbox-all").prop('checked', false);
+        }
+    });
+
+    // 페이징 관련 이벤트
+    function changeRows() {
+        $('[id^="form-"]').submit();
+    }
+
+    function changeFilt() {
+        $('[id^="form-"]').submit();
+    }
+
+    function changeSort() {
+        $('[id^="form-"]').submit();
+    }
+
+    function changePage(page, event) {
+        event.preventDefault();
+        $("input[name=page]").val(page);
+        $('[id^="form-"]').submit();
+    }
+</script>
+</body>
+</html>

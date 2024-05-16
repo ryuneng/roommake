@@ -1,0 +1,91 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 주문취소완료</title>
+</head>
+<div layout:fragment="content" class="container my-3 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-3">
+            </div>
+            <div class="col-6 text-center mb-4">
+                <h4 class="fw-bold mb-5">주문취소가 완료되었습니다</h4>
+                <!-- 상품 영역 시작 -->
+                <div class="mb-5 pb-3">
+                    <div class="text-start fw-bold" style="font-size: 17px">상품 정보 <span th:text="${dto.items.size()}">2</span>건</div>
+                    <hr>
+                    <table class="table text-center">
+                        <tbody class="align-middle">
+                        <tr th:each="item : ${dto.items}">
+                            <td>
+                                <div class="d-flex w-100 justify-content-start">
+                                    <a th:href="@{/store/detail/{id}(id=${item.productId})}" class="link-underline link-underline-opacity-0 text-dark">
+                                        <div>
+                                            <img th:src="@{${item.imageName}}" style="width: 80px; height: 80px">
+                                        </div>
+                                    </a>
+                                    <div class="ms-3 text-start">
+                                        <div>
+                                            <div th:text="${item.name}" style="display: -webkit-box;
+                                                                  overflow: hidden;
+                                                                  text-overflow: ellipsis;
+                                                                  -webkit-box-orient: vertical;
+                                                                  -webkit-line-clamp: 1;">
+                                                LED조명 통서랍 수납침대 SSQ(매트리스 선택)
+                                            </div>
+                                            <div class="text-secondary mt-2" style="font-size: 12px">
+                                                사이즈: <span th:text="${item.size}">슈퍼싱글SS 프레임만</span>
+                                                / 색상: <span th:text="${item.color}">화이트</span>
+                                            </div>
+                                            <div style="font-size: small"><span th:text="${item.amount}">1</span>개</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 상품 영역 끝 -->
+                <div class="mb-4">
+                    <div class="text-start fw-bold" style="font-size: 17px">환불 정보</div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold mb-2">
+                        <div>환불금액</div>
+                        <div>
+                            <span th:text="${#numbers.formatInteger(dto.payment.price, 1, 'COMMA')}">283,800</span>원
+                        </div>
+                    </div>
+                    <div style="font-size: 15px">
+                        <!--<div class="d-flex justify-content-between small mb-1 text-secondary">
+                            <div>총 상품금액</div>
+                            <div>334,800원</div>
+                        </div>
+                        <div class="d-flex justify-content-between small mb-1 text-secondary">
+                            <div>총 할인금액</div>
+                            <div>- 50,000원</div>
+                        </div>-->
+                        <div class="d-flex justify-content-between small mb-1 text-secondary">
+                            <div>반환 포인트</div>
+                            <div><span th:text="${#numbers.formatInteger(dto.payment.usePoint, 1, 'COMMA')}">1,000</span> P</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between fw-bold mb-5 pb-4">
+                    <div>환불수단</div>
+                    <div th:text="${dto.payment.method}">카카오페이</div>
+                </div>
+                <div class="text-secondary mb-4" style="font-size: small">
+                    <div>7영업일 내에 환불이 완료되며,</div>
+                    <div>사용한 포인트는 환불 완료 후 반환됩니다.</div>
+                </div>
+                <div class="d-flex justify-content-between mb-5">
+                    <a th:href="@{|/order/claim/cancel-detail/${dto.orderId}|}" type="button" class="btn btn-outline-dark w-50 me-3">취소상세 확인</a>
+                    <a th:href="@{/store/home}" class="btn btn-primary w-50 ms-3">쇼핑하기</a>
+                </div>
+            </div>
+            <div class="col-3">
+            </div>
+        </div>
+    </div>
+</div>
+</html>

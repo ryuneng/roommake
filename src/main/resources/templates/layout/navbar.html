@@ -1,0 +1,165 @@
+<div th:fragment="navbar-fragment" class="container-fluid">
+    <!-- 최상단 내비게이션 바 (로그인, 회원가입 등) -->
+    <div class="row">
+        <div class="col-12">
+            <div class="col small mb-2">
+                <ul class="nav text-dark justify-content-end">
+                    <li class="nav-item" sec:authorize="isAnonymous()">
+                        <a class="nav-link text-dark" th:href="@{/user/login}">로그인</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link text-dark" th:href="@{/user/logout}">로그아웃</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAnonymous()">
+                        <a class="nav-link text-dark" th:href="@{/user/signup}">회원가입</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" th:href="@{/cs/notice/list}">고객센터</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" th:href="@{/admin/home}" target="_blank">판매자센터</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 내비게이션 바 (로고, 검색, 마이페이지 등) -->
+    <div class="d-flex justify-content-between align-items-center">
+        <!-- 좌측 로고, 메뉴 -->
+        <div class="ms-3 d-flex flex-row align-items-center">
+            <div class="me-3">
+                <a class="navbar-brand" href="http://43.202.27.255"><img th:src="@{/images/home/logo.png}"
+                                                                         style="width: 100px; height: 30px"></a>
+            </div>
+            <div>
+                <ul class="nav justify-content-start fw-bold" style="font-size: large">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" th:href="@{/store/home}" id="link-store">쇼핑</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" th:href="@{/community/list/1}" id="link-community">커뮤니티</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" th:href="@{/event/list}">이벤트</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- 통합검색 -->
+        <div>
+            <form class="d-flex">
+                <div class="me-2" style="width: 550px">
+                    <input class="form-control" type="search" placeholder="통합검색" aria-label="Search">
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+        <!-- 우측 마이페이지, 장바구니, 알림 -->
+        <div class="me-3">
+            <ul class="nav justify-content-end">
+                <li class="nav-item">
+                    <a class="nav-link text-dark" th:href="@{/user/mypage}">
+                        <i class="bi bi-person-circle h4"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark position-relative" th:href="@{/cart}">
+                        <i class="bi bi-cart2 h4"></i>
+                        <span class="position-absolute translate-middle badge border border-light rounded-circle bg-primary">
+                            <span class="small" th:text="${cartCount}">2</span>
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark position-relative" href="#">
+                        <i class="bi bi-bell h4"></i>
+                        <span class="position-absolute translate-middle badge border border-light rounded-circle bg-danger p-1"><span
+                                class="visually-hidden">unread messages</span></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <hr>
+    <div class="row d-none" id="submenu-community">
+        <div class="col-12">
+            <ul class="nav text-dark justify-content-start">
+                <li class="nav-item">
+                    <a class="nav-link text-dark" th:href="@{/community/list/1}">집들이</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" th:href="@{/community/list/2}">노하우</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" th:href="@{/channel/list}">채널</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- 네비바 쇼핑위에 마우스가 올라갔을 때 실핼될 서브메뉴들 -->
+    <div class="row d-none" id="submenu-store">
+        <div class="col-12">
+            <ul class="nav text-dark justify-content-start">
+                <li class="nav-item">
+                    <a class="nav-link text-dark" th:href="@{/store/home}" id="store-home">쇼핑홈</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" id="store-category">카테고리</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <!-- 네비바 쇼핑>카테고리 위에 마우스가 올라갔을때 실행될 서브메뉴 -->
+    <div class="row d-none" id="submenu-store-category">
+        <div class="col-12">
+            <ul class="nav text-dark justify-content-start">
+                <li class="nav-item" th:each="category, loop : ${categories}">
+                    <a class="nav-link text-dark" th:href="@{|/store/category/${category.id}/top|}" th:text="${category.name}">가구</a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+    <script>
+        $(function() {
+            $("#link-community").mouseenter(function() {
+                $("#submenu-store").addClass("d-none");
+                $("#submenu-store-category").addClass('d-none');
+                $("#submenu-community").removeClass('d-none');
+            });
+
+            $("#submenu-community").mouseleave(function() {
+                $(this).addClass('d-none');
+            });
+
+            // 네비바 쇼핑부분의 마우스가 진입했을 때 실행될 함수
+            $("#link-store").mouseenter(function() {
+                $("#submenu-community").addClass('d-none');
+                $("#submenu-store-category").addClass('d-none');
+                $("#submenu-store").removeClass('d-none');
+
+            });
+
+            // 네비바 쇼핑>카테고리의 마우스가 진입했을 때 실행될 함수
+            $("#store-category").mouseenter(function() {
+                $("#submenu-community").addClass('d-none');
+                $("#submenu-store-category").removeClass('d-none');
+            });
+
+            // 네비바 쇼핑>카테고리의 마우스가 빠져나갔을 때 실행될 함수
+            $("#submenu-store-category").mouseleave(function() {
+                $(this).addClass('d-none');
+                // 네비바 쇼핑부분의 마우스가 빠져나갔을 때 실행될 함수
+                $("#submenu-store").addClass('d-none');
+            });
+
+            // 네비바 쇼핑>쇼핑홈의 마우스가 진입했을 때 실핼될 함수
+            $("#store-home").mouseenter(function() {
+                $("#submenu-store-category").addClass('d-none');
+            })
+        });
+    </script>
+</div>

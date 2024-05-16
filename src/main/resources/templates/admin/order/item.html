@@ -1,0 +1,84 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='order'">
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-9">
+            <h1>주문내역 리스트(배송관리)</h1>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end"></div>
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th style="width: 40px">순번</th>
+                    <th>주문번호</th>
+                    <th>상품번호</th>
+                    <th style="width: 50px">상세</th>
+                    <th>상품이름</th>
+                    <th style="width: 40px">수량</th>
+                    <th style="width: 80px">상품금액</th>
+                    <th>배송상태</th>
+                    <th style="width: 55px"></th>
+                    <th style="width: 80px">송장번호</th>
+                    <th style="width: 80px">주문자</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${orders}">
+                    <td style="width: 40px" th:text="${orderStat.count}">index</td>
+                    <td th:text="${order.id}">4646-464</td>
+                    <td th:text="${order.productId}">100</td>
+                    <td style="width: 50px" th:text="${order.detailId}">150</td>
+                    <td th:text="${order.productName}">책상</td>
+                    <td style="width: 20px" th:text="${order.qty}">2개</td>
+                    <td style="width: 60px" th:text="${order.price}">5,000</td>
+                    <td>
+                        <select th:id="${order.id}" th:name="${order.id}">
+                            <option th:selected="${order.status==1}" value="1">상품준비중</option>
+                            <option th:selected="${order.status==2}" value="2">배송중</option>
+                            <option th:selected="${order.status==3}" value="3">배송완료</option>
+                            <option th:selected="${order.status==4}" value="4">구매확정</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" th:onclick="|updateOrder(${order.id})|">저장</button>
+                    </td>
+                    <td th:text="${order.invoiceNumber}" style="width: 80px">151-118</td>
+                    <td style="width: 80px" th:text="${order.userNickname}">홍길동</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</html>
+<script type="text/javascript">
+    function updateOrder(orderId) {
+        const item = document.getElementById(orderId);
+
+        let statusId = item.options[item.selectedIndex].value
+        let url = '/admin/order/updateItem';
+        if (statusId === "2") {
+            url = '/admin/order/updateDeliveryNo'
+        }
+        const order = {
+            id: orderId,
+            status: {
+                id: statusId
+            }
+        };
+
+        if (confirm('정말 저장하시겠습니까?')) {
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: JSON.stringify(order),
+                contentType: 'application/json',
+                success: function(data) {
+                    alert("상품배송 업데이트가 완료되었습니다.")
+                    window.location.reload()
+                }
+            });
+        }
+    }
+</script>

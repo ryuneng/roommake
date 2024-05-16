@@ -1,0 +1,262 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='management'">
+<head>
+    <style>
+        /* th, td 폭 좁아졌을 때 말줄임표 출력 */
+        td > a {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        #table-complaint-board, #table-complaint-reply {
+            max-height: 400px;
+            overflow-y: scroll;
+        }
+
+        thead > tr {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+    </style>
+</head>
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h4>신고 관리</h4>
+            <hr>
+            <h5>게시글 신고</h5>
+            <form id="form-board-complaint" action="/admin/management/complaint" method="get">
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="filt" value="all" th:checked="${filt eq 'all' or filt == null}" th:onchange="changeSort()"/>
+                        <label class="form-check-label">전체</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="filt" value="N" th:checked="${filt eq 'N'}" th:onchange="changeSort()"/>
+                        <label class="form-check-label">미처리</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="filt" value="Y" th:checked="${filt eq 'Y'}" th:onchange="changeSort()"/>
+                        <label class="form-check-label">처리완료</label>
+                    </div>
+                </div>
+                <div id="table-complaint-board" class="border mb-3">
+                    <table class="table table-bordered">
+                        <colgroup>
+                            <col style="width: 5%;"/>
+                            <col style="width: 5%;"/>
+                            <col style="width: 15%;"/>
+                            <col style="width: 10%;"/>
+                            <col style="width: 10%;"/>
+                            <col style="width: 25%;"/>
+                            <col style="width: 10%;"/>
+                            <col style="width: 10%;"/>
+                            <col style="width: 10%;"/>
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th><input type="checkbox" id="checkbox-all"></th>
+                            <th>번호</th>
+                            <th>신고 내용</th>
+                            <th>신고자</th>
+                            <th>유형</th>
+                            <th>해당 게시글</th>
+                            <th>신고 일자</th>
+                            <th>처리 상태</th>
+                            <th>처리 일자</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="boardComplaint : ${boardComplaints}">
+                            <td>
+                                <input th:disabled="${boardComplaint.complaintYn == 'Y'}" type="checkbox" name="no" th:attr="data-board-complaint-id=${boardComplaint.type + '.' +boardComplaint.id}">
+                            </td>
+                            <td th:text="${boardComplaint.id}"></td>
+                            <td th:text="${boardComplaint.categoryContent}"></td>
+                            <td th:text="${boardComplaint.complaintUserNickname}">13413535</td>
+                            <td th:text="${boardComplaint.type}">13413535</td>
+                            <td>
+                                <a th:if="${#strings.equals(boardComplaint.type, 'community')}" th:text="${boardComplaint.content}" th:href="@{|/community/detail/${boardComplaint.contentId}|}"></a>
+                                <a th:if="${#strings.equals(boardComplaint.type, 'post')}" th:text="${boardComplaint.content}" th:href="@{|/channel/post/detail/${boardComplaint.contentId}|}"></a>
+                            </td>
+                            <td th:text="${#dates.format(boardComplaint.createDate, 'yyyy-MM-dd')}">2024년 4월 11일</td>
+                            <td th:text="${boardComplaint.complaintYn == 'N' ? '미처리' : '완료'}"></td>
+                            <td th:text="${boardComplaint.updateDate != null ? #dates.format(boardComplaint.updateDate, 'yyyy-MM-dd') : ''}">2024년 4월 11일</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mb-2">
+                    <button type="button" class="btn btn-primary btn-sm" id="btn-board-delete-y">신고 취소</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="btn-board-complaint-y">신고 확정</button>
+                </div>
+                <hr>
+                <h5>댓글 신고</h5>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="replyfilt" value="all" th:checked="${replyfilt eq 'all' or replyfilt == null}" th:onchange="changeSort()"/>
+                        <label class="form-check-label">전체</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="replyfilt" value="N" th:checked="${replyfilt eq 'N'}" th:onchange="changeSort()"/>
+                        <label class="form-check-label">미처리</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="replyfilt" value="Y" th:checked="${replyfilt eq 'Y'}" th:onchange="changeSort()"/>
+                        <label class="form-check-label">처리완료</label>
+                    </div>
+                </div>
+                <div id="table-complaint-reply" class="border mb-3">
+                    <table class="table table-bordered">
+                        <colgroup>
+                            <col style="width: 5%;"/>
+                            <col style="width: 5%;"/>
+                            <col style="width: 15%;"/>
+                            <col style="width: 10%;"/>
+                            <col style="width: 10%;"/>
+                            <col style="width: 25%;"/>
+                            <col style="width: 10%;"/>
+                            <col style="width: 10%;"/>
+                            <col style="width: 10%;"/>
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <td><input type="checkbox" id="checkbox-all-reply"></td>
+                            <th>번호</th>
+                            <th>신고내용</th>
+                            <th>신고자</th>
+                            <th>유형</th>
+                            <th>해당 댓글</th>
+                            <th>신고 일자</th>
+                            <th>처리 상태</th>
+                            <th>처리 일자</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="replyComplaint : ${replyComplaints}">
+                            <td><input th:disabled="${replyComplaint.complaintYn == 'Y'}" type="checkbox" name="replyno" th:attr="data-reply-complaint-id=${replyComplaint.type + '.' + replyComplaint.id}"></td>
+                            <td th:text="${replyComplaint.id}"></td>
+                            <td th:text="${replyComplaint.categoryContent}"></td>
+                            <td th:text="${replyComplaint.complaintUserNickname}"></td>
+                            <td th:text="${replyComplaint.type}"></td>
+                            <td th:text="${replyComplaint.content}"></td>
+                            <td th:text="${#dates.format(replyComplaint.createDate, 'yyyy-MM-dd')}"></td>
+                            <td th:text="${replyComplaint.complaintYn == 'N' ? '미처리' : '완료'}"></td>
+                            <td th:text="${replyComplaint.updateDate != null ? #dates.format(replyComplaint.updateDate, 'yyyy-MM-dd') : ''}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+            <div class="text-end mb-2">
+                <button type="button" class="btn btn-primary btn-sm" id="btn-reply-delete-y">신고 취소</button>
+                <button type="button" class="btn btn-danger btn-sm" id="btn-reply-complaint-y">신고 확정</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script">
+    // 댓글 체크박스 이벤트
+    $("#checkbox-all-reply").change(function() {
+        let currentReplyCheckedStatus = $(this).prop('checked');
+
+        $(":checkbox[name=replyno]:enabled").prop("checked", currentReplyCheckedStatus);
+    });
+    $(":checkbox[name=replyno]").change(function() {
+        let len = $(":checkbox[name=replyno]:enabled").length;
+        let checkedLen = $(":checkbox[name=replyno]:checked").length;
+
+        if (len == checkedLen) {
+            $("#checkbox-all-reply").prop('checked', true);
+        } else {
+            $("#checkbox-all-reply").prop('checked', false);
+        }
+    });
+
+    // 게시글 신고 확정 처리
+    $('#btn-board-complaint-y').click(function() {
+        let checkedBoardComplaintTypeAndIds = [];
+        $(":checkbox[name=no]:checked").each(function() {
+            checkedBoardComplaintTypeAndIds.push($(this).attr("data-board-complaint-id"));
+        });
+        $.ajax({
+            type: "POST",
+            url: '/admin/management/complaint/confirm',
+            data: JSON.stringify(checkedBoardComplaintTypeAndIds),
+            contentType: 'application/json',
+            success: function() {
+                location.reload();
+            },
+            error: function() {
+                alert("신고 처리에 실패했습니다. 확인 후 다시 시도해주십시오.");
+            }
+        })
+    })
+
+    // 댓글 신고 확정 처리
+    $('#btn-reply-complaint-y').click(function() {
+        let checkedReplyComplaintTypeAndIds = [];
+        $(":checkbox[name=replyno]:checked").each(function() {
+            checkedReplyComplaintTypeAndIds.push($(this).attr("data-reply-complaint-id"));
+        });
+        $.ajax({
+            type: 'POST',
+            url: '/admin/management/complaint/confirm',
+            data: JSON.stringify(checkedReplyComplaintTypeAndIds),
+            contentType: 'application/json',
+            success: function() {
+                location.reload();
+            },
+            error: function() {
+                alert("신고 처리에 실패했습니다. 확인 후 다시 시도해주십시오.");
+            }
+        })
+    })
+
+    // 게시글 신고 취소 처리
+    $("#btn-board-delete-y").click(function() {
+        let checkedReplyComplaintTypeAndIds = [];
+        $(":checkbox[name=no]:checked").each(function() {
+            checkedReplyComplaintTypeAndIds.push($(this).attr("data-board-complaint-id"));
+        });
+        $.ajax({
+            type: 'POST',
+            url: '/admin/management/complaint/delete',
+            data: JSON.stringify(checkedReplyComplaintTypeAndIds),
+            contentType: 'application/json',
+            success: function() {
+                location.reload();
+            },
+            error: function() {
+                alert("신고 삭제에 실패했습니다. 확인 후 다시 시도해주십시오.");
+            }
+        })
+    })
+
+    // 게시글 신고 확정 처리
+    $('#btn-reply-delete-y').click(function() {
+        let checkedReplyComplaintTypeAndIds = [];
+        $(":checkbox[name=replyno]:checked").each(function() {
+            checkedReplyComplaintTypeAndIds.push($(this).attr("data-reply-complaint-id"));
+        });
+        $.ajax({
+            type: 'POST',
+            url: '/admin/management/complaint/delete',
+            data: JSON.stringify(checkedReplyComplaintTypeAndIds),
+            contentType: 'application/json',
+            success: function() {
+                location.reload();
+            },
+            error: function() {
+                alert("신고 취소에 실패했습니다. 확인 후 다시 시도해주십시오.");
+            }
+        })
+    })
+
+</script>
+</html>

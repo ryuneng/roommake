@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='product'">
+<head>
+    <style>
+        .thumbnail-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .img-thumbnail {
+            transition: transform 0.5s ease; /* 이미지 확대 애니메이션 효과 */
+        }
+
+        .img-thumbnail:hover {
+            transform: scale(1.5); /* 마우스 호버 시 이미지 확대 */
+        }
+
+        .thumbnail-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .thumbnail-item {
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <!-- 변경된 사이드바 대체 경로 -->
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <div class="row mb-3">
+                <div class="col-3">
+                    <div class="thumbnail-container">
+                        <img th:src="@{|${defaultImage}|}" class="img-thumbnail main-thumbnail" alt="" width="400" height="400">
+                        <div class="thumbnail-list">
+                            <img th:each="image : ${productImages}" th:src="@{|${image.name}|}" class="img-thumbnail thumbnail-item" alt="" width="60" height="60">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-9">
+                    <h1>제품상세설명</h1>
+                    <table class="table">
+                        <tbody>
+                        <tr>
+                            <th>상품번호</th>
+                            <td th:text="${product.id}">56</td>
+                            <th>상품명</th>
+                            <td th:text="${product.name}">쇼파</td>
+                        </tr>
+                        <tr>
+                            <th>판매상태여부</th>
+                            <td th:text="${product.statusYn}">N</td>
+                            <th>상품가격</th>
+                            <td th:text="${product.price}">50,000원></td>
+                        </tr>
+                        <tr>
+                            <th>할인률</th>
+                            <td th:text="${product.discount}">10%</td>
+                            <th>상품수정일</th>
+                            <td th:text="${product.updateDate}">2024-03-04</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <form action="/admin/product/detail" method="post">
+                        <input type="hidden" name="productId" th:value="${product.id}"/>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#product-detail">
+                                    상품상세정보 등록
+                                </button>
+                                <div class="modal modal-lg" id="product-detail" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1>상품상세정보등록</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-group mb-3">
+                                                    <h5>
+                                                        <label class="form-label">사이즈</label>
+                                                    </h5>
+                                                    <select class="form-select" name="size">
+                                                        <option value="대">대</option>
+                                                        <option value="중">중</option>
+                                                        <option value="소">소</option>
+                                                    </select>
+                                                    <h5>
+                                                        <label class="form-label">색상</label>
+                                                    </h5>
+                                                    <select class="form-select" name="color">
+                                                        <option value="빨강">빨강</option>
+                                                        <option value="파랑">파랑</option>
+                                                        <option value="노랑">노랑</option>
+                                                    </select>
+                                                    <h5>
+                                                        <label>재고</label>
+                                                        <input type="text" class="form-control" name="stock">
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">저장</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a class="btn btn-primary me-md-2" type="submit" th:href="@{/admin/product/list}">확인</a>
+                        </div>
+                    </form>
+                </div>
+                <div>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>상품상세번호</th>
+                            <th>상품고유번호</th>
+                            <th>상품크기</th>
+                            <th>상품색상</th>
+                            <th>상품재고</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="productDetail : ${productDetailList}">
+                            <td th:text="${productDetail.id}">0</td>
+                            <td th:text="${productDetail.uniqueId}">0</td>
+                            <td th:text="${productDetail.size}">대</td>
+                            <td th:text="${productDetail.color}">파랑</td>
+                            <td th:text="${productDetail.stock}">0</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 작은 사진을 클릭하여 큰 사진으로 변경
+    const thumbnailItems = document.querySelectorAll('.thumbnail-item');
+    const mainThumbnail = document.querySelector('.main-thumbnail');
+
+    thumbnailItems.forEach(item => {
+        item.addEventListener('click', () => {
+            mainThumbnail.src = item.src;
+        });
+    });
+</script>
+</body>
+</html>

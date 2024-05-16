@@ -1,0 +1,80 @@
+<html layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 글 작성</title>
+    <style>
+        /* CKEditor 입력창 크기 */
+        .ck-editor__editable:not(.ck-editor__nested-editable) {
+            height: 450px;
+        }
+    </style>
+</head>
+<div layout:fragment="content" class="container my-3">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="my-3" th:unless="${communityId != null}">글 작성하기</h3>
+            <h3 class="my-3" th:if="${communityId != null}">글 수정하기</h3>
+            <form class="border bg-light p-3" method="post" th:object="${communityForm}" enctype="multipart/form-data">
+                <div class="form-group mb-3">
+                    <label class="form-label">카테고리</label>
+                    <select class="form-select" th:unless="${communityId != null}" th:field="*{categoryId}" name="catNo">
+                        <div th:each="commCat : ${commCatList}">
+                            <option th:value="${commCat.id}" th:text="${commCat.name}">집들이</option>
+                        </div>
+                    </select>
+                    <select class="form-select" th:if="${communityId != null}" th:field="*{categoryId}" name="catNo" disabled>
+                        <div th:each="commCat : ${commCatList}">
+                            <option th:value="${commCat.id}" th:text="${commCat.name}" th:selected="${commCat.id} == ${communityForm.categoryId}">집들이</option>
+                        </div>
+                    </select>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">제목</label>
+                    <input type="text" class="form-control" th:field="*{title}" name="title" placeholder="제목을 입력해주세요."/>
+                    <div th:errors="*{title}" class="text-danger"></div>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">대표사진</label>
+                    <input type="file" class="form-control" th:field="*{imageFile}" name="imageFile"/>
+                </div>
+                <div class="form-group mb-3" th:if="${imageName != null}">
+                    <div class="mb-2">
+                        <span style="font-size: 17px">저장된 사진</span>
+                    </div>
+                    <img th:src="@{${imageName}}" style="width: 150px; height: 150px;">
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">내용</label>
+                    <textarea id="content" th:field="*{content}" name="content" placeholder="내용을 입력해주세요."></textarea>
+                    <div th:errors="*{content}" class="text-danger"></div>
+                </div>
+                <div class="text-end">
+                    <a class="btn btn-secondary" th:if="${communityId == null}" th:href="@{/community/list/1}">취소</a>
+                    <button type="submit" class="btn btn-primary" th:if="${communityId == null}">등록</button>
+                    <a class="btn btn-secondary" th:if="${communityId != null}" th:href="@{|/community/detail/${communityId}|}">취소</a>
+                    <button type="submit" class="btn btn-primary" th:if="${communityId != null}">수정</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.3.0/classic/ckeditor.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.3.0/classic/translations/ko.js"></script>
+    <script type="text/javascript" layout:fragment="script">
+        // CK5 에디터
+        ClassicEditor
+            .create(document.querySelector('#content'), {
+                language: "ko",
+                ckfinder: {
+                    uploadUrl: "/community/image/upload",
+                    withCredentials: true
+                }
+            })
+            .then(editor => {
+                window.editor = editor;
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    </script>
+</div>
+</html>

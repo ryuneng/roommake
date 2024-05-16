@@ -1,0 +1,214 @@
+<html layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 채널</title>
+</head>
+<div layout:fragment="content" class="container my-3">
+    <!-- 채널 정보, 참여하기 버튼 영역 -->
+    <div class="row">
+        <!-- 채널 이미지 -->
+        <div class="col-12 mb-3">
+            <img th:src="@{${channel.imageName}}" style="width: 100%; height: 300px; object-fit: cover;">
+        </div>
+        <!-- 채널 제목 -->
+        <div class="col-6">
+            <div>
+                <h3 th:text="${channel.title}">오늘의 우리집</h3>
+                <span style="color: gray; font-size: 15px"><strong th:text="${participantCount}">252</strong>명 활동 중・<strong th:text="${postCount}">77</strong>개의 콘텐츠</span>
+            </div>
+        </div>
+        <!-- 채널 참여하기, 수정, 삭제 버튼 -->
+        <div class="col-6 d-flex align-items-center justify-content-end">
+            <div sec:authorize="isAuthenticated()" th:unless="${#authentication.principal.id == channel.user.id}">
+                <button th:if="${!participant}" class="btn btn-outline-primary" id="btn-add-channelParticipant" th:attr="data-channel-id=${channel.id}">참여하기</button>
+                <button th:if="${participant}" class="btn btn-primary" id="btn-delete-channelParticipant" th:attr="data-channel-id=${channel.id}">활동중</button>
+            </div>
+            <div sec:authorize="isAuthenticated()" th:if="${#authentication.principal.id == channel.user.id}">
+                <a th:href="@{|/channel/modify/${channel.id}|}" class="btn btn-warning me-1">수정</a>
+                <a th:href="@{|/channel/delete/${channel.id}|}" class="btn btn-danger" id="channel-delete-check">삭제</a>
+            </div>
+        </div>
+        <!-- 채널 소개 -->
+        <div class="col-12 mt-4">
+            <span style="color: gray; font-size: 15px" th:text="${channel.description}">오늘의 우리 집엔 어떤 장면이 있나요?</span>
+        </div>
+    </div>
+    <hr>
+
+    <!-- 채널 정렬 옵션, 글쓰기 버튼 -->
+    <form id="form-post" method="get" th:action="@{|/channel/post/list/${channelId}|}">
+        <input type="hidden" name="page"/>
+        <div class="row my-4" style="padding-right: 30px; padding-left: 30px;">
+            <div class="col-6 d-flex justify-content-start">
+                <select class="form-select" style="width:150px;" name="sort" onchange="changeSort()">
+                    <option value="all" th:selected="${#strings.equals(param.sort, 'all')}">전체</option>
+                    <option value="date" th:selected="${#strings.equals(param.sort, 'date')}">최신순</option>
+                    <option value="like" th:selected="${#strings.equals(param.sort, 'like')}">좋아요수</option>
+                    <option value="view" th:selected="${#strings.equals(param.sort, 'view')}">조회수</option>
+                </select>
+            </div>
+            <div class="col-6 d-flex justify-content-end" th:if="${participant}">
+                <a th:href="@{|/channel/post/create/${channel.id}|}" class="btn btn-outline-primary" id="div-create-post">글쓰기</a>
+            </div>
+        </div>
+
+        <!-- 채널글 목록 -->
+        <div th:if="${postList.isEmpty()}">
+            <div class="row mb-5" style="padding-right: 30px; padding-left: 30px;">
+                <div class="col-12 text-center">
+                    <h5>글이 존재하지 않습니다.</h5>
+                </div>
+            </div>
+        </div>
+        <div th:if="${!postList.isEmpty()}">
+            <div class="row mb-3" style="padding-right: 30px; padding-left: 30px;">
+                <div class="col-3 mb-3" th:each="post : ${postList}">
+                    <div class="card h-20" style="width: 100%;">
+                        <a th:href="@{|/channel/post/detail/${post.id}|}">
+                            <img th:src="@{${post.imageName}}" class="card-img-top" style="height: 240px;" alt="...">
+                        </a>
+                        <!-- 채널글 제목 -->
+                        <div class="card-body">
+                            <div class="card-title">
+                                <p class="card-text" style="font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" th:text="${post.title}">
+                                    오늘의 우리집 주방을 소개합니다. 오늘의 우리집 주방을 소개합니다. 오늘의 우리집 주방을 소개합니다.
+                                </p>
+                            </div>
+                            <!-- 작성자, 좋아요 영역 -->
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <a href="#" style="text-decoration: none; color: black">
+                                        <small class="nav-item" style="font-size: 13px; font-weight: bold" th:text="${post.user.nickname}">홍길동</small>
+                                    </a>
+                                </div>
+                                <div class="d-flex align-items-center" sec:authorize="!isAuthenticated()">
+                                    <a th:href="@{/user/login}" class="btn p-0" style="text-decoration: none; color: black">
+                                        <small class="nav-item text-danger" style="font-size: 13px;"><i class="bi bi-heart"></i></small>
+                                        <small style="font-size: 13px;" th:text="${post.likeCount}"> 7</small>
+                                    </a>
+                                </div>
+                                <div class="d-flex align-items-center" sec:authorize="isAuthenticated()" th:if="${post.likeStatus} == 0">
+                                    <a class="btn p-0" style="text-decoration: none; color: black" th:id="|btn-post-like-${post.id}|" th:attr="data-post-id=${post.id}">
+                                        <div th:class="|post-like-icon-${post.id}|">
+                                            <small class="nav-item text-danger" style="font-size: 13px;"><i class="bi bi-heart"></i></small>
+                                            <small style="font-size: 13px;" th:id="|post-like-count-${post.id}|" th:text="${post.likeCount}"> 7</small>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="d-flex align-items-center" sec:authorize="isAuthenticated()" th:if="${post.likeStatus} == 1">
+                                    <a class="btn p-0" style="text-decoration: none; color: black" th:id="|btn-post-unLike-${post.id}|" th:attr="data-post-id=${post.id}">
+                                        <div th:class="|post-like-icon-${post.id}|">
+                                            <small class="nav-item text-danger" style="font-size: 13px;"><i class="bi bi-heart-fill"></i></small>
+                                            <small style="font-size: 13px;" th:id="|post-like-count-${post.id}|" th:text="${post.likeCount}"> 7</small>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 페이지 네비게이션바 -->
+        <div class="row my-1">
+            <div class="col-12">
+                <div th:if="${paging.totalRows ne 0}">
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                <a th:href="@{|/channel/post/list/${channelId}?page=${paging.currentPage - 1}|}"
+                                   class="page-link" th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                            </li>
+                            <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                    <a th:href="@{|/channel/post/list/${channelId}?page=${num}|}"
+                                       class="page-link" th:classappend="${paging.currentPage == num ? 'active' : ''}"
+                                       th:text="${num}" th:onclick="|changePage(${num}, event)|"></a>
+                                </li>
+                            </th:block>
+                            <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                <a th:href="@{|/channel/post/list/${channelId}?page=${paging.currentPage + 1}|}"
+                                   class="page-link" th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script layout:fragment="script">
+
+    function changeSort() {
+        let form = document.getElementById("form-post");
+        form.submit();
+    }
+
+    function changePage(page, event) {
+        event.preventDefault();
+        document.querySelector("input[name=page]").value = page;
+        document.getElementById("form-post").submit();
+    }
+
+    $(function() {
+        // 참여하기 버튼을 클릭했을 때
+        $(document).on("click", "#btn-add-channelParticipant", function() {
+            let channelId = $(this).attr("data-channel-id");
+
+            // AJAX를 사용하여 참여 상태를 서버에 전달
+            $.post(`/channel/addUser`, {channelId: channelId}, function() {
+                // 성공적으로 요청이 완료되면 버튼을 활동중 상태로 변경
+                /*$("#btn-add-channelParticipant")
+                    .removeClass("btn-outline-primary")
+                    .addClass("btn-primary")
+                    .text("활동중")
+                    .attr("id", "btn-delete-channelParticipant");
+                $("#div-create-post").show();*/
+                location.reload();
+            });
+        });
+
+        // 활동중 버튼을 클릭했을 때
+        $(document).on("click", "#btn-delete-channelParticipant", function() {
+            let channelId = $(this).attr("data-channel-id");
+
+            // AJAX를 사용하여 참여 상태를 서버에 전달
+            $.get(`/channel/deleteUser`, {channelId: channelId}, function() {
+                // 성공적으로 요청이 완료되면 버튼을 참여하기 상태로 변경
+                /*$("#btn-delete-channelParticipant")
+                    .removeClass("btn-primary")
+                    .addClass("btn-outline-primary")
+                    .text("참여하기")
+                    .attr("id", "btn-add-channelParticipant");
+                $("#div-create-post").hide();*/
+                location.reload();
+            });
+        });
+
+        $("#channel-delete-check").click(function() {
+            if (confirm("삭제하시겠습니까?")) {
+                return true;
+            } else {
+                return false;
+            }
+        })
+
+        $(document).on("click", "[id^='btn-post-like-']", function() {
+            let postId = $(this).attr("data-post-id");
+            $.post(`/channel/post/addLike`, {postId: postId}, function(postLikeCount) {
+                $("#post-like-count-" + postId).text(postLikeCount);
+                $(".post-like-icon-" + postId + " i").removeClass('bi-heart').addClass('bi-heart-fill');
+                $("#btn-post-like-" + postId).attr("id", "btn-post-unLike-" + postId);
+            })
+        })
+        $(document).on("click", "[id^='btn-post-unLike-']", function() {
+            let postId = $(this).attr("data-post-id");
+            $.get(`/channel/post/deleteLike`, {postId: postId}, function(postLikeCount) {
+                $("#post-like-count-" + postId).text(postLikeCount);
+                $(".post-like-icon-" + postId + " i").removeClass('bi-heart-fill').addClass('bi-heart');
+                $("#btn-post-unLike-" + postId).attr("id", "btn-post-like-" + postId);
+            })
+        })
+    });
+</script>
+</html>

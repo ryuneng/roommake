@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.roommake.community.mapper.CommunityReplyMapper">
+
+    <select id="getTotalReplyCountByCommId" parameterType="int" resultType="int">
+        select
+            count(*)
+        from
+            community_reply
+        where
+            comm_reply_status = 'active'
+            and comm_reply_delete_yn = 'N'
+            and comm_id = #{commId}
+    </select>
+
+    <select id="getTotalReplyRow" parameterType="int" resultType="int">
+        select
+            count(*)
+        from
+            community_reply
+        where
+            comm_reply_delete_yn = 'N'
+            and comm_id = #{commId}
+    </select>
+
+    <select id="getAllRepliesByUserId" parameterType="com.roommake.community.dto.CommReplyCriteria" resultType="com.roommake.community.dto.CommReplyDto">
+        select
+            comm_reply_id                as id,
+            comm_id                      as "community.id",
+            user_id                      as "user.id",
+            user_nickname                as "user.nickname",
+            comm_reply_content           as content,
+            comm_reply_create_date       as createDate,
+            comm_reply_update_date       as updateDate,
+            comm_reply_delete_date       as deleteDate,
+            comm_reply_status            as status,
+            comm_reply_delete_yn         as deleteYn,
+            comm_reply_like_count        as likeCount,
+            comm_reply_complaint_count   as complaintCount,
+            comm_reply_group_id          as groupId,
+            parents_comm_reply_id        as parentsId,
+            likeStatus                   as likeStatus
+        from(
+            select
+                cr.comm_reply_id,
+                cr.comm_id,
+                cr.user_id,
+                u.user_nickname                 as user_nickname,
+                cr.comm_reply_content,
+                cr.comm_reply_create_date,
+                cr.comm_reply_update_date,
+                cr.comm_reply_delete_date,
+                cr.comm_reply_status,
+                cr.comm_reply_delete_yn,
+                cr.comm_reply_like_count,
+                cr.comm_reply_complaint_count,
+                cr.comm_reply_group_id,
+                cr.parents_comm_reply_id,
+                exists(
+                    select 1
+                    from community_reply_like rl
+                    where rl.comm_reply_id = cr.comm_reply_id
+                    and rl.user_id = #{userId}) as likeStatus,
+                @rownum := @rownum + 1          as rownum
+            from
+                (select @rownum := 0) r,
+                community_reply cr
+                left join user u on u.user_id = cr.user_id
+            where
+                cr.comm_id = #{communityId}
+                and cr.comm_reply_delete_yn = 'N'
+            order by
+                cr.comm_reply_group_id asc,
+                cr.comm_reply_id asc
+            ) as reply
+        where
+            rownum between #{begin} and #{end}
+    </select>
+
+    <select id="getAllReplies" parameterType="com.roommake.community.dto.CommReplyCriteria" resultType="com.roommake.community.dto.CommReplyDto">
+        select
+            comm_reply_id                as id,
+            comm_id                      as "community.id",
+            user_id                      as "user.id",
+            user_nickname                as "user.nickname",
+            comm_reply_content           as content,
+            comm_reply_create_date       as createDate,
+            comm_reply_update_date       as updateDate,
+            comm_reply_delete_date       as deleteDate,
+            comm_reply_status            as status,
+            comm_reply_delete_yn         as deleteYn,
+            comm_reply_like_count        as likeCount,
+            comm_reply_complaint_count   as complaintCount,
+            comm_reply_group_id          as groupId,
+            parents_comm_reply_id        as parentsId
+        from(
+                select
+                    cr.comm_reply_id,
+                    cr.comm_id,
+                    cr.user_id,
+                    u.user_nickname                 as user_nickname,
+                    cr.comm_reply_content,
+                    cr.comm_reply_create_date,
+                    cr.comm_reply_update_date,
+                    cr.comm_reply_delete_date,
+                    cr.comm_reply_status,
+                    cr.comm_reply_delete_yn,
+                    cr.comm_reply_like_count,
+                    cr.comm_reply_complaint_count,
+                    cr.comm_reply_group_id,
+                    cr.parents_comm_reply_id,
+                    @rownum := @rownum + 1          as rownum
+                from
+                    (select @rownum := 0) r,
+                    community_reply cr
+                    left join user u on u.user_id = cr.user_id
+                where
+                    cr.comm_id = #{communityId}
+                    and cr.comm_reply_delete_yn = 'N'
+                order by
+                    cr.comm_reply_group_id asc,
+                    cr.comm_reply_id asc
+            ) as reply
+        where
+            rownum between #{begin} and #{end}
+    </select>
+
+    <insert id="createCommunityReply" parameterType="com.roommake.community.vo.CommunityReply">
+        insert into community_reply
+            (comm_id, user_id, comm_reply_content)
+        values
+            (#{community.id}, #{user.id}, #{content})
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+    </insert>
+
+    <update id="modifyReplyGroupId" parameterType="com.roommake.community.vo.CommunityReply">
+        update
+            community_reply
+        set
+            comm_reply_group_id = #{groupId}
+        where
+            comm_reply_id = #{id}
+    </update>
+
+    <insert id="createCommunityReReply" parameterType="com.roommake.community.vo.CommunityReply">
+        insert into community_reply
+            (comm_id, user_id, comm_reply_content, parents_comm_reply_id, comm_reply_group_id)
+        values
+            (#{community.id}, #{user.id}, #{content}, #{parentsId}, #{groupId})
+    </insert>
+
+    <select id="getCommReplyByReplyId" parameterType="int" resultType="com.roommake.community.vo.CommunityReply">
+        select
+            comm_reply_id                   as id,
+            comm_id                         as "community.id",
+            user_id                         as "user.id",
+            comm_reply_content              as content,
+            comm_reply_create_date          as createDate,
+            comm_reply_update_date          as updateDate,
+            comm_reply_delete_date          as deleteDate,
+            comm_reply_status               as status,
+            comm_reply_delete_yn            as deleteYn,
+            comm_reply_like_count           as likeCount,
+            comm_reply_complaint_count      as complaintCount,
+            parents_comm_reply_id           as parentsId,
+            comm_reply_group_id             as groupId
+        from
+            community_reply
+        where
+            comm_reply_id = #{replyId}
+    </select>
+
+    <update id="modifyCommunityReply" parameterType="com.roommake.community.vo.CommunityReply">
+        update
+            community_reply
+        <set>
+            comm_reply_content = #{content},
+            comm_reply_update_date = #{updateDate},
+            comm_reply_status = #{status},
+            comm_reply_delete_yn = #{deleteYn},
+            comm_reply_like_count = #{likeCount},
+            comm_reply_complaint_count = #{complaintCount},
+            comm_reply_group_id = #{groupId},
+            <if test=' "Y" == deleteYn '>
+                comm_reply_delete_date = #{deleteDate}
+            </if>
+        </set>
+        where
+            comm_reply_id = #{id}
+    </update>
+
+    <select id="getReReplyCount" parameterType="int" resultType="int">
+        select
+            count(*)
+        from
+            community_reply
+        where
+            comm_reply_delete_yn = 'N'
+            and comm_reply_status = 'active'
+            and parents_comm_reply_id = #{replyId}
+    </select>
+
+    <insert id="createCommunityReplyComplaint" parameterType="com.roommake.community.vo.CommunityReplyComplaint">
+        insert into community_reply_complaint
+            (community_reply_id, user_id, complaint_category_id)
+        values
+            (#{reply.id}, #{user.id}, #{complaintCat.id})
+    </insert>
+
+    <insert id="addCommunityReplyLike" parameterType="com.roommake.community.vo.CommunityReplyLike">
+        insert into community_reply_like
+            (comm_reply_id, user_id)
+        values
+            (#{commReplyId}, #{userId})
+    </insert>
+
+    <delete id="deleteCommunityReplyLike" parameterType="com.roommake.community.vo.CommunityReplyLike">
+        delete from
+            community_reply_like
+        where
+            comm_reply_id = #{commReplyId}
+            and user_id = #{userId}
+    </delete>
+
+</mapper>

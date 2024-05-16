@@ -1,0 +1,260 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base-admin}" th:with="menu='management'">
+<!-- th:with="menu='notice'" -> navbar에서 active를 주기 위해 넣는 것 -->
+<div layout:fragment="content-admin" class="container my-3">
+    <div class="row mb-3">
+        <div class="col-2">
+            <div th:replace="~{layout/sidebar-admin :: sidebar-admin-fragment}"></div>
+        </div>
+        <div class="col-10">
+            <h4>배너 관리</h4>
+            <hr>
+            <form id="form-notice" method="get" action="/admin/management/banner">
+                <input type="hidden" name="page">
+                <!-- rows, 게시상태, 정렬 조건 선택하는 부분 -->
+                <div class="my-3 d-flex justify-content-between">
+                    <select class="form-control w-25" name="rows" onchange="changeRows()">
+                        <option value="5" th:selected="${criteria.rows eq 5}">5개씩보기</option>
+                        <option value="10" th:selected="${criteria.rows eq 10 or criteria.rows == null}" }>10개씩보기</option>
+                        <option value="20" th:selected="${criteria.rows eq 20}" }>20개씩보기</option>
+                        <option value="50" th:selected="${criteria.rows eq 50}" }>50개씩보기</option>
+                    </select>
+                    <select class="form-control w-25" name="filt" onchange="changeFilt()">
+                        <option value="all" th:selected="${criteria.filt eq 'all' or criteria.filt == null}" }>전체</option>
+                        <option value="expect" th:selected="${criteria.filt eq 'expect'}">게시 예정</option>
+                        <option value="active" th:selected="${criteria.filt eq 'active'}" }>게시 중</option>
+                        <option value="end" th:selected="${criteria.filt eq 'end'}" }>게시 종료</option>
+                    </select>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sort" value="new" th:checked="${criteria.sort eq 'new' or criteria.sort == null}" th:onchange="changeSort()"/>
+                            <label class="form-check-label">최신순</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sort" value="old" th:checked="${criteria.sort eq 'old'}" th:onchange="changeSort()"/>
+                            <label class="form-check-label">번호순</label>
+                        </div>
+                    </div>
+                </div>
+                <!-- 배너 리스트 출력 -->
+                <table class="table table-bordered mb-3" id="table-banners">
+                    <colgroup>
+                        <col style="width: 5%">
+                        <col style="width: 5%">
+                        <col style="width: 20%">
+                        <col style="width: 20%">
+                        <col style="width: 10%">
+                        <col style="width: 10%">
+                        <col style="width: 10%">
+                        <col style="width: 10%">
+                        <col style="width: 10%">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" id="checkbox-all"></th>
+                        <th>번호</th>
+                        <th>배너설명</th>
+                        <th>배너이미지</th>
+                        <th>게시 시작일</th>
+                        <th>게시 종료일</th>
+                        <th>게시 상태</th>
+                        <th>등록자</th>
+                        <th>등록일</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${bannerList.isEmpty()}">
+                        <td class="text-center" style="font-weight: bold;" colspan="9">배너가 없습니다.</td>
+                    </tr>
+                    <tr th:each="banner : ${bannerList}" th:attr="id=|banner-${banner.id}|">
+                        <td><input type="checkbox" name="no" th:attr="data-banner-id=${banner.id}"></td>
+                        <td th:text="${banner.id}">121</td>
+                        <td><a th:href="@{|/banner/detail/${banner.id}|}" th:text="${banner.description}" th:attr="data-banner-id=${banner.id}">출석체크이벤트 배너</a></td>
+                        <td th:text="${banner.imageOriginName}">banner1.jpg</td>
+                        <td th:text="${#dates.format(banner.startDate, 'yyyy-MM-dd')}">2024년 4월 5일</td>
+                        <td th:text="${#dates.format(banner.endDate, 'yyyy-MM-dd')}">2024년 4월 11일</td>
+                        <td>
+                            <span th:if="${#strings.equals(banner.status, 'expect')}" th:text="${banner.status}">게시예정</span>
+                            <span th:if="${#strings.equals(banner.status, 'active')}" th:text="${banner.status}">게시 중</span>
+                            <span th:if="${#strings.equals(banner.status, 'end')}" th:text="${banner.status}">게시종료</span>
+                        </td>
+                        <td th:text="${banner.user.nickname}">김유신</td>
+                        <!--                    <td th:text="${banner.user.nickname}">김유신</td>-->
+                        <td th:text="${#dates.format(banner.createDate, 'yyyy-MM-dd')}">2024년 4월 1일</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <!-- 페이징 처리 -->
+                <div class="col-12">
+                    <div th:if="${paging.totalRows ne 0 }">
+                        <nav>
+                            <ul class="pagination d-flex justify-content-center">
+                                <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                    <a th:href="@{|/admin/management/banner?page=${paging.currentPage - 1}|}" class="page-link"
+                                       th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                                </li>
+                                <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                    <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                        <a th:href="@{|/admin/management/banner?page=${num}|}" class="page-link"
+                                           th:onclick="|changePage(${num}, event)|" th:text="${num}"></a>
+                                    </li>
+                                </th:block>
+
+                                <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                    <a th:href="@{|/admin/management/banner?page=${paging.currentPage + 1}|}" class="page-link"
+                                       th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </form>
+            <div class="text-end">
+                <button type="button" class="btn btn-danger" id="btn-del">삭제</button>
+            </div>
+            <hr>
+            <form class="border bg-light p-3" method="post" enctype="multipart/form-data" id="create-banner-form">
+                <input type="hidden" id="banner-id" name="id">
+                <div class="form-group mb-3">
+                    <label class="form-label">배너 설명</label>
+                    <input type="text" class="form-control" id="banner-description" name="description"/>
+                </div>
+                <div class="form-group mb-3" id="banner-image-file">
+                    <label class="form-label">배너이미지</label>
+                    <input type="file" id="banner-image" name="imageFile"/>
+                    <span id="banner-image-name"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">시작일:</label>
+                    <input type="date" id="start-date" name="startDate">
+                    <label class="form-label">종료일:</label>
+                    <input type="date" id="end-date" name="endDate">
+                </div>
+                <div>
+                    <label class="form-label">연결될 페이지 URL</label>
+                    <input class="form-control" type="text" name="url" id="banner-url" placeholder="localhost를 제외한 /부터 작성하세요.">
+                </div>
+                <div class="text-end">
+                    <button type="button" class="btn btn-primary" id="btn-save-banner">등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script">
+    $(function() {
+        // 배너 등록, 수정
+        $("#btn-save-banner").click(function(event) {
+            event.preventDefault();
+            let bannerId = $('#banner-id').val();
+            let formData = new FormData();
+            formData.append('id', bannerId);
+            formData.append('description', $('#banner-description').val());
+            // 첨부파일 없을 경우 append하면 에러 발생하기 때문에 조건 설정
+            if ($('#banner-image')[0].files[0]) {
+                formData.append('imageFile', $('#banner-image')[0].files[0]);
+            }
+            formData.append('startDate', $('#start-date').val());
+            formData.append('endDate', $('#end-date').val());
+            formData.append('url', $('#banner-url').val());
+
+            let url;
+            if (bannerId) {
+                url = `/admin/management/banner/modify/${bannerId}`;
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success: function(banner) {
+                        let $tr = $(`#banner-${banner.id}`);
+                        $tr.find("td:eq(2) a").text(banner.description);
+                        $tr.find("td:eq(3)").text(banner.imageOriginName);
+                        $tr.find("td:eq(4)").text(banner.startDate);
+                        $tr.find("td:eq(5)").text(banner.endDate);
+                        $tr.find("td:eq(6) span").text(banner.status);
+                        $tr.find("td:eq(7)").text(banner.user.id);
+                        $tr.find("td:eq(8)").text(banner.createDate);
+                        // 기존 이미지 지운 후 바뀐 이미지 넣기
+                        $('#div-banner-image').remove();
+                        let imageTag = '<div class="form-group mb-3" id="div-banner-image">';
+                        imageTag += '<div class="mb-2"><span style="font-size: 17px">저장된 사진</span></div>';
+                        imageTag += '<img src="' + banner.imageUploadName + '" style="height: 150px; object-fit: cover">';
+                        imageTag += '</div>';
+                        $('#banner-image-file').after(imageTag);
+                        alert("배너가 수정되었습니다.");
+                    },
+                    error: function() {
+                        alert("배너 수정이 실패했습니다. 확인 후 다시 시도해주십시오.");
+                    }
+                });
+            } else {
+                url = `/admin/management/banner/create`;
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    success: function(response) {
+                        alert("배너가 등록 되었습니다.");
+                        location.reload();
+                    },
+                    error: function() {
+                        alert("배너 등록이 실패했습니다. 확인 후 다시 시도해주십시오.");
+                    }
+                })
+            }
+        });
+
+        // 배너 디테일
+        $("#table-banners tbody a").click(function(event) {
+            event.preventDefault();
+
+            let bannerId = $(this).attr("data-banner-id");
+            $.getJSON(`/admin/management/banner/detail/${bannerId}`, function(banner) {
+                $('#banner-id').val(banner.id);
+                $('#banner-description').val(banner.description);
+
+                // 기존 이미지 파일 삭제
+                $('#div-banner-image').remove();
+
+                let imageOriginName = banner.imageOriginName;
+                let imageUploadName = banner.imageUploadName;
+
+                let imageTag = '<div class="form-group mb-3" id="div-banner-image">';
+                if (imageOriginName != null) {
+                    imageTag += '<div class="mb-2"><span style="font-size: 17px">저장된 사진</span></div>';
+                    imageTag += `<img src="${imageUploadName}" style="height: 150px; object-fit: cover">`;
+                }
+                imageTag += '</div>';
+                $('#banner-image-file').after(imageTag);
+                $('#start-date').val(banner.startDate);
+                $('#end-date').val(banner.endDate);
+                $('#banner-url').val(banner.url);
+            })
+        })
+
+        $('#btn-del').click(function(event) {
+            let checkedBannerIds = [];
+            $(":checkbox[name=no]:checked").each(function() {
+                checkedBannerIds.push($(this).attr("data-banner-id"));
+            });
+            // AJAX 요청을 통해 공지사항 삭제를 처리
+            $.ajax({
+                type: 'POST',
+                url: '/admin/management/banner/delete',
+                data: JSON.stringify(checkedBannerIds),
+                contentType: 'application/json',
+                success: function(response) {
+                    location.reload();
+                    alert("배너가 삭제되었습니다.");
+                },
+                error: function() {
+                    alert("배너 삭제가 실패했습니다. 확인 후 다시 시도해주십시오.");
+                }
+            });
+        })
+    });
+</script>
+</html>

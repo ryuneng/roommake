@@ -1,0 +1,272 @@
+<html lang="ko" layout:decorate="~{layout/mypage-base}" th:with="category='프로필'" th:attr="data-category='프로필',data-sub-category='스크랩'">
+<div class="container my-3 mt-4" layout:fragment="content">
+    <div class="container mt-5 mb-5" style="max-width: 800px">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4>스크랩북</h4>
+        </div>
+        <div class="container mt-5">
+            <div class="text-center" style="margin-bottom: 70px;">
+                <img class="rounded-circle" th:src="${user.profilePhoto}" style="width: 125px; height: 125px; margin-bottom: 15px;">
+                <h4 class="mb-3" style="font-size: 18px;" th:text="${user.nickname}">그릭요거트</h4>
+            </div>
+            <!-- 스크랩 북 카테고리-->
+            <ul class="nav nav-tabs justify-content-center mt-3" th:each="scrapCount : ${scrapCounts}">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="/user/scrapbook" style="color: cornflowerblue !important;">모두 (<span th:text="${scrapCount.totalCount}">0</span>)</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="/user/scrapbook1" style="color: black;">폴더 (<span th:text="${scrapCount.folderCount}">0</span>)</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="/user/scrapbook2" style="color: black;">상품 (<span th:text="${scrapCount.productCount}">0</span>)</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="/user/scrapbook3" style="color: black;">커뮤니티 (<span th:text="${scrapCount.communityCount}">0</span>)</a>
+                </li>
+            </ul>
+            <div class="text-end mt-3">
+                <a class="edit-link" href="#" style="color: cornflowerblue; text-decoration: none;">편집</a>
+            </div>
+            <div class="row mt-3">
+
+                <!-- 갤러리 이미지  -->
+                <div class="col-md-3 mb-3" th:each="scrap : ${allScraps}">
+                    <a th:href="${scrap.type == 'Product' ? '/store/detail/' + scrap.itemId : (scrap.type == 'Community' ? '/community/detail/' + scrap.itemId : '')}">
+                        <div class="position-relative" style="width: 100%; height: 150px;">
+                            <!-- 아이템별 체크박스에 고유한 ID와 타입을 설정 -->
+                            <input class="scrap-checkbox position-absolute" style="display: none; top: 10px; left: 10px;"
+                                   type="checkbox" th:data-item-id="${scrap.itemId}" th:data-item-type="${scrap.type}">
+
+                        <img class="float-start" style="width:100%; height: 150px; border-radius: 2px;"
+                                 alt="Community Image"
+                                 th:if="${scrap.type == 'Community'}"
+                                 th:src="@{${scrap.imageName}}">
+
+                            <img class="float-start" style="width:100%; height: 150px; border-radius: 2px;"
+                                 alt="Product Image"
+                                 th:if="${scrap.type == 'Product'}"
+                                 th:src="@{${scrap.imageName}}">
+                            <!-- 레이블 -->
+                            <span style="position: absolute; bottom: 5px; left: 5px; background-color: rgba(0, 0, 0, 0.7); color: white; font-weight: bold; padding: 2px 5px; border-radius: 3px; z-index: 1; font-size: 12px;"
+                                  th:if="${scrap.type == 'Product'}">상품</span>
+                            <span style="position: absolute; bottom: 5px; left: 5px; background-color: rgba(0, 0, 0, 0.7); color: white; font-weight: bold; padding: 2px 5px; border-radius: 3px; z-index: 1; font-size: 12px;"
+                                  th:if="${scrap.type == 'Community'}">커뮤니티</span>
+                        </div>
+                    </a>
+                </div>
+                <!-- 폴더 이동 모달 -->
+                <div aria-hidden="true" aria-labelledby="moveFolderModalLabel" class="modal fade" id="moveFolderModal" role="dialog" tabindex="-1">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header justify-content-center">
+                                <h5 class="modal-title" id="moveFolderModalLabel">폴더 선택</h5>
+                                <button aria-label="Close" class="close" data-dismiss="modal" style="background: none; border: none; position: absolute; right: 0; top: 0; margin: 15px;" type="button">
+                                    <span aria-hidden="true" style="font-size: 1.5rem;">×</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <ul class="list-group mb-3">
+                                    <!-- 폴더 추가 행 -->
+                                    <li class="list-group-item">
+                                        <div class="input-group">
+                                            <i class="bi bi-plus-square-fill" style="color: grey; font-size: 24px; margin-right: 10px;"></i>
+                                            <input aria-label="Folder name" class="form-control border-0" placeholder="새로운 폴더 추가하기" type="text">
+                                            <button id="completeMove" class="btn btn-secondary btn-sm" style="border-radius: 5px;" type="button">완료</button>
+                                        </div>
+                                    </li>
+                                    <!-- 폴더 목록 행 -->
+                                    <th:block th:each="folder : ${recentScraps}">
+                                        <li class="list-group-item folder-item" th:data-folder-id="${folder.folderId}" th:data-folder-name="${folder.folderName}">
+                                            <img class="float-start" style="width: 40px; height: 40px; border-radius: 2px; margin-right: 1rem;"
+                                                 th:if="${folder.type == 'Community' && !#strings.isEmpty(folder.imageName)}"
+                                                 th:src="@{${folder.imageName}}"
+                                                 alt="Community Folder Image">
+                                            <img class="float-start" style="width: 40px; height: 40px; border-radius: 2px; margin-right: 1rem;"
+                                                 th:if="${folder.type == 'Product' && !#strings.isEmpty(folder.imageName)}"
+                                                 th:src="@{${folder.imageName}}"
+                                                 alt="Product Folder Image">
+                                            <img class="float-start" style="width: 40px; height: 40px; border-radius: 2px; margin-right: 1rem;"
+                                                 th:if="${#strings.isEmpty(folder.type) || #strings.isEmpty(folder.imageName)}"
+                                                 th:src="@{https://roommake.s3.ap-northeast-2.amazonaws.com/d1843087-ad9d-4ad7-a15b-3ba61f291d09.png}"
+                                                 alt="Default Folder Image">
+                                            <!-- 폴더 이름 표시 -->
+                                            <span th:text="${folder.folderName}">폴더명</span>
+                                        </li>
+                                    </th:block>
+                                </ul>
+                            </div>
+                            <div class="modal-footer"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 폴더 이동 폼 -->
+                <form id="move-form" action="/user/scrapbook/moveItems" method="post" style="display:none;">
+                    <input type="hidden" name="itemIds" id="move-item-ids">
+                    <input type="hidden" name="targetFolderId" id="move-target-folder-id">
+                    <input type="hidden" name="types" id="move-item-types">
+                </form>
+                <!-- 폴더 아이템 삭제 폼 -->
+                <form id="delete-form" action="/user/scrapbook/deleteItems" method="post" style="display:none;">
+                    <input type="hidden" name="itemIds" id="delete-item-ids">
+                    <input type="hidden" name="types" id="delete-item-types">
+                </form>
+                <!-- 새로운 폴더 생성 및 이동 폼 -->
+                <form id="insert-move-form" action="/user/scrapbook/insertAndMove" method="post" style="display:none;">
+                    <input type="hidden" name="folderName" id="insert-move-folder-name">
+                    <input type="hidden" name="itemIds" id="insert-move-item-ids">
+                    <input type="hidden" name="types" id="insert-move-item-types">
+                </form>
+            </div>
+            <div class="row mt-3 mb-3">
+                <div class="col-12">
+                    <div th:if="${paging.totalRows ne 0 }">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${paging.first ? 'disabled' : ''}">
+                                    <a th:href="@{/user/scrapbook(page=${paging.currentPage - 1})}" class="page-link"
+                                       th:onclick="|changePage(${paging.currentPage - 1}, event)|">이전</a>
+                                </li>
+                                <th:block th:each="num : ${#numbers.sequence(paging.beginPage, paging.endPage)}">
+                                    <li class="page-item" th:classappend="${paging.currentPage == num ? 'active' : ''}">
+                                        <a  th:href="@{/user/scrapbook(page=${num})}" class="page-link"
+                                           th:onclick="|changePage(${num}, event)|" th:text="${num}">1</a>
+                                    </li>
+                                </th:block>
+
+                                <li class="page-item" th:classappend="${paging.last ? 'disabled' : ''}">
+                                    <a th:href="@{/user/scrapbook(page=${paging.currentPage + 1})}" class="page-link"
+                                       th:onclick="|changePage(${paging.currentPage + 1}, event)|">다음</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+<script layout:fragment="script" type="text/javascript">
+    $(document).ready(function() {
+        // 편집 버튼 클릭 시 편집 모드로 전환
+        $('a.edit-link').on('click', function(e) {
+            e.preventDefault();
+            $('input.scrap-checkbox').show();
+            $(this).hide(); // 편집 버튼 숨김
+
+            // 폴더 이동, 삭제, 취소 버튼 추가
+            $('.text-end').append(`
+            <div class="action-text enabled" style="display: inline-block; margin: 0 10px; color: grey; pointer-events: none;">폴더 이동</div>
+            <div class="action-text enabled" style="display: inline-block; margin: 0 10px; color: grey; pointer-events: none;">삭제</div>
+            <div class="action-text cancel-btn" style="display: inline-block; margin: 0 10px; color: black; pointer-events: auto;">취소</div>
+        `);
+
+            // 체크박스 선택 시 폴더 이동 및 삭제 활성화
+            $('input.scrap-checkbox').change(function() {
+                var checked = $('input.scrap-checkbox:checked').length > 0;
+                $('.action-text.enabled')
+                    .css('color', checked ? 'black' : 'grey')
+                    .css('pointer-events', checked ? 'auto' : 'none');
+            });
+        });
+
+        // 취소 버튼 클릭 시 편집 모드를 취소하고 다시 편집 버튼을 표시
+        $(document).on('click', '.cancel-btn', function() {
+            $('.action-text').remove();
+            $('input.scrap-checkbox').hide().prop('checked', false);
+            $('a.edit-link').show();
+        });
+
+        // 폴더 이동 또는 삭제 처리
+        $(document).on('click', '.action-text.enabled', function() {
+            var actionText = $(this).text();
+
+            if (actionText === '삭제') {
+                var selectedItems = $('input.scrap-checkbox:checked');
+                var itemIds = [];
+                var itemTypes = [];
+
+                selectedItems.each(function() {
+                    itemIds.push($(this).data('item-id'));
+                    itemTypes.push($(this).data('item-type'));
+                });
+
+                // 폼에 직렬화된 데이터를 설정
+                $('#delete-item-ids').val(itemIds.join(',')); // 콤마로 구분된 문자열로 직렬화
+                $('#delete-item-types').val(itemTypes.join(','));
+
+                if (confirm("선택한 컨텐츠를 스크랩북에서 삭제하시겠습니까? 스크랩북 내 모든 메뉴에서 삭제됩니다.")) {
+                    $('#delete-form').submit();
+                }
+            }
+
+            if (actionText === '폴더 이동') {
+                $('#moveFolderModal').modal('show');
+            }
+        });
+
+        $('.folder-item').on('click', function() {
+            var folderId = $(this).data('folder-id');
+            var folderName = $(this).data('folder-name');
+            var selectedItems = $('input.scrap-checkbox:checked');
+            var itemIds = [];
+            var itemTypes = [];
+
+            selectedItems.each(function() {
+                itemIds.push($(this).data('item-id'));
+                itemTypes.push($(this).data('item-type'));
+            });
+
+            // 폼에 직렬화된 데이터를 설정
+            $('#move-target-folder-id').val(folderId);
+            $('#move-item-ids').val(itemIds.join(','));
+            $('#move-item-types').val(itemTypes.join(','));
+
+            if (confirm(`선택한 컨텐츠를 '${folderName}'(으)로 이동하시겠습니까?`)) {
+                $('#move-form').submit();
+            }
+        });
+
+        // 모달 내의 입력 필드에 입력 시 완료 버튼 활성화
+        $('#moveFolderModal input').on('input', function() {
+            var inputLength = $(this).val().trim().length;
+            var completeButton = $('#completeMove');
+            if (inputLength > 0) {
+                completeButton.removeClass('btn-secondary').addClass('btn-primary');
+                completeButton.prop('disabled', false);
+            } else {
+                completeButton.removeClass('btn-primary').addClass('btn-secondary');
+                completeButton.prop('disabled', true);
+            }
+        });
+
+        // 모달의 X 버튼 클릭 시 모달 닫기
+        $('.modal .close').on('click', function() {
+            $(this).closest('.modal').modal('hide');
+        });
+
+        $('#completeMove').off('click').on('click', function() {
+            var folderNameInput = $('#moveFolderModal input[type="text"]').val().trim();
+            var selectedItems = $('input.scrap-checkbox:checked');
+            var itemIds = [];
+            var itemTypes = [];
+
+            // 각 체크박스에서 데이터 수집
+            selectedItems.each(function() {
+                itemIds.push($(this).data('item-id'));
+                itemTypes.push($(this).data('item-type'));
+            });
+
+            // 올바른 폼에 배열을 직렬화하여 설정
+            $('#insert-move-folder-name').val(folderNameInput);
+            $('#insert-move-item-ids').val(itemIds.join(',')); // 콤마로 구분된 문자열로 직렬화
+            $('#insert-move-item-types').val(itemTypes.join(','));
+
+            // 이동 확인 메시지
+            if (confirm(`선택한 컨텐츠를 '${folderNameInput}'(으)로 이동하시겠습니까?`)) {
+                $('#insert-move-form').submit();
+            }
+        });
+    });
+</script>
+</html>

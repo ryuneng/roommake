@@ -1,0 +1,94 @@
+<html lang="ko" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout/base}">
+<head>
+    <title>룸메이크 | 주문완료</title>
+</head>
+<div layout:fragment="content" class="container my-3 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-3"></div>
+            <div class="col-6 text-center mb-4">
+                <h4 class="fw-bold mb-5">주문이 완료되었습니다</h4>
+                <div class="text-start mb-4">
+                    <span class="me-3 fw-bold">주문번호</span>
+                    <span th:text="${dto.orderId}" class="text-primary">20240412938174</span>
+                </div>
+                <div class="justify-content-center mb-4">
+                    <h6 class="text-start fw-bold mb-2">
+                        <span>받는분 | </span>
+                        <span th:text="${dto.delivery.recipient}">홍길동</span>
+                    </h6>
+                    <div class="text-start small">
+                        <div class="mb-1">
+                            (<span th:text="${dto.delivery.zipcode}">(03134)</span>)
+                            <span th:text="${dto.delivery.address1}">서울특별시 종로구 율곡로10길 105</span>
+                            <span th:text="${dto.delivery.address2}">디아망 4F</span>
+                        </div>
+                        <div th:text="${dto.delivery.phone}">010-1234-5678</div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between fw-bold mb-2">
+                        <div>결제금액</div>
+                        <div>
+                            <span th:text="${#numbers.formatInteger(dto.totalPrice, 1, 'COMMA')}">283,800</span>원
+                        </div>
+                    </div>
+                    <div style="font-size: 15px">
+                        <div class="d-flex justify-content-between small mb-1 text-secondary">
+                            <div>포인트 사용</div>
+                            <div><span th:text="${#numbers.formatInteger(dto.usePoint, 1, 'COMMA')}">1,000</span> P</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between fw-bold mb-5">
+                    <div>결제수단</div>
+                    <div th:text="${dto.payment.method}">카카오페이</div>
+                </div>
+                <!-- 주문상품 영역 시작 -->
+                <div class="mb-5">
+                    <h6 class="text-start fw-bold">주문상품 <span th:text="${dto.items.size()}">2</span>건</h6>
+                    <table class="table text-center">
+                        <tbody class="align-middle">
+                        <tr th:each="item : ${dto.items}">
+                            <td>
+                                <div class="d-flex w-100 justify-content-start">
+                                    <a th:href="@{/store/detail/{id}(id=${item.productId})}" class="link-underline link-underline-opacity-0 text-dark">
+                                        <div>
+                                            <img th:src="@{${item.imageName}}" style="width: 80px; height: 80px">
+                                        </div>
+                                    </a>
+                                    <div class="ms-3 text-start">
+                                        <div>
+                                            <div th:text="${item.name}" style="display: -webkit-box;
+                                                              overflow: hidden;
+                                                              text-overflow: ellipsis;
+                                                              -webkit-box-orient: vertical;
+                                                              -webkit-line-clamp: 1;">
+                                                LED조명 통서랍 수납침대 SSQ(매트리스 선택)
+                                            </div>
+                                            <div>
+                                                <span th:text="${#numbers.formatInteger(item.price, 1, 'COMMA')}">189,000</span>원
+                                            </div>
+                                            <div class="text-secondary mt-2" style="font-size: 12px">
+                                                사이즈: <span th:text="${item.size}">슈퍼싱글SS 프레임만</span>
+                                                / 색상: <span th:text="${item.color}">화이트</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 주문상품 영역 끝 -->
+                <div class="d-flex justify-content-between mb-5">
+                    <a th:href="@{|detail/${dto.orderId}|}" type="button" class="btn btn-outline-dark w-50 me-3">주문상세 확인</a>
+                    <a th:href="@{/store/home}" class="btn btn-primary w-50 ms-3">계속 쇼핑하기</a>
+                </div>
+            </div>
+            <div class="col-3"></div>
+        </div>
+    </div>
+</div>
+</html>

@@ -9,6 +9,7 @@
 
 <br>
 
+
 <table>
   <tr>
     <td>곽유진</td>
@@ -36,6 +37,12 @@
   </tr>
 </table>
 
+
+### 🔗 About
+> 
+  📧 <b>Notion</b> <a target="_blank" href="https://www.notion.so/ryuneng/Project-Final-88bf72f9c08c4bcab952109aa501faa0">https://www.notion.so/</a><br>
+
+  
 <br>
 <br>
 

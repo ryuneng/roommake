@@ -54,12 +54,12 @@
 </table>
 
 ### 담당 기능
-1. 메인화면 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/home/service/HomeService.java">주요 소스 보기</a>
+1. 주문/결제 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/service/OrderService.java">주요 소스 보기</a> `(카카오페이 Open API 사용)`
 2. 장바구니 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/cart/controller/CartController.java">주요 소스 보기</a>
-3. 주문/결제 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/service/OrderService.java">주요 소스 보기</a>
-4. 주문내역 및 주문상세 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/service/MyOrderService.java">주요 소스 보기</a>
-5. 주문취소/반품/교환 신청 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/controller/OrderClaimController.java">주요 소스 보기</a>
-6. 배송지 관리 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/controller/DeliveryController.java">주요 소스 보기</a>
+3. 주문취소/반품/교환 신청 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/controller/OrderClaimController.java">주요 소스 보기</a>
+4. 배송지 관리 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/controller/DeliveryController.java">주요 소스 보기</a>
+5. 주문내역 및 주문상세 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/service/MyOrderService.java">주요 소스 보기</a>
+6. 메인화면 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/home/service/HomeService.java">주요 소스 보기</a>
 
 <br>
 
@@ -95,7 +95,8 @@
 
 ## ⛓️ ERD
 <details>
-  <summary><b>주문 관련 ERD (21개 엔티티)</b></summary><br>
+  <summary><b>주문 관련 ERD (21개 엔티티)</b></summary>
+  <a href="https://www.erdcloud.com/d/RfPs7YXxK9vAcdAzT">🔗 ERD CLOUD 이동</a><br>
   <img src="https://github.com/user-attachments/assets/38c54d4a-ca85-45a3-ab64-7162dcfcd430">
 </details>
 <details>
@@ -122,15 +123,15 @@
 
 **2. 코딩 컨벤션**
 <details>
-  <summary><b>코드 작성 규칙 (메소드명)</b></summary><br>
+  <summary>코드 작성 규칙 (메소드명)</summary><br>
   <img src="https://github.com/user-attachments/assets/6991450a-08f8-4f1f-9c2d-3d2a2dca9614">
 </details>
 <details>
-  <summary><b>Java</b></summary><br>
+  <summary>Java</summary><br>
   <img src="https://github.com/user-attachments/assets/035c8e40-d51b-447a-bad4-6fc4ec8f5664">
 </details>
 <details>
-  <summary><b>Database</b></summary><br>
+  <summary>Database</summary><br>
   <img src="https://github.com/user-attachments/assets/7f6a7353-20f2-4638-be74-c848f2f74f71">
 </details>
 

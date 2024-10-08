@@ -18,7 +18,7 @@
 비슷한 관심과 취향을 가진 사람들과 소통할 수 있는 커뮤니티를 제공합니다.
 
 <br>
-
+👀 <a href="https://github.com/ryuneng/roommake/wiki">서비스 둘러보기</a>
 <img src="https://github.com/ryuneng/roommake/assets/137076160/a95b74a0-c25a-467e-82f7-f12b03a4ddca">
 
 <br>

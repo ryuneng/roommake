@@ -1,18 +1,18 @@
 # <img width="110px" src="https://github.com/ryuneng/roommake/assets/137076160/11c55ca0-27ef-4b7e-8fd6-c0626dc81d49"> &nbsp;ROOMMAKE
 
-## 🔍 목차
-1. [서비스 소개](#-서비스-소개)
-2. [R&R 및 담당 기능](#-rr)
-3. [프로젝트 환경](#%EF%B8%8F-프로젝트-환경)
-4. [ERD](#%EF%B8%8F-erd)
-5. [컨벤션 전략](#-컨벤션-전략)
-6. [Commit과 PR 관리](#-commit과-pr-관리)
-7. [고민한 흔적](#-고민한-흔적)
+> ## 🔍 목차
+> 1. [서비스 소개](#-서비스-소개)
+> 2. [R&R 및 담당 기능](#-rr)
+> 3. [프로젝트 환경](#%EF%B8%8F-프로젝트-환경)
+> 4. [ERD](#%EF%B8%8F-erd)
+> 5. [컨벤션 전략](#-컨벤션-전략)
+> 6. [Commit과 PR 관리](#-commit과-pr-관리)
+> 7. [고민한 흔적](#-고민한-흔적)
 
 <br>
 
 ## 📋 서비스 소개
-> 라이프스타일 트렌드가 변화함에 따라 개인마다의 공간에 대한 관심이 높아지고 있습니다. <br>
+- 라이프스타일 트렌드가 변화함에 따라 개인마다의 공간에 대한 관심이 높아지고 있습니다. <br>
 룸메이크는 **인테리어 관련 커머스와 커뮤니티를 결합한 플랫폼 서비스**로, <br>
 마음에 드는 상품을 바로 구매할 수 있는 커머스 기능과 함께 <br>
 비슷한 관심과 취향을 가진 사람들과 소통할 수 있는 커뮤니티를 제공합니다.
@@ -54,12 +54,12 @@
 </table>
 
 ### 담당 기능
-1. 주문/결제 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/service/OrderService.java">주요 소스 보기</a> `(카카오페이 Open API 사용)`
-2. 장바구니 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/cart/controller/CartController.java">주요 소스 보기</a>
-3. 주문취소/반품/교환 신청 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/controller/OrderClaimController.java">주요 소스 보기</a>
-4. 배송지 관리 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/controller/DeliveryController.java">주요 소스 보기</a>
-5. 주문내역 및 주문상세 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/service/MyOrderService.java">주요 소스 보기</a>
-6. 메인화면 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/home/service/HomeService.java">주요 소스 보기</a>
+1. 주문/결제 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/service/OrderService.java">주요 소스 코드 보기</a> `(카카오페이 Open API 사용)`
+2. 장바구니 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/cart/controller/CartController.java">주요 소스 코드 보기</a>
+3. 주문취소/반품/교환 신청 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/controller/OrderClaimController.java">주요 소스 코드 보기</a>
+4. 배송지 관리 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/controller/DeliveryController.java">주요 소스 코드 보기</a>
+5. 주문내역 및 주문상세 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/order/service/MyOrderService.java">주요 소스 코드 보기</a>
+6. 메인화면 - <a href="https://github.com/ryuneng/roommake/blob/portfolio/src/main/java/com/roommake/home/service/HomeService.java">주요 소스 코드 보기</a>
 
 <br>
 
@@ -151,3 +151,5 @@
 ## 🤔 고민한 흔적
 - 복잡한 주문/결제의 CRUD 프로세스를 효율적으로 파악하는 방법 - <a href="https://github.com/ryuneng/roommake/wiki/%EB%B3%B5%EC%9E%A1%ED%95%9C-%EC%A3%BC%EB%AC%B8-%EA%B2%B0%EC%A0%9C%EC%9D%98-CRUD-%ED%94%84%EB%A1%9C%EC%84%B8%EC%8A%A4%EB%A5%BC-%ED%9A%A8%EC%9C%A8%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%8C%8C%EC%95%85%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95"> WIKI 이동 </a>
 - 카카오페이 Open API 구현 과정을 효과적으로 익히는 방법 - <a href="https://github.com/ryuneng/roommake/wiki/%EC%B9%B4%EC%B9%B4%EC%98%A4%ED%8E%98%EC%9D%B4-Open-API-%EA%B5%AC%ED%98%84-%EA%B3%BC%EC%A0%95%EC%9D%84-%ED%9A%A8%EA%B3%BC%EC%A0%81%EC%9C%BC%EB%A1%9C-%EC%9D%B5%ED%9E%88%EB%8A%94-%EB%B0%A9%EB%B2%95"> WIKI 이동 </a>
+
+<br>

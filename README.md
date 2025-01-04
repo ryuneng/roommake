@@ -151,5 +151,3 @@
 ## 🤔 고민한 흔적
 - 복잡한 주문/결제의 CRUD 프로세스를 효율적으로 파악하는 방법 - <a href="https://github.com/ryuneng/roommake/wiki/%EB%B3%B5%EC%9E%A1%ED%95%9C-%EC%A3%BC%EB%AC%B8-%EA%B2%B0%EC%A0%9C%EC%9D%98-CRUD-%ED%94%84%EB%A1%9C%EC%84%B8%EC%8A%A4%EB%A5%BC-%ED%9A%A8%EC%9C%A8%EC%A0%81%EC%9C%BC%EB%A1%9C-%ED%8C%8C%EC%95%85%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95"> WIKI 이동 </a>
 - 카카오페이 Open API 구현 과정을 효과적으로 익히는 방법 - <a href="https://github.com/ryuneng/roommake/wiki/%EC%B9%B4%EC%B9%B4%EC%98%A4%ED%8E%98%EC%9D%B4-Open-API-%EA%B5%AC%ED%98%84-%EA%B3%BC%EC%A0%95%EC%9D%84-%ED%9A%A8%EA%B3%BC%EC%A0%81%EC%9C%BC%EB%A1%9C-%EC%9D%B5%ED%9E%88%EB%8A%94-%EB%B0%A9%EB%B2%95"> WIKI 이동 </a>
-
-<br>
